@@ -1,6 +1,6 @@
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {normalizeForecast,costaRicaDay} from '../public/forecast-science.js';
-import {openMeteoJSON} from './provider-cache.mjs';
+import {openMeteoJSON,openMeteoUrl} from './provider-cache.mjs';
 import {normalizeTimeline} from '../public/weather-state.js';
 const folder=new URL('../public/data/forecast/',import.meta.url);const memory=new Map(),inflight=new Map();
 export async function getForecast(site){if(inflight.has(site.id))return inflight.get(site.id);const work=load(site).finally(()=>inflight.delete(site.id));inflight.set(site.id,work);return work;}
@@ -13,7 +13,7 @@ const sourceUrl='https://api.open-meteo.com/v1/forecast?'+query;
 const ensembleQuery=new URLSearchParams({latitude:site.latitude.toFixed(5),longitude:site.longitude.toFixed(5),daily:'temperature_2m_mean',models:'gfs_seamless',timezone:'America/Costa_Rica',start_date:start,end_date:end});
 const ensembleUrl='https://ensemble-api.open-meteo.com/v1/ensemble?'+ensembleQuery;
 const json=openMeteoJSON;
-const [main,ens]=await Promise.allSettled([json(sourceUrl),json(ensembleUrl)]);
+const [main,ens]=await Promise.allSettled([json(openMeteoUrl('https://api.open-meteo.com/v1/forecast',query)),json(openMeteoUrl('https://ensemble-api.open-meteo.com/v1/ensemble',ensembleQuery))]);
 if(main.status==='rejected'){if(valid)return {...cached,cache:true,warning:'No se pudo actualizar la fuente. Se muestra la última consulta conservada con sus fechas originales.'};throw main.reason;}
 const raw=main.value,ensemble=ens.status==='fulfilled'?ens.value:null;const days=normalizeForecast(raw,ensemble);if(days.length!==7)throw Error('La fuente no cubre los próximos siete días completos.');
 const result={site:site.id,name:site.name,requested:{latitude:site.latitude,longitude:site.longitude},modelPoint:{latitude:raw.latitude,longitude:raw.longitude,elevation:raw.elevation},retrievedAt:new Date().toISOString(),source:'Open-Meteo Forecast API · selección automática de modelos',sourceUrl,ensembleSource:'GFS ensemble vía Open-Meteo',ensembleUrl,timezone:raw.timezone,days,timeline:normalizeTimeline(raw,start),warning:ensemble?null:'El conjunto GFS no está disponible; no se muestran rangos de dispersión.',raw,rawEnsemble:ensemble};
