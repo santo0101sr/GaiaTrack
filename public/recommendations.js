@@ -1,3 +1,13 @@
+import {
+  experimentalStressIndex,
+  monthlyReference,
+  pearsonCorrelation,
+  precipitationAnomaly,
+  simulateScenario,
+  stressIndicators,
+  temperatureAnomaly
+} from './earth-pulse.js';
+
 const PROFILES = {
   'sarapiqui': { zone: 'Zona rural · Bosque lluvioso tropical', eco: 'Región de alta biodiversidad y ríos caudalosos. Los bosques ribereños filtran sedimentos y amortiguan crecidas repentinas.', kind: 'rural-wet' },
   'limon': { zone: 'Costa Caribe · Bosque húmedo tropical', eco: 'Humedad constante y corredores biológicos costeros. La cobertura vegetal protege los suelos ante aguaceros intensos.', kind: 'rural-wet' },
@@ -42,9 +52,68 @@ export function nearestSite(lat, lon, sites = []) {
   return best ? { site: best, distanceKm: bestKm } : null;
 }
 
-export function buildRecommendations(siteId, weather = {}, forecastDays = []) {
+function currentCostaRicaMonth() {
+  const m = Number(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Costa_Rica', month: 'numeric' }).format(new Date()));
+  return Number.isFinite(m) && m >= 1 && m <= 12 ? m : new Date().getUTCMonth() + 1;
+}
+
+export function evaluateTerritoryMetrics(monthlyRows = [], weather = {}, { month = currentCostaRicaMonth(), scenario = null } = {}) {
+  if (!Array.isArray(monthlyRows) || !monthlyRows.length) return null;
+  const refT = monthlyReference(monthlyRows, 'T2M', month, 2001, 2025);
+  const refP = monthlyReference(monthlyRows, 'PRECTOTCORR', month, 2001, 2025);
+  const refS = monthlyReference(monthlyRows, 'GWETTOP', month, 2001, 2025);
+
+  const monthRows = monthlyRows.filter(r => r.month === month).sort((a, b) => a.year - b.year);
+  const latestMonth = monthRows.at(-1) || {};
+
+  // Align sources strictly by unit and scale:
+  // Temperature uses °C (live T2M or latest monthly T2M); precipitation & GWETTOP stay on NASA POWER daily/monthly units.
+  const baseObs = {
+    t: Number.isFinite(weather.temperature) ? weather.temperature : latestMonth.T2M,
+    p: Number.isFinite(latestMonth.PRECTOTCORR) ? latestMonth.PRECTOTCORR : refP.mean,
+    sm: Number.isFinite(latestMonth.GWETTOP) ? latestMonth.GWETTOP : refS.mean,
+    ndvi: null
+  };
+
+  const activeObs = scenario ? simulateScenario(baseObs, scenario) : baseObs;
+  const anomT = temperatureAnomaly(activeObs.t, refT.mean);
+  const anomP = precipitationAnomaly(activeObs.p, refP.mean);
+  const indicators = stressIndicators(activeObs, { t: refT, p: refP, sm: refS });
+  const ieaResult = experimentalStressIndex(indicators);
+
+  const rTP = pearsonCorrelation(
+    monthRows.map(r => r.T2M),
+    monthRows.map(r => r.PRECTOTCORR)
+  );
+
+  let ieaLevel = 'Sin referencia';
+  if (Number.isFinite(ieaResult.iea)) {
+    if (ieaResult.iea >= 1.0) ieaLevel = 'Estrés elevado';
+    else if (ieaResult.iea >= 0.35) ieaLevel = 'Estrés moderado';
+    else if (ieaResult.iea > -0.35) ieaLevel = 'Rango habitual';
+    else ieaLevel = 'Condición favorable';
+  }
+
+  return {
+    month,
+    isScenario: Boolean(scenario && (scenario.deltaT || scenario.deltaPPercent)),
+    refs: { t: refT, p: refP, sm: refS },
+    observed: activeObs,
+    anomalies: { tempC: anomT, precipAbs: anomP.abs, precipPct: anomP.pct },
+    indicators,
+    iea: ieaResult.iea,
+    ieaLevel,
+    ieaNote: ieaResult.note,
+    activeIndicators: ieaResult.activeCount,
+    pearsonTP: rTP
+  };
+}
+
+export function buildRecommendations(siteId, weather = {}, forecastDays = [], options = {}) {
   const profile = territoryProfile(siteId);
+  const metrics = options.monthly ? evaluateTerritoryMetrics(options.monthly, weather, options) : null;
   const tips = [];
+
   const precip = Number.isFinite(weather.precipitation) ? weather.precipitation : null;
   const interval = weather.intervalSeconds > 0 ? weather.intervalSeconds : 3600;
   const rainRate = precip !== null ? precip * (3600 / interval) : null;
@@ -53,9 +122,10 @@ export function buildRecommendations(siteId, weather = {}, forecastDays = []) {
   const soil = Number.isFinite(weather.soilMoisture) ? weather.soilMoisture : null;
   const temp = Number.isFinite(weather.temperature) ? weather.temperature : null;
   const wind = Number.isFinite(weather.windSpeed) ? weather.windSpeed : null;
+  const mountainOrRural = profile.kind === 'rural-wet' || profile.kind === 'mountain';
 
+  // 1. Live storm / rain + wind risk
   if (rainRate !== null && rainRate >= 3.5) {
-    const mountainOrRural = profile.kind === 'rural-wet' || profile.kind === 'mountain';
     tips.push({
       tag: '⚡ Lluvia fuerte y rayería',
       tone: 'alert',
@@ -82,12 +152,46 @@ export function buildRecommendations(siteId, weather = {}, forecastDays = []) {
     });
   }
 
+  // 2. Multi-metric seasonal anomaly & IEA stress rules (Earth Pulse)
+  if (metrics) {
+    const zT = metrics.indicators.I_T;
+    const zP = metrics.indicators.I_P !== null ? -metrics.indicators.I_P : null;
+    if (zT !== null && zT >= 1.2) {
+      tips.push({
+        tag: `🌡 Anomalía térmica (+${metrics.anomalies.tempC.toFixed(1)} °C)`,
+        tone: 'sun',
+        title: `Temperatura por encima de lo habitual para el mes (Z = +${zT.toFixed(1)})`,
+        body: profile.kind === 'dry-coast'
+          ? 'Calor anómalo para la época: priorizá hidratación, sombra en ganado/cultivos y riego fuera de horas pico.'
+          : 'Supera la referencia histórica de este mismo mes; ventilá espacios y evitá exposición solar intensa al mediodía.'
+      });
+    }
+    if (zP !== null && zP <= -1.0) {
+      tips.push({
+        tag: '🌵 Déficit hídrico estacional',
+        tone: 'alert',
+        title: `Lluvia por debajo del promedio del mes (Iₚ = +${metrics.indicators.I_P.toFixed(1)})`,
+        body: 'Déficit respecto a años anteriores para este mismo mes: evitá quemas agrícolas o forestales y protegé la humedad del suelo con cobertura orgánica.'
+      });
+    } else if (zP !== null && zP >= 1.2 && !(rainRate !== null && rainRate >= 3.5)) {
+      tips.push({
+        tag: '🌊 Exceso de lluvia mensual',
+        tone: 'rain',
+        title: 'Acumulación mensual superior a la referencia histórica',
+        body: mountainOrRural
+          ? 'El mes supera su referencia histórica de precipitación: mantené limpios canales de escorrentía y vigilá suelos en pendiente.'
+          : 'Mayor carga hídrica que el promedio del mes; revisá drenajes pluviales y techos antes de aguaceros vespertinos.'
+      });
+    }
+  }
+
+  // 3. Soil & UV / radiation & wind rules
   if (soil !== null && soil >= 0.36) {
     tips.push({
       tag: '🌱 Suelo saturado',
-      tone: profile.kind === 'mountain' || profile.kind === 'rural-wet' ? 'alert' : 'eco',
+      tone: mountainOrRural ? 'alert' : 'eco',
       title: 'Alta humedad en el suelo superficial',
-      body: profile.kind === 'mountain' || profile.kind === 'rural-wet'
+      body: mountainOrRural
         ? 'El terreno está muy húmedo: no requiere riego y conviene vigilar laderas o drenajes rurales ante lluvias adicionales.'
         : 'Suspendé el riego en jardines y áreas verdes para evitar encharcamientos y pérdida de nutrientes.'
     });
@@ -133,5 +237,5 @@ export function buildRecommendations(siteId, weather = {}, forecastDays = []) {
     body: profile.eco
   });
 
-  return { profile, tips: tips.slice(0, 4) };
+  return { profile, metrics, tips: tips.slice(0, 4) };
 }

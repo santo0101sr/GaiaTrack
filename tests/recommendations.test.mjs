@@ -42,3 +42,21 @@ test('buildRecommendations adapts advice to rural heavy rain, saturated soil, an
   assert.equal(empty.profile.zone, territoryProfile('barva').zone);
   assert.ok(empty.tips.length >= 1);
 });
+
+test('buildRecommendations integrates real monthly NASA data and Earth Pulse scenario metrics', async () => {
+  const heredia = JSON.parse(await readFile(new URL('../public/data/heredia.json', import.meta.url)));
+  const baseline = buildRecommendations('heredia', { temperature: 21, precipitation: 0, soilMoisture: 0.3 }, [], {
+    monthly: heredia.monthly,
+    month: 11
+  });
+  assert.ok(Number.isFinite(baseline.metrics.iea));
+  assert.ok(Number.isFinite(baseline.metrics.pearsonTP));
+
+  const warmDry = buildRecommendations('heredia', { temperature: 21, precipitation: 0, soilMoisture: 0.3 }, [], {
+    monthly: heredia.monthly,
+    month: 11,
+    scenario: { deltaT: 3.5, deltaPPercent: -50 }
+  });
+  assert.ok(warmDry.metrics.iea > baseline.metrics.iea);
+  assert.ok(warmDry.tips.some(t => /Anomalía térmica/i.test(t.tag)));
+});
