@@ -27,8 +27,29 @@ const PROFILES = {
   'san-pablo': { zone: 'Valle Central · Urbano residencial', eco: 'Cercano a cauces del Virilla; mantener franjas verdes y drenajes limpios protege ante tormentas convectivas.', kind: 'urban-valley' }
 };
 
+const KIND_PROFILES = {
+  'mountain': { zone: 'Zona montañosa · Clima fresco', eco: 'Laderas y cuencas altas que recargan acuíferos. La cobertura boscosa y las cercas vivas reducen la erosión en pendientes.' },
+  'rural-wet': { zone: 'Tierras bajas húmedas · Bosque lluvioso', eco: 'Lluvias abundantes y ríos caudalosos. Los bosques ribereños y humedales amortiguan crecidas y filtran sedimentos.' },
+  'dry-coast': { zone: 'Pacífico seco · Bosque tropical seco', eco: 'Estación seca marcada y alta radiación. La sombra, el acolchado orgánico y la protección de manglares cuidan suelo y agua.' },
+  'urban-valley': { zone: 'Valle Central · Urbano y periurbano', eco: 'Suelos impermeabilizados que aceleran la escorrentía; arbolado urbano y jardines de lluvia alivian calor y anegamientos.' }
+};
+const TERRITORIES = new Map();
+const PROVINCE_NAMES = { 'san-jose': 'San José', alajuela: 'Alajuela', cartago: 'Cartago', heredia: 'Heredia', guanacaste: 'Guanacaste', puntarenas: 'Puntarenas', limon: 'Limón' };
+
+// Registra provincia, tipo y clasificación ecológica de cada sitio del manifiesto.
+export function registerTerritories(sites = []) {
+  for (const s of sites) if (s?.id) TERRITORIES.set(s.id, s);
+}
+
 export function territoryProfile(siteId) {
-  return PROFILES[siteId] || {
+  if (PROFILES[siteId]) return PROFILES[siteId];
+  const site = TERRITORIES.get(siteId);
+  const kind = site?.climate?.kind;
+  if (kind && KIND_PROFILES[kind]) {
+    const where = site.type === 'province' ? 'Provincia' : `Cantón de ${PROVINCE_NAMES[site.province] ?? 'Costa Rica'}`;
+    return { zone: `${KIND_PROFILES[kind].zone} · ${where}`, eco: KIND_PROFILES[kind].eco, kind };
+  }
+  return {
     zone: 'Territorio de Costa Rica',
     eco: 'Monitoreo continuo de temperatura, lluvia, radiación solar y humedad superficial del suelo.',
     kind: 'urban-valley'

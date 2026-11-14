@@ -6,11 +6,13 @@ import { buildRecommendations, nearestSite, territoryProfile } from '../public/r
 test('nearestSite finds closest Costa Rica province or canton from coordinates', async () => {
   const manifest = JSON.parse(await readFile(new URL('../public/data/manifest.json', import.meta.url)));
   const nearLiberia = nearestSite(10.63, -85.44, manifest.sites);
-  assert.equal(nearLiberia.site.id, 'guanacaste');
+  assert.equal(nearLiberia.site.id, 'liberia');
   const nearSarapiqui = nearestSite(10.45, -84.01, manifest.sites);
   assert.equal(nearSarapiqui.site.id, 'sarapiqui');
   const nearSanJose = nearestSite(9.93, -84.08, manifest.sites);
-  assert.ok(['santo-domingo', 'san-jose', 'san-pablo', 'heredia'].includes(nearSanJose.site.id));
+  // GPS selects the nearest reference point, not polygon containment.
+  assert.equal(nearSanJose.site.id, 'tibas');
+  assert.equal(nearSanJose.site.province, 'san-jose');
 });
 
 test('buildRecommendations adapts advice to rural heavy rain, saturated soil, and dry heat', () => {

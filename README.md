@@ -2,11 +2,11 @@
 
 GitHub está conectado al proyecto `gaiatrack` de Vercel. Cada push a `main` dispara un despliegue a producción; las otras ramas generan vistas previas. Las APIs meteorológicas no requieren claves ni planes de pago. Para publicar cambios: `git add`, `git commit` y `git push`.
 
-Observatorio interactivo de la provincia de Heredia, Costa Rica. Proyecto para NASA Space Apps. Publicado en https://gaiatrack.vercel.app con despliegue automático desde GitHub.
+Observatorio interactivo de las siete provincias de Costa Rica y los 83 cantones de la cartografía geoBoundaries incluida. Proyecto para NASA Space Apps. Publicado en https://gaiatrack.vercel.app con despliegue automático desde GitHub.
 
 ## Abrir
 
-Requiere Node.js 24. No requiere instalar paquetes.
+Requiere Node.js 26. No requiere instalar paquetes.
 
 ```powershell
 npm start
@@ -16,7 +16,7 @@ Abrir http://127.0.0.1:4173. No abrir `index.html` directamente: el pronóstico 
 
 ## Funciones
 
-- Mapa de los diez cantones con puntos de referencia interiores y selector accesible.
+- Mapa nacional de 7 provincias y 83 cantones con puntos de referencia y selectores agrupados por provincia. Heredia provincia y Heredia cantón tienen identificadores separados (`heredia` y `heredia-centro`) y comparten el punto histórico conservado.
 - Histórico real NASA POWER 2001–2025: temperatura media, promedio de mínimas diarias, promedio de máximas diarias, radiación solar, precipitación, humedad superficial del suelo y humedad relativa del aire.
 - Pronóstico real de los próximos siete días desde mañana, vía Open-Meteo; consulta actualizable y caché compartida de hasta una hora.
 - Dispersión P10–P90 de temperatura media diaria calculada de 31 miembros GFS vía Open-Meteo. Es otro producto distinto del pronóstico principal de selección automática; no es un intervalo de confianza calibrado.

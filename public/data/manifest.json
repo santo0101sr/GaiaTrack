@@ -1,6 +1,6 @@
 {
   "retrievedAt": "2026-11-14T17:04:10.222Z",
-  "generatedAt": "2026-11-14T19:00:51.804Z",
+  "generatedAt": "2026-11-14T21:24:12.994Z",
   "start": 2001,
   "end": 2025,
   "source": "NASA POWER Daily API",
@@ -38,118 +38,1303 @@
     "imagePreview": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/CRI/ADM2/geoBoundaries-CRI-ADM2-PREVIEW.png",
     "simplifiedGeometryGeoJSON": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/CRI/ADM2/geoBoundaries-CRI-ADM2_simplified.geojson"
   },
-  "sites": [
+  "provinces": [
     {
-      "id": "heredia",
-      "name": "Heredia",
-      "longitude": -84.03922966873245,
-      "latitude": 10.12856348019119,
-      "sourceRetrievedAt": null
-    },
-    {
-      "id": "barva",
-      "name": "Barva",
-      "longitude": -84.11553353526293,
-      "latitude": 10.073480159335872,
-      "sourceRetrievedAt": null
-    },
-    {
-      "id": "santo-domingo",
-      "name": "Santo Domingo",
-      "longitude": -84.06813936279605,
-      "latitude": 9.988053504466762,
-      "sourceRetrievedAt": null
-    },
-    {
-      "id": "santa-barbara",
-      "name": "Santa Bárbara",
-      "longitude": -84.1474214939546,
-      "latitude": 10.082212019727507,
-      "sourceRetrievedAt": null
-    },
-    {
-      "id": "san-rafael",
-      "name": "San Rafael",
-      "longitude": -84.08154923964028,
-      "latitude": 10.059791904252762,
-      "sourceRetrievedAt": null
-    },
-    {
-      "id": "san-isidro",
-      "name": "San Isidro",
-      "longitude": -84.04318998617993,
-      "latitude": 10.029508507749938,
-      "sourceRetrievedAt": null
-    },
-    {
-      "id": "belen",
-      "name": "Belén",
-      "longitude": -84.17685400217081,
-      "latitude": 9.98547136272839,
-      "sourceRetrievedAt": null
-    },
-    {
-      "id": "flores",
-      "name": "Flores",
-      "longitude": -84.15390899511812,
-      "latitude": 10.005629996249208,
-      "sourceRetrievedAt": null
-    },
-    {
-      "id": "san-pablo",
-      "name": "San Pablo",
-      "longitude": -84.09360389228718,
-      "latitude": 9.991882744355049,
-      "sourceRetrievedAt": null
-    },
-    {
-      "id": "sarapiqui",
-      "name": "Sarapiquí",
-      "longitude": -83.93595275239454,
-      "latitude": 10.487786832977406,
-      "sourceRetrievedAt": null
+      "id": "san-jose",
+      "name": "San José",
+      "siteId": "san-jose"
     },
     {
       "id": "alajuela",
       "name": "Alajuela",
-      "longitude": -84.75130666666666,
-      "latitude": 10.4549,
-      "sourceRetrievedAt": "2026-11-14T20:08:09.605Z"
+      "siteId": "alajuela"
     },
     {
       "id": "cartago",
       "name": "Cartago",
-      "longitude": -83.69825,
-      "latitude": 9.8248,
-      "sourceRetrievedAt": "2026-11-14T20:08:11.160Z"
+      "siteId": "cartago"
+    },
+    {
+      "id": "heredia",
+      "name": "Heredia",
+      "siteId": "heredia"
     },
     {
       "id": "guanacaste",
       "name": "Guanacaste",
-      "longitude": -85.36019999999999,
-      "latitude": 10.47475,
-      "sourceRetrievedAt": "2026-11-14T20:08:12.303Z"
-    },
-    {
-      "id": "limon",
-      "name": "Limón",
-      "longitude": -83.24815000000001,
-      "latitude": 10.00015,
-      "sourceRetrievedAt": "2026-11-14T20:08:13.534Z"
+      "siteId": "guanacaste"
     },
     {
       "id": "puntarenas",
       "name": "Puntarenas",
-      "longitude": -83.58836,
-      "latitude": 8.56312,
-      "sourceRetrievedAt": "2026-11-14T20:08:15.283Z"
+      "siteId": "puntarenas"
     },
+    {
+      "id": "limon",
+      "name": "Limón",
+      "siteId": "limon"
+    }
+  ],
+  "sites": [
     {
       "id": "san-jose",
       "name": "San José",
+      "type": "province",
+      "province": "san-jose",
       "longitude": -84.009,
       "latitude": 9.635850000000001,
-      "sourceRetrievedAt": "2026-11-14T20:08:16.407Z"
+      "sourceRetrievedAt": "2026-11-14T20:08:16.407Z",
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 21.4,
+        "annualPrecipMm": 2431
+      }
+    },
+    {
+      "id": "alajuela",
+      "name": "Alajuela",
+      "type": "province",
+      "province": "alajuela",
+      "longitude": -84.75130666666666,
+      "latitude": 10.4549,
+      "sourceRetrievedAt": "2026-11-14T20:08:09.605Z",
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 25.1,
+        "annualPrecipMm": 1580
+      }
+    },
+    {
+      "id": "cartago",
+      "name": "Cartago",
+      "type": "province",
+      "province": "cartago",
+      "longitude": -83.69825,
+      "latitude": 9.8248,
+      "sourceRetrievedAt": "2026-11-14T20:08:11.160Z",
+      "climate": {
+        "kind": "mountain",
+        "meanTempC": 20.3,
+        "annualPrecipMm": 2417
+      }
+    },
+    {
+      "id": "guanacaste",
+      "name": "Guanacaste",
+      "type": "province",
+      "province": "guanacaste",
+      "longitude": -85.36019999999999,
+      "latitude": 10.47475,
+      "sourceRetrievedAt": "2026-11-14T20:08:12.303Z",
+      "climate": {
+        "kind": "dry-coast",
+        "meanTempC": 27.5,
+        "annualPrecipMm": 1853
+      }
+    },
+    {
+      "id": "puntarenas",
+      "name": "Puntarenas",
+      "type": "province",
+      "province": "puntarenas",
+      "longitude": -83.58836,
+      "latitude": 8.56312,
+      "sourceRetrievedAt": "2026-11-14T20:08:15.283Z",
+      "climate": {
+        "kind": "dry-coast",
+        "meanTempC": 27.6,
+        "annualPrecipMm": 2775
+      }
+    },
+    {
+      "id": "limon",
+      "name": "Limón",
+      "type": "province",
+      "province": "limon",
+      "longitude": -83.24815000000001,
+      "latitude": 10.00015,
+      "sourceRetrievedAt": "2026-11-14T20:08:13.534Z",
+      "climate": {
+        "kind": "rural-wet",
+        "meanTempC": 24.5,
+        "annualPrecipMm": 3221
+      }
+    },
+    {
+      "id": "san-jose-centro",
+      "name": "San José",
+      "type": "canton",
+      "province": "san-jose",
+      "longitude": -84.11354603829881,
+      "latitude": 9.936036437609062,
+      "sourceRetrievedAt": "2026-11-14T21:23:03.836Z",
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "escazu",
+      "name": "Escazú",
+      "type": "canton",
+      "province": "san-jose",
+      "longitude": -84.15307689344863,
+      "latitude": 9.916264338073034,
+      "sourceRetrievedAt": "2026-11-14T21:23:04.026Z",
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "desamparados",
+      "name": "Desamparados",
+      "type": "canton",
+      "province": "san-jose",
+      "longitude": -84.03472160982302,
+      "latitude": 9.824197434250031,
+      "sourceRetrievedAt": "2026-11-14T21:23:03.957Z",
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 20.3,
+        "annualPrecipMm": 2417
+      }
+    },
+    {
+      "id": "puriscal",
+      "name": "Puriscal",
+      "type": "canton",
+      "province": "san-jose",
+      "longitude": -84.37181488826909,
+      "latitude": 9.73377488881846,
+      "sourceRetrievedAt": "2026-11-14T21:23:04.872Z",
+      "climate": {
+        "kind": "mountain",
+        "meanTempC": 26.2,
+        "annualPrecipMm": 2513
+      }
+    },
+    {
+      "id": "tarrazu",
+      "name": "Tarrazú",
+      "type": "canton",
+      "province": "san-jose",
+      "longitude": -84.06388387133745,
+      "latitude": 9.583673398461798,
+      "sourceRetrievedAt": "2026-11-14T21:23:05.231Z",
+      "climate": {
+        "kind": "mountain",
+        "meanTempC": 26.2,
+        "annualPrecipMm": 2513
+      }
+    },
+    {
+      "id": "aserri",
+      "name": "Aserrí",
+      "type": "canton",
+      "province": "san-jose",
+      "longitude": -84.14246091499345,
+      "latitude": 9.745937406742659,
+      "sourceRetrievedAt": "2026-11-14T21:23:05.295Z",
+      "climate": {
+        "kind": "mountain",
+        "meanTempC": 26.2,
+        "annualPrecipMm": 2513
+      }
+    },
+    {
+      "id": "mora",
+      "name": "Mora",
+      "type": "canton",
+      "province": "san-jose",
+      "longitude": -84.27976690154185,
+      "latitude": 9.872230084034129,
+      "sourceRetrievedAt": "2026-11-14T21:23:06.153Z",
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "goicoechea",
+      "name": "Goicoechea",
+      "type": "canton",
+      "province": "san-jose",
+      "longitude": -83.9827161122345,
+      "latitude": 9.957234270745971,
+      "sourceRetrievedAt": "2026-11-14T21:23:06.638Z",
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 20.3,
+        "annualPrecipMm": 2417
+      }
+    },
+    {
+      "id": "santa-ana",
+      "name": "Santa Ana",
+      "type": "canton",
+      "province": "san-jose",
+      "longitude": -84.19546911311878,
+      "latitude": 9.918167867802794,
+      "sourceRetrievedAt": "2026-11-14T21:23:06.712Z",
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "alajuelita",
+      "name": "Alajuelita",
+      "type": "canton",
+      "province": "san-jose",
+      "longitude": -84.1146166753525,
+      "latitude": 9.888981186283957,
+      "sourceRetrievedAt": "2026-11-14T21:23:07.535Z",
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "vazquez-de-coronado",
+      "name": "Vázquez de Coronado",
+      "type": "canton",
+      "province": "san-jose",
+      "longitude": -83.94648452360522,
+      "latitude": 10.077199964107706,
+      "sourceRetrievedAt": "2026-11-14T21:23:08.315Z",
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 20.3,
+        "annualPrecipMm": 2417
+      }
+    },
+    {
+      "id": "acosta",
+      "name": "Acosta",
+      "type": "canton",
+      "province": "san-jose",
+      "longitude": -84.23655901422887,
+      "latitude": 9.742249938704504,
+      "sourceRetrievedAt": "2026-11-14T21:23:08.142Z",
+      "climate": {
+        "kind": "mountain",
+        "meanTempC": 26.2,
+        "annualPrecipMm": 2513
+      }
+    },
+    {
+      "id": "tibas",
+      "name": "Tibás",
+      "type": "canton",
+      "province": "san-jose",
+      "longitude": -84.08085182314335,
+      "latitude": 9.956281127654433,
+      "sourceRetrievedAt": "2026-11-14T21:23:08.862Z",
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "moravia",
+      "name": "Moravia",
+      "type": "canton",
+      "province": "san-jose",
+      "longitude": -84.02023348656681,
+      "latitude": 10.009526205688843,
+      "sourceRetrievedAt": "2026-11-14T21:23:09.264Z",
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 20.3,
+        "annualPrecipMm": 2417
+      }
+    },
+    {
+      "id": "montes-de-oca",
+      "name": "Montes de Oca",
+      "type": "canton",
+      "province": "san-jose",
+      "longitude": -84.01117204959237,
+      "latitude": 9.93979241228655,
+      "sourceRetrievedAt": "2026-11-14T21:23:09.885Z",
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 20.3,
+        "annualPrecipMm": 2417
+      }
+    },
+    {
+      "id": "turrubares",
+      "name": "Turrubares",
+      "type": "canton",
+      "province": "san-jose",
+      "longitude": -84.4978447926782,
+      "latitude": 9.747576416053846,
+      "sourceRetrievedAt": "2026-11-14T21:23:10.117Z",
+      "climate": {
+        "kind": "dry-coast",
+        "meanTempC": 26.2,
+        "annualPrecipMm": 2513
+      }
+    },
+    {
+      "id": "dota",
+      "name": "Dota",
+      "type": "canton",
+      "province": "san-jose",
+      "longitude": -83.87354675491252,
+      "latitude": 9.584471120786787,
+      "sourceRetrievedAt": "2026-11-14T21:23:10.648Z",
+      "climate": {
+        "kind": "mountain",
+        "meanTempC": 21.4,
+        "annualPrecipMm": 2431
+      }
+    },
+    {
+      "id": "curridabat",
+      "name": "Curridabat",
+      "type": "canton",
+      "province": "san-jose",
+      "longitude": -84.02862806637222,
+      "latitude": 9.916231675777482,
+      "sourceRetrievedAt": "2026-11-14T21:23:11.053Z",
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 20.3,
+        "annualPrecipMm": 2417
+      }
+    },
+    {
+      "id": "perez-zeledon",
+      "name": "Pérez Zeledón",
+      "type": "canton",
+      "province": "san-jose",
+      "longitude": -83.71567820701301,
+      "latitude": 9.336771303019162,
+      "sourceRetrievedAt": "2026-11-14T21:23:11.532Z",
+      "climate": {
+        "kind": "rural-wet",
+        "meanTempC": 21.4,
+        "annualPrecipMm": 2431
+      }
+    },
+    {
+      "id": "leon-cortes-castro",
+      "name": "León Cortés Castro",
+      "type": "canton",
+      "province": "san-jose",
+      "longitude": -84.06258210775715,
+      "latitude": 9.693853290084007,
+      "sourceRetrievedAt": "2026-11-14T21:23:11.896Z",
+      "climate": {
+        "kind": "mountain",
+        "meanTempC": 26.2,
+        "annualPrecipMm": 2513
+      }
+    },
+    {
+      "id": "alajuela-centro",
+      "name": "Alajuela",
+      "type": "canton",
+      "province": "alajuela",
+      "longitude": -84.2298925114343,
+      "latitude": 10.197198004915707,
+      "sourceRetrievedAt": "2026-11-14T21:23:12.239Z",
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "san-ramon",
+      "name": "San Ramón",
+      "type": "canton",
+      "province": "alajuela",
+      "longitude": -84.60380865200347,
+      "latitude": 10.21741993020845,
+      "sourceRetrievedAt": "2026-11-14T21:23:13.003Z",
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "grecia",
+      "name": "Grecia",
+      "type": "canton",
+      "province": "alajuela",
+      "longitude": -84.29564234129401,
+      "latitude": 10.090468564214092,
+      "sourceRetrievedAt": "2026-11-14T21:23:13.263Z",
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "san-mateo",
+      "name": "San Mateo",
+      "type": "canton",
+      "province": "alajuela",
+      "longitude": -84.55986414080903,
+      "latitude": 9.960340867585103,
+      "sourceRetrievedAt": "2026-11-14T21:23:13.634Z",
+      "climate": {
+        "kind": "dry-coast",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "atenas",
+      "name": "Atenas",
+      "type": "canton",
+      "province": "alajuela",
+      "longitude": -84.40476939612216,
+      "latitude": 9.979705909771525,
+      "sourceRetrievedAt": "2026-11-14T21:23:14.389Z",
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "naranjo",
+      "name": "Naranjo",
+      "type": "canton",
+      "province": "alajuela",
+      "longitude": -84.3879269116542,
+      "latitude": 10.105221913625826,
+      "sourceRetrievedAt": "2026-11-14T21:23:14.510Z",
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "palmares",
+      "name": "Palmares",
+      "type": "canton",
+      "province": "alajuela",
+      "longitude": -84.4380169206448,
+      "latitude": 10.04703000605491,
+      "sourceRetrievedAt": "2026-11-14T21:23:14.797Z",
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "poas",
+      "name": "Poás",
+      "type": "canton",
+      "province": "alajuela",
+      "longitude": -84.24773105126778,
+      "latitude": 10.105605259110092,
+      "sourceRetrievedAt": "2026-11-14T21:23:15.537Z",
+      "climate": {
+        "kind": "mountain",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "orotina",
+      "name": "Orotina",
+      "type": "canton",
+      "province": "alajuela",
+      "longitude": -84.57559919434061,
+      "latitude": 9.892518046757516,
+      "sourceRetrievedAt": "2026-11-14T21:23:16.024Z",
+      "climate": {
+        "kind": "dry-coast",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "san-carlos",
+      "name": "San Carlos",
+      "type": "canton",
+      "province": "alajuela",
+      "longitude": -84.51114816938662,
+      "latitude": 10.62049744208411,
+      "sourceRetrievedAt": "2026-11-14T21:23:16.184Z",
+      "climate": {
+        "kind": "rural-wet",
+        "meanTempC": 23.6,
+        "annualPrecipMm": 1719
+      }
+    },
+    {
+      "id": "zarcero",
+      "name": "Zarcero",
+      "type": "canton",
+      "province": "alajuela",
+      "longitude": -84.4165872189169,
+      "latitude": 10.2183244771754,
+      "sourceRetrievedAt": "2026-11-14T21:23:17.145Z",
+      "climate": {
+        "kind": "mountain",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "sarchi",
+      "name": "Sarchí",
+      "type": "canton",
+      "province": "alajuela",
+      "longitude": -84.2982244675857,
+      "latitude": 10.16105974981474,
+      "sourceRetrievedAt": "2026-11-14T21:23:17.681Z",
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "upala",
+      "name": "Upala",
+      "type": "canton",
+      "province": "alajuela",
+      "longitude": -85.16446928173099,
+      "latitude": 10.868164738095153,
+      "sourceRetrievedAt": "2026-11-14T21:23:17.469Z",
+      "climate": {
+        "kind": "rural-wet",
+        "meanTempC": 26.4,
+        "annualPrecipMm": 1581
+      }
+    },
+    {
+      "id": "los-chiles",
+      "name": "Los Chiles",
+      "type": "canton",
+      "province": "alajuela",
+      "longitude": -84.67371232793482,
+      "latitude": 10.857113598625972,
+      "sourceRetrievedAt": "2026-11-14T21:23:18.371Z",
+      "climate": {
+        "kind": "rural-wet",
+        "meanTempC": 25.8,
+        "annualPrecipMm": 1763
+      }
+    },
+    {
+      "id": "guatuso",
+      "name": "Guatuso",
+      "type": "canton",
+      "province": "alajuela",
+      "longitude": -84.8305338843366,
+      "latitude": 10.70365240239937,
+      "sourceRetrievedAt": "2026-11-14T21:23:18.847Z",
+      "climate": {
+        "kind": "rural-wet",
+        "meanTempC": 25.1,
+        "annualPrecipMm": 1580
+      }
+    },
+    {
+      "id": "rio-cuarto",
+      "name": "Río Cuarto",
+      "type": "canton",
+      "province": "alajuela",
+      "longitude": -84.2131537873322,
+      "latitude": 10.40942856983196,
+      "sourceRetrievedAt": "2026-11-14T21:23:19.141Z",
+      "climate": {
+        "kind": "rural-wet",
+        "meanTempC": 23.6,
+        "annualPrecipMm": 1719
+      }
+    },
+    {
+      "id": "cartago-centro",
+      "name": "Cartago",
+      "type": "canton",
+      "province": "cartago",
+      "longitude": -83.92625335334827,
+      "latitude": 9.787371007798816,
+      "sourceRetrievedAt": "2026-11-14T21:23:19.529Z",
+      "climate": {
+        "kind": "mountain",
+        "meanTempC": 20.3,
+        "annualPrecipMm": 2417
+      }
+    },
+    {
+      "id": "paraiso",
+      "name": "Paraíso",
+      "type": "canton",
+      "province": "cartago",
+      "longitude": -83.76078600861993,
+      "latitude": 9.729628674067179,
+      "sourceRetrievedAt": "2026-11-14T21:23:20.053Z",
+      "climate": {
+        "kind": "mountain",
+        "meanTempC": 21.4,
+        "annualPrecipMm": 2431
+      }
+    },
+    {
+      "id": "la-union",
+      "name": "La Unión",
+      "type": "canton",
+      "province": "cartago",
+      "longitude": -83.99519495858232,
+      "latitude": 9.912503717809585,
+      "sourceRetrievedAt": "2026-11-14T21:23:20.266Z",
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 20.3,
+        "annualPrecipMm": 2417
+      }
+    },
+    {
+      "id": "jimenez",
+      "name": "Jiménez",
+      "type": "canton",
+      "province": "cartago",
+      "longitude": -83.69193027392959,
+      "latitude": 9.81906242961876,
+      "sourceRetrievedAt": "2026-11-14T21:23:20.640Z",
+      "climate": {
+        "kind": "rural-wet",
+        "meanTempC": 20.3,
+        "annualPrecipMm": 2417
+      }
+    },
+    {
+      "id": "turrialba",
+      "name": "Turrialba",
+      "type": "canton",
+      "province": "cartago",
+      "longitude": -83.56591929817884,
+      "latitude": 9.783805634912284,
+      "sourceRetrievedAt": "2026-11-14T21:23:21.260Z",
+      "climate": {
+        "kind": "rural-wet",
+        "meanTempC": 20.3,
+        "annualPrecipMm": 2417
+      }
+    },
+    {
+      "id": "alvarado",
+      "name": "Alvarado",
+      "type": "canton",
+      "province": "cartago",
+      "longitude": -83.80156407941175,
+      "latitude": 9.944516977412434,
+      "sourceRetrievedAt": "2026-11-14T21:23:21.607Z",
+      "climate": {
+        "kind": "mountain",
+        "meanTempC": 20.3,
+        "annualPrecipMm": 2417
+      }
+    },
+    {
+      "id": "oreamuno",
+      "name": "Oreamuno",
+      "type": "canton",
+      "province": "cartago",
+      "longitude": -83.86435134975163,
+      "latitude": 9.997306423497577,
+      "sourceRetrievedAt": "2026-11-14T21:23:22.145Z",
+      "climate": {
+        "kind": "mountain",
+        "meanTempC": 20.3,
+        "annualPrecipMm": 2417
+      }
+    },
+    {
+      "id": "el-guarco",
+      "name": "El Guarco",
+      "type": "canton",
+      "province": "cartago",
+      "longitude": -83.90990582206612,
+      "latitude": 9.732123668033182,
+      "sourceRetrievedAt": "2026-11-14T21:23:22.481Z",
+      "climate": {
+        "kind": "mountain",
+        "meanTempC": 21.4,
+        "annualPrecipMm": 2431
+      }
+    },
+    {
+      "id": "heredia",
+      "name": "Heredia",
+      "type": "province",
+      "province": "heredia",
+      "longitude": -84.03922966873245,
+      "latitude": 10.12856348019119,
+      "sourceRetrievedAt": null,
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 20.3,
+        "annualPrecipMm": 2417
+      }
+    },
+    {
+      "id": "barva",
+      "name": "Barva",
+      "type": "canton",
+      "province": "heredia",
+      "longitude": -84.11553353526293,
+      "latitude": 10.073480159335872,
+      "sourceRetrievedAt": null,
+      "climate": {
+        "kind": "mountain",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "santo-domingo",
+      "name": "Santo Domingo",
+      "type": "canton",
+      "province": "heredia",
+      "longitude": -84.06813936279605,
+      "latitude": 9.988053504466762,
+      "sourceRetrievedAt": null,
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "santa-barbara",
+      "name": "Santa Bárbara",
+      "type": "canton",
+      "province": "heredia",
+      "longitude": -84.1474214939546,
+      "latitude": 10.082212019727507,
+      "sourceRetrievedAt": null,
+      "climate": {
+        "kind": "mountain",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "san-rafael",
+      "name": "San Rafael",
+      "type": "canton",
+      "province": "heredia",
+      "longitude": -84.08154923964028,
+      "latitude": 10.059791904252762,
+      "sourceRetrievedAt": null,
+      "climate": {
+        "kind": "mountain",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "san-isidro",
+      "name": "San Isidro",
+      "type": "canton",
+      "province": "heredia",
+      "longitude": -84.04318998617993,
+      "latitude": 10.029508507749938,
+      "sourceRetrievedAt": null,
+      "climate": {
+        "kind": "mountain",
+        "meanTempC": 20.3,
+        "annualPrecipMm": 2417
+      }
+    },
+    {
+      "id": "belen",
+      "name": "Belén",
+      "type": "canton",
+      "province": "heredia",
+      "longitude": -84.17685400217081,
+      "latitude": 9.98547136272839,
+      "sourceRetrievedAt": null,
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "flores",
+      "name": "Flores",
+      "type": "canton",
+      "province": "heredia",
+      "longitude": -84.15390899511812,
+      "latitude": 10.005629996249208,
+      "sourceRetrievedAt": null,
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "san-pablo",
+      "name": "San Pablo",
+      "type": "canton",
+      "province": "heredia",
+      "longitude": -84.09360389228718,
+      "latitude": 9.991882744355049,
+      "sourceRetrievedAt": null,
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "sarapiqui",
+      "name": "Sarapiquí",
+      "type": "canton",
+      "province": "heredia",
+      "longitude": -83.93595275239454,
+      "latitude": 10.487786832977406,
+      "sourceRetrievedAt": null,
+      "climate": {
+        "kind": "rural-wet",
+        "meanTempC": 24.9,
+        "annualPrecipMm": 2943
+      }
+    },
+    {
+      "id": "liberia",
+      "name": "Liberia",
+      "type": "canton",
+      "province": "guanacaste",
+      "longitude": -85.4951193429545,
+      "latitude": 10.691900433761504,
+      "sourceRetrievedAt": "2026-11-14T21:23:23.499Z",
+      "climate": {
+        "kind": "dry-coast",
+        "meanTempC": 27.5,
+        "annualPrecipMm": 1853
+      }
+    },
+    {
+      "id": "nicoya",
+      "name": "Nicoya",
+      "type": "canton",
+      "province": "guanacaste",
+      "longitude": -85.44320507935069,
+      "latitude": 10.103148474636157,
+      "sourceRetrievedAt": "2026-11-14T21:23:23.236Z",
+      "climate": {
+        "kind": "dry-coast",
+        "meanTempC": 27.6,
+        "annualPrecipMm": 1840
+      }
+    },
+    {
+      "id": "santa-cruz",
+      "name": "Santa Cruz",
+      "type": "canton",
+      "province": "guanacaste",
+      "longitude": -85.64047416570907,
+      "latitude": 10.235907150195345,
+      "sourceRetrievedAt": "2026-11-14T21:23:23.837Z",
+      "climate": {
+        "kind": "dry-coast",
+        "meanTempC": 27.6,
+        "annualPrecipMm": 1840
+      }
+    },
+    {
+      "id": "bagaces",
+      "name": "Bagaces",
+      "type": "canton",
+      "province": "guanacaste",
+      "longitude": -85.24650783111991,
+      "latitude": 10.512016830802361,
+      "sourceRetrievedAt": "2026-11-14T21:23:24.388Z",
+      "climate": {
+        "kind": "dry-coast",
+        "meanTempC": 25.1,
+        "annualPrecipMm": 1580
+      }
+    },
+    {
+      "id": "carrillo",
+      "name": "Carrillo",
+      "type": "canton",
+      "province": "guanacaste",
+      "longitude": -85.5908461131576,
+      "latitude": 10.481455073560795,
+      "sourceRetrievedAt": "2026-11-14T21:23:24.728Z",
+      "climate": {
+        "kind": "dry-coast",
+        "meanTempC": 27.5,
+        "annualPrecipMm": 1853
+      }
+    },
+    {
+      "id": "canas",
+      "name": "Cañas",
+      "type": "canton",
+      "province": "guanacaste",
+      "longitude": -85.09894975181281,
+      "latitude": 10.45028152625045,
+      "sourceRetrievedAt": "2026-11-14T21:23:25.130Z",
+      "climate": {
+        "kind": "dry-coast",
+        "meanTempC": 25.1,
+        "annualPrecipMm": 1580
+      }
+    },
+    {
+      "id": "abangares",
+      "name": "Abangares",
+      "type": "canton",
+      "province": "guanacaste",
+      "longitude": -85.02631350606705,
+      "latitude": 10.250633248891603,
+      "sourceRetrievedAt": "2026-11-14T21:23:25.511Z",
+      "climate": {
+        "kind": "dry-coast",
+        "meanTempC": 25.1,
+        "annualPrecipMm": 1580
+      }
+    },
+    {
+      "id": "tilaran",
+      "name": "Tilarán",
+      "type": "canton",
+      "province": "guanacaste",
+      "longitude": -84.90626231863052,
+      "latitude": 10.486617188592874,
+      "sourceRetrievedAt": "2026-11-14T21:23:26.185Z",
+      "climate": {
+        "kind": "mountain",
+        "meanTempC": 25.1,
+        "annualPrecipMm": 1580
+      }
+    },
+    {
+      "id": "nandayure",
+      "name": "Nandayure",
+      "type": "canton",
+      "province": "guanacaste",
+      "longitude": -85.30291403896283,
+      "latitude": 9.90129542929094,
+      "sourceRetrievedAt": "2026-11-14T21:23:26.253Z",
+      "climate": {
+        "kind": "dry-coast",
+        "meanTempC": 27.1,
+        "annualPrecipMm": 1687
+      }
+    },
+    {
+      "id": "la-cruz",
+      "name": "La Cruz",
+      "type": "canton",
+      "province": "guanacaste",
+      "longitude": -85.59354395057795,
+      "latitude": 11.009114658677788,
+      "sourceRetrievedAt": "2026-11-14T21:23:26.663Z",
+      "climate": {
+        "kind": "dry-coast",
+        "meanTempC": 26.6,
+        "annualPrecipMm": 1801
+      }
+    },
+    {
+      "id": "hojancha",
+      "name": "Hojancha",
+      "type": "canton",
+      "province": "guanacaste",
+      "longitude": -85.40906804897966,
+      "latitude": 9.974389271511939,
+      "sourceRetrievedAt": "2026-11-14T21:23:27.418Z",
+      "climate": {
+        "kind": "dry-coast",
+        "meanTempC": 27.6,
+        "annualPrecipMm": 1840
+      }
+    },
+    {
+      "id": "puntarenas-centro",
+      "name": "Puntarenas",
+      "type": "canton",
+      "province": "puntarenas",
+      "longitude": -85.1487768800821,
+      "latitude": 9.692119696290193,
+      "sourceRetrievedAt": "2026-11-14T21:23:27.509Z",
+      "climate": {
+        "kind": "dry-coast",
+        "meanTempC": 27.9,
+        "annualPrecipMm": 2573
+      }
+    },
+    {
+      "id": "esparza",
+      "name": "Esparza",
+      "type": "canton",
+      "province": "puntarenas",
+      "longitude": -84.64741783034921,
+      "latitude": 9.995212188194245,
+      "sourceRetrievedAt": "2026-11-14T21:23:27.978Z",
+      "climate": {
+        "kind": "dry-coast",
+        "meanTempC": 23.5,
+        "annualPrecipMm": 2005
+      }
+    },
+    {
+      "id": "buenos-aires",
+      "name": "Buenos Aires",
+      "type": "canton",
+      "province": "puntarenas",
+      "longitude": -83.2665553487497,
+      "latitude": 9.078898209698366,
+      "sourceRetrievedAt": "2026-11-14T21:23:29.207Z",
+      "climate": {
+        "kind": "rural-wet",
+        "meanTempC": 22,
+        "annualPrecipMm": 2220
+      }
+    },
+    {
+      "id": "montes-de-oro",
+      "name": "Montes de Oro",
+      "type": "canton",
+      "province": "puntarenas",
+      "longitude": -84.73371342883252,
+      "latitude": 10.146423649291478,
+      "sourceRetrievedAt": "2026-11-14T21:23:28.818Z",
+      "climate": {
+        "kind": "dry-coast",
+        "meanTempC": 27.1,
+        "annualPrecipMm": 1687
+      }
+    },
+    {
+      "id": "osa",
+      "name": "Osa",
+      "type": "canton",
+      "province": "puntarenas",
+      "longitude": -83.53371846445415,
+      "latitude": 8.892155336963611,
+      "sourceRetrievedAt": "2026-11-14T21:23:29.268Z",
+      "climate": {
+        "kind": "rural-wet",
+        "meanTempC": 25.8,
+        "annualPrecipMm": 2684
+      }
+    },
+    {
+      "id": "quepos",
+      "name": "Quepos",
+      "type": "canton",
+      "province": "puntarenas",
+      "longitude": -84.04646824763708,
+      "latitude": 9.413344011732903,
+      "sourceRetrievedAt": "2026-11-14T21:23:30.406Z",
+      "climate": {
+        "kind": "rural-wet",
+        "meanTempC": 21.4,
+        "annualPrecipMm": 2431
+      }
+    },
+    {
+      "id": "golfito",
+      "name": "Golfito",
+      "type": "canton",
+      "province": "puntarenas",
+      "longitude": -83.09622841852645,
+      "latitude": 8.423144549010146,
+      "sourceRetrievedAt": "2026-11-14T21:23:30.726Z",
+      "climate": {
+        "kind": "rural-wet",
+        "meanTempC": 26.2,
+        "annualPrecipMm": 2405
+      }
+    },
+    {
+      "id": "coto-brus",
+      "name": "Coto Brus",
+      "type": "canton",
+      "province": "puntarenas",
+      "longitude": -82.909287397925,
+      "latitude": 8.893856878946394,
+      "sourceRetrievedAt": "2026-11-14T21:23:30.878Z",
+      "climate": {
+        "kind": "mountain",
+        "meanTempC": 22,
+        "annualPrecipMm": 2220
+      }
+    },
+    {
+      "id": "parrita",
+      "name": "Parrita",
+      "type": "canton",
+      "province": "puntarenas",
+      "longitude": -84.34451260337491,
+      "latitude": 9.549195859869787,
+      "sourceRetrievedAt": "2026-11-14T21:23:31.573Z",
+      "climate": {
+        "kind": "rural-wet",
+        "meanTempC": 26.2,
+        "annualPrecipMm": 2513
+      }
+    },
+    {
+      "id": "corredores",
+      "name": "Corredores",
+      "type": "canton",
+      "province": "puntarenas",
+      "longitude": -82.9396574201929,
+      "latitude": 8.537375312399547,
+      "sourceRetrievedAt": "2026-11-14T21:23:32.021Z",
+      "climate": {
+        "kind": "rural-wet",
+        "meanTempC": 26.2,
+        "annualPrecipMm": 2405
+      }
+    },
+    {
+      "id": "garabito",
+      "name": "Garabito",
+      "type": "canton",
+      "province": "puntarenas",
+      "longitude": -84.61567376554095,
+      "latitude": 9.708235578337792,
+      "sourceRetrievedAt": "2026-11-14T21:23:32.202Z",
+      "climate": {
+        "kind": "dry-coast",
+        "meanTempC": 26.2,
+        "annualPrecipMm": 2513
+      }
+    },
+    {
+      "id": "puerto-jimenez",
+      "name": "Puerto Jiménez",
+      "type": "canton",
+      "province": "puntarenas",
+      "longitude": -83.46189782240813,
+      "latitude": 8.532915279743293,
+      "sourceRetrievedAt": "2026-11-14T21:23:33.571Z",
+      "climate": {
+        "kind": "rural-wet",
+        "meanTempC": 27.6,
+        "annualPrecipMm": 2775
+      }
+    },
+    {
+      "id": "limon-centro",
+      "name": "Limón",
+      "type": "canton",
+      "province": "limon",
+      "longitude": -83.19257879896392,
+      "latitude": 9.776091523193173,
+      "sourceRetrievedAt": "2026-11-14T21:23:33.505Z",
+      "climate": {
+        "kind": "rural-wet",
+        "meanTempC": 24.5,
+        "annualPrecipMm": 3221
+      }
+    },
+    {
+      "id": "pococi",
+      "name": "Pococí",
+      "type": "canton",
+      "province": "limon",
+      "longitude": -83.64509090870936,
+      "latitude": 10.502144797463188,
+      "sourceRetrievedAt": "2026-11-14T21:23:34.415Z",
+      "climate": {
+        "kind": "rural-wet",
+        "meanTempC": 24.9,
+        "annualPrecipMm": 2943
+      }
+    },
+    {
+      "id": "siquirres",
+      "name": "Siquirres",
+      "type": "canton",
+      "province": "limon",
+      "longitude": -83.49405774218295,
+      "latitude": 10.148019088517799,
+      "sourceRetrievedAt": "2026-11-14T21:23:34.875Z",
+      "climate": {
+        "kind": "rural-wet",
+        "meanTempC": 20.3,
+        "annualPrecipMm": 2417
+      }
+    },
+    {
+      "id": "talamanca",
+      "name": "Talamanca",
+      "type": "canton",
+      "province": "limon",
+      "longitude": -83.02094013119063,
+      "latitude": 9.421899408376134,
+      "sourceRetrievedAt": "2026-11-14T21:23:35.201Z",
+      "climate": {
+        "kind": "rural-wet",
+        "meanTempC": 21,
+        "annualPrecipMm": 2540
+      }
+    },
+    {
+      "id": "matina",
+      "name": "Matina",
+      "type": "canton",
+      "province": "limon",
+      "longitude": -83.3093577043042,
+      "latitude": 10.011043524018675,
+      "sourceRetrievedAt": "2026-11-14T21:23:35.776Z",
+      "climate": {
+        "kind": "rural-wet",
+        "meanTempC": 24.5,
+        "annualPrecipMm": 3221
+      }
+    },
+    {
+      "id": "guacimo",
+      "name": "Guácimo",
+      "type": "canton",
+      "province": "limon",
+      "longitude": -83.62290706942238,
+      "latitude": 10.204230520894583,
+      "sourceRetrievedAt": "2026-11-14T21:23:36.219Z",
+      "climate": {
+        "kind": "rural-wet",
+        "meanTempC": 20.3,
+        "annualPrecipMm": 2417
+      }
+    },
+    {
+      "id": "heredia-centro",
+      "name": "Heredia",
+      "type": "canton",
+      "province": "heredia",
+      "longitude": -84.03922966873245,
+      "latitude": 10.12856348019119,
+      "sourceRetrievedAt": null,
+      "climate": {
+        "kind": "urban-valley",
+        "meanTempC": 20.3,
+        "annualPrecipMm": 2417
+      }
     }
   ]
 }

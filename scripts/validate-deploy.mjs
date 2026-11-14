@@ -2,7 +2,7 @@ import {readFile,access} from 'node:fs/promises';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 const root=new URL('../',import.meta.url);
-for(const file of ['public/index.html','public/app.js','public/immersive.js','public/scene-art.js','public/weather-experience.js','public/weather-state.js','public/earth-pulse.js','public/recommendations.js','public/credits.html','public/vendor/three.module.js','api/current.mjs','api/forecast.mjs']){const url=new URL(file,root);await access(url);if(file.endsWith('.js')||file.endsWith('.mjs')){const result=spawnSync(process.execPath,['--check',fileURLToPath(url)],{encoding:'utf8'});if(result.status!==0)throw Error(result.stderr||`Error de sintaxis: ${file}`);}}
+for(const file of ['public/index.html','public/app.js','public/territories.js','public/immersive.js','public/scene-art.js','public/weather-experience.js','public/weather-state.js','public/earth-pulse.js','public/recommendations.js','public/credits.html','public/vendor/three.module.js','api/current.mjs','api/forecast.mjs']){const url=new URL(file,root);await access(url);if(file.endsWith('.js')||file.endsWith('.mjs')){const result=spawnSync(process.execPath,['--check',fileURLToPath(url)],{encoding:'utf8'});if(result.status!==0)throw Error(result.stderr||`Error de sintaxis: ${file}`);}}
 const manifest=JSON.parse(await readFile(new URL('public/data/manifest.json',root),'utf8'));
 for(const site of manifest.sites){const source=JSON.parse(await readFile(new URL(`public/data/${site.id}.json`,root),'utf8'));if(!source.monthly?.length)throw Error(`Missing data: ${site.id}`);}
-console.log(`GaiaTrack listo: archivos estáticos y ${manifest.sites.length} cantones verificados.`);
+console.log(`GaiaTrack listo: archivos estáticos y ${manifest.sites.length} territorios verificados.`);
