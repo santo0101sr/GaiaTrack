@@ -59,6 +59,10 @@ test('Rain stops immediately when selecting a dry province, and province effects
     scene.animate(1110,true);assert.equal(rainyProvince.visible,false);
     document.dispatchEvent(new CustomEvent('gaiatrack:territory-view',{detail:{province:null}}));
     scene.animate(1120,true);assert.equal(rainyProvince.visible,true);
+    assert.equal(group.visible,false);
+    // Country view uses all seven province systems, without overlaying a selected canton's rain.
+    document.dispatchEvent(new CustomEvent('gaiatrack:selection',{detail:{site:'heredia'}}));
+    scene.animate(1125,true);assert.equal(rainyProvince.visible,true);assert.equal(group.visible,false);
 
     // No current data for this canton must not freeze other provinces' rain.
     document.dispatchEvent(new CustomEvent('gaiatrack:selection',{detail:{site:'unknown-canton'}}));
