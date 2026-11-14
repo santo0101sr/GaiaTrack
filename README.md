@@ -62,3 +62,9 @@ Entrada inmersiva WebGL con Three.js 0.160.1, geometría cantonal real extruida 
 ## OpenWeather: condiciones actuales
 Copiar .env.example a .env y definir OPENWEATHER_API_KEY. La clave solo se lee en el servidor; .env está excluido de Git y fuera del directorio público. El endpoint /api/current?site=heredia consulta Current Weather con unidades métricas e idioma español, valida el cantón y conserva los resultados en memoria por diez minutos. La web muestra fecha del dato del proveedor y de consulta; no presenta los mínimos/máximos espaciales de Current Weather como extremos diarios. Valores no reportados no se convierten en cero. Si la clave es rechazada (401), el error se muestra sin inventar condiciones. OpenWeather aporta condiciones actuales; NASA POWER y Open-Meteo mantienen histórico y pronósticos de las variables que no cubre este endpoint. Documentación: https://openweathermap.org/current
 
+
+## Vercel
+El proyecto incluye vercel.json, funciones Node.js para /api/current y /api/forecast y validación con npm run build. Vercel sirve public/ como salida estática. Las funciones incluyen los datos cantonales necesarios; la caché de pronóstico usa memoria y no escribe en el sistema de archivos de Vercel.
+
+Vincular cuenta: vercel login. Vincular proyecto: vercel link. Configurar OPENWEATHER_API_KEY como variable del servidor en Vercel para Preview y Production; no subir .env. Despliegue de prueba: npm run deploy. Producción: npm run deploy:prod. La carpeta .vercel/ contiene la vinculación local y está ignorada por Git. Para despliegues automáticos desde GitHub, conectar el repositorio privado en el proyecto de Vercel.
+
