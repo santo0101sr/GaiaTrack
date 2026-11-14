@@ -36,12 +36,14 @@ test('Rain stops immediately when selecting a dry province, and province effects
       const mesh=new THREE.Mesh(new THREE.BoxGeometry(1,.26,1),new THREE.MeshStandardMaterial());
       mesh.position.x=i*4;mesh.userData={id:province+'-centro',province};root.add(mesh);return mesh;
     });
-    const raw=(site,precipitation,weatherCode,longitude)=>({site,name:site,precipitation,weatherCode,intervalSeconds:900,observedAt:new Date().toISOString(),clouds:100,requested:{longitude,latitude:0}});
+    const raw=(site,precipitation,weatherCode,longitude)=>({site,name:site,precipitation,weatherCode,intervalSeconds:900,observedAt:new Date().toISOString(),clouds:100,isDay:true,solarRadiation:700,requested:{longitude,latitude:0}});
     publishWeather('current',raw('heredia',1,63,0));
     publishWeather('current',raw('limon',0,3,4));
     const scene=createWeatherExperience({root,meshes,light,coords});
     const group=root.getObjectByName('selected-weather');
     const rain=group.children.find(c=>c.isLineSegments);
+    const selectedSky=group.getObjectByName('territory-sky');
+    assert.equal(selectedSky.userData.cloudCover,1);assert.equal(selectedSky.userData.sunStrength,0);
     for(let t=0;t<1000;t+=33)scene.animate(t,true);
     assert.ok(rain.geometry.drawRange.count>0);
 
@@ -54,6 +56,11 @@ test('Rain stops immediately when selecting a dry province, and province effects
     assert.equal(rainyProvince.visible,true);
     assert.ok(rainyProvince.children.find(c=>c.isLineSegments).geometry.drawRange.count>0);
     assert.equal(root.getObjectByName('province-weather-limon').visible,false);
+    publishWeather('current',{...raw('limon',0,2,4),clouds:10,isDay:true});
+    assert.equal(selectedSky.userData.cloudCover,.1);assert.ok(selectedSky.userData.sunStrength>0);
+    publishWeather('current',{...raw('limon',0,2,4),clouds:10,isDay:false});
+    assert.equal(selectedSky.userData.sunStrength,0);
+    assert.match(document.querySelector('#weather-date').textContent,/Night/);
 
     document.dispatchEvent(new CustomEvent('gaiatrack:territory-view',{detail:{province:'limon'}}));
     scene.animate(1110,true);assert.equal(rainyProvince.visible,false);
