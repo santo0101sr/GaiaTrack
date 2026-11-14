@@ -78,3 +78,6 @@ Vincular cuenta: vercel login. Vincular proyecto: vercel link. No se requieren v
 ## Atmósfera conectada y línea de tiempo 3D
 La escena traduce radiación, cobertura nubosa, precipitación y humedad del suelo a efectos ilustrativos en el punto seleccionado. La línea de tiempo contiene 168 horas de pronóstico, accesos por día, reproducción y acercamiento de cámara. No simula física atmosférica ni efemérides solares. Se reutilizan las consultas cacheadas del panel, sin solicitudes extra durante la reproducción. Ver /credits.html y docs/LICENSING.md: esta versión en Vercel es de prueba y aún requiere migración de fuentes/alojamiento antes de uso comercial.
 
+
+## Proveedor confirmado
+Por instrucción del responsable, que informa haber consultado y confirmado las condiciones comerciales aplicables a su proyecto, Open-Meteo queda seleccionado para condiciones actuales y pronósticos, incluidos radiación y humedad superficial del suelo. Esta anotación registra su confirmación sin certificar una autorización particular del proveedor. Se conservan atribuciones, caché compartida y NASA POWER para el histórico. Vercel se mantiene para pruebas. Las rutas activas no dependen de MET Norway ni requieren METNO_TERMS_ACCEPTED o METNO_USER_AGENT.

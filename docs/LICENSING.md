@@ -2,6 +2,10 @@
 
 Revisión documental al 14 de noviembre de 2026. Vercel se mantiene exclusivamente para pruebas por decisión del usuario. Esta revisión no certifica ausencia de riesgos legales; identifica condiciones y pendientes concretos.
 
+## Proveedor seleccionado y confirmación del responsable
+
+El responsable de GaiaTrack indicó en esta conversación que consultó el uso comercial de Open-Meteo y confirmó que puede utilizarlo para su proyecto. Por instrucción expresa se selecciona Open-Meteo para condiciones actuales, radiación, suelo y pronósticos, y se conserva NASA POWER para el histórico. Esta anotación registra la confirmación del responsable; no es una verificación independiente de una autorización particular del proveedor. No se han contratado planes ni activado cobros. Vercel permanece como entorno de pruebas.
+
 ## Diferencia esencial
 
 Los derechos sobre los datos no equivalen al derecho a usar gratis un servicio de API. Los datos de Open-Meteo están bajo CC BY 4.0, con reutilización comercial, atribución y declaración de modificaciones. El acceso a su API gratuita está restringido a usos no comerciales. Vercel Hobby también limita el alojamiento a uso personal/no comercial. La aplicación actual no se presenta como lista para comercializar con esos servicios.
@@ -29,7 +33,7 @@ Fuentes:
 - https://nomads.ncep.noaa.gov/
 - https://nomads.ncep.noaa.gov/info.php?page=gribfilter
 
-Recomendación inicial: evaluar Visual Crossing como proveedor comercial de uso limitado y NOAA GFS para los campos que no cubra. No se ha abierto cuenta, contratado plan ni cambiado el proveedor de la demo. La ruta completamente libre de cuotas comerciales de un intermediario es procesar directamente modelos públicos, con mayor trabajo de infraestructura.
+Alternativas documentadas para referencia. La decisión vigente del responsable es utilizar Open-Meteo; no se ha abierto cuenta ni contratado plan con estas alternativas.
 
 ## Otros componentes
 
