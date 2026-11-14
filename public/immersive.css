@@ -40,15 +40,17 @@ body.immersive-mode{overflow:hidden;background:#03090f}.immersive-mode>.topbar{p
 @keyframes valuePop{0%{opacity:.45;transform:translateY(4px) scale(.97)}100%{opacity:1;transform:translateY(0) scale(1)}}
 @media(prefers-reduced-motion:reduce){.weather-console,.flight-bottom,#flight-label,#weather-clean-view,.lab-open>main,.value-pop{animation:none!important}.flight-intro,.flight-panel,.weather-console,#weather-clean-view,.flight-controls button,.flight-panel button,.weather-console button{transition:none!important}}
 /* Layout & overflow fixes for Pronóstico 3D and Telemetry panels */
-.flight-intro{top:86px}
+.flight-intro{top:82px}
 .flight-intro h1{margin:6px 0}
-.flight-intro p{margin:6px 0 0;line-height:1.55}
+.flight-intro p{margin:6px 0 0;line-height:1.5;font-size:8.5px}
 #weather-clean-view{top:92px;right:3.8%}
-.flight-panel{top:138px;max-height:calc(100vh - 285px);overflow-y:auto;padding:20px}
-.flight-panel h2{margin-top:16px}
-.flight-reading{margin:16px 0 4px}
+.flight-panel{top:138px;max-height:calc(100vh - 285px);overflow-y:auto;padding:18px 20px}
+.hud-select{width:100%;margin-top:12px;padding:7px 9px;font:500 11px var(--font);color:#d9f9eb;background:#0a1c26cc;border:1px solid #8bc8af44;border-radius:6px;cursor:pointer;outline:none;transition:border-color .2s}
+.hud-select:hover,.hud-select:focus{border-color:#c3f77a88}
+.flight-panel h2{margin-top:10px}
+.flight-reading{margin:14px 0 4px}
 #flight-label{right:3.8%;bottom:32px}
-.weather-console{top:234px;bottom:auto;width:302px;padding:14px 16px;max-height:calc(100vh - 340px)}
+.weather-console{top:248px;bottom:auto;width:302px;padding:14px 16px;max-height:calc(100vh - 355px)}
 .weather-readings{gap:12px 10px;margin-top:12px}
 .weather-readings strong{font-size:14px;line-height:1.35}
 #weather-date{margin:10px 0}
