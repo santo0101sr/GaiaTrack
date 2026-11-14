@@ -10,7 +10,7 @@ function buildSectionShell(){
 }
 buildSectionShell();
 
-const $=s=>document.querySelector(s),cache=new Map(),pending=new Map();let site='heredia',sequence=0;
+const $=s=>document.querySelector(s),cache=new Map(),pending=new Map();let site=null,sequence=0;
 const download=document.createElement('button');download.className='outline-button';download.disabled=true;
 function attachDownload(){
   download.textContent=tx('↓ Export conditions CSV','↓ Exportar condiciones CSV');
@@ -56,7 +56,8 @@ function paint(result){
 
 async function load(){
   download.disabled=true;const requested=site,token=++sequence,stored=cache.get(requested);
-  if(stored&&Date.now()-stored.time<900000){
+  if(!requested){$('#current-status').textContent=tx('Choose a province','Elegí una provincia');$('#current-values').replaceChildren();$('#current-time').textContent='';$('#current-refresh').disabled=true;recSection.replaceChildren();return;}
+  $('#current-refresh').disabled=false;if(stored&&Date.now()-stored.time<900000){
     if(stored.error){$('#current-status').textContent=stored.error;hud(tx('TELEMETRY · UNAVAILABLE','TELEMETRÍA · NO DISPONIBLE'));}
     else paint(stored.value);
     $('#current-refresh').disabled=false;return;

@@ -31,7 +31,7 @@ export function initForecast(){
 }
 
 export async function updateForecast(site,variable,refresh=false){
-  if(!site)return;initForecast();
+  if(!site){selectedSite=null;forecast=null;request++;$('#forecast-location').textContent=tx('Choose a province','Elegí una provincia');for(const id of ['forecast-days','forecast-detail','forecast-period','forecast-update'])$('#'+id).textContent='';$('#forecast-status').hidden=false;$('#forecast-status').textContent=tx('Choose a province to see its forecast.','Elegí una provincia para ver su pronóstico.');$('#forecast-refresh').disabled=true;$('#forecast-download').disabled=true;return;}initForecast();
   const changed=site.id!==selectedSite?.id;selectedSite=site;selectedVariable=variable;
   $('#forecast-location').textContent=`${site.name} · ${tx('reference point','punto de referencia')}`;
   if(changed)selectedDay=0;

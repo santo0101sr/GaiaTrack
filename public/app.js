@@ -29,21 +29,21 @@ const rawVariables=[
     es:{name:'Humedad relativa del aire',short:'Humedad del aire',unit:'%',definition:'Promedio anual de la humedad relativa del aire a 2 m sobre la superficie.',resolution:'Meteorología: celdas de 0,5° × 0,625° (aprox. 55 × 68 km).'}}
 ];
 
-const state={variable:'T2M',site:'heredia',year:2025,start:2001,end:2025,anomaly:false,compare:false,compareSite:'sarapiqui'};
-let lastMapSite=null,mapOverview=false;
+const state={variable:'T2M',site:null,year:2025,start:2001,end:2025,anomaly:false,compare:false,compareSite:'sarapiqui'};
+let lastMapSite=null,mapOverview=true;
 let manifest,geo,data={},map,boundaryLayer,markers={},seaMarkers=[],timer=null;
 const v=()=>{const r=rawVariables.find(x=>x.id===state.variable);const l=r[getLang()];return {id:r.id,icon:r.icon,digits:r.digits,...l};};
 const format=(n,d=v().digits)=>Number.isFinite(n)?new Intl.NumberFormat(locale(),{minimumFractionDigits:d,maximumFractionDigits:d}).format(n):tx('No data','Sin datos');
 const signed=(n,d=v().digits)=>(n>0?'+':'')+format(n,d);
-const series=(id=state.site)=>annualSeries(data[id].monthly,state.variable);
+const series=(id=state.site)=>annualSeries(data[id]?.monthly??[],state.variable);
 const valueAt=(id,year)=>series(id).find(d=>d.year===year)?.value;
 const deltaUnit=()=>state.variable==='RH2M'?tx('pp','p.p.'):v().unit;
 const currentColor='#c3f77a';
 
 function showError(message){$('#status').textContent=message;}
 const PROVINCE_IDS=['san-jose','alajuela','cartago','heredia','guanacaste','puntarenas','limon'];
-function options(select,value){const province=manifest.sites.find(s=>s.id===value)?.province;select.innerHTML=select.id==='site-select'?territoryOptionsHtml(manifest,province,getLang()):siteOptionsHtml(manifest,getLang());select.value=value;}
-function selectSite(id){if(!data[id])return;state.site=id;stop();render();}
+function options(select,value){const province=manifest.sites.find(s=>s.id===value)?.province;select.innerHTML=select.id==='site-select'?(province?territoryOptionsHtml(manifest,province,getLang()):`<option value="">${tx('Choose a province first','Primero elegí una provincia')}</option>`):siteOptionsHtml(manifest,getLang());select.value=value??'';}
+function selectSite(id){if(id!=null&&!data[id])return;state.site=id??null;stop();render();}
 document.addEventListener('gaiatrack:select-site',e=>selectSite(e.detail.site));
 
 function buildLayerButtons(){
@@ -57,19 +57,34 @@ function buildLayerButtons(){
 
 function setVariable(id){state.variable=id;render();}
 function stop(){if(timer){clearInterval(timer);timer=null;}$('#play').textContent='▶';$('#play').setAttribute('aria-label',tx('Play time series','Reproducir evolución temporal'));}
-function setYear(year){state.year=Number(year);document.dispatchEvent(new CustomEvent('gaiatrack:selection',{detail:{site:state.site,variable:state.variable,year:state.year}}));renderMap();renderInspector();renderChart();$('#year-slider').value=state.year;$('#selected-year').textContent=state.year;}
+function setYear(year){state.year=Number(year);if(!state.site){render();return;}document.dispatchEvent(new CustomEvent('gaiatrack:selection',{detail:{site:state.site,variable:state.variable,year:state.year}}));renderMap();renderInspector();renderChart();$('#year-slider').value=state.year;$('#selected-year').textContent=state.year;}
 
 function render(){
   document.querySelectorAll('.layer-button').forEach(b=>{const active=b.dataset.variable===state.variable;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});
-  options($('#site-select'),state.site);$('#province-select').innerHTML=provinceOptionsHtml(manifest);$('#province-select').value=manifest.sites.find(s=>s.id===state.site).province;$('#compare-site').value=state.compareSite;
+  options($('#site-select'),state.site);$('#province-select').innerHTML=`<option value="">${tx('Choose a province','Elegí una provincia')}</option>`+provinceOptionsHtml(manifest);$('#province-select').value=manifest.sites.find(s=>s.id===state.site)?.province??'';$('#compare-site').value=state.compareSite;
   $('#metric-name').textContent=v().name;$('#metric-unit').textContent=v().unit;$('#metric-definition').textContent=v().definition;
   $('#resolution-note').textContent=v().resolution+tx(' One point does not represent the entire territory.',' Un punto no representa todo el territorio.');
-  renderMap();renderInspector();renderChart();renderStats();
+  $('#play').disabled=$('#download').disabled=$('#fit-province').disabled=!state.site;
+  renderMap();if(state.site){renderInspector();renderChart();renderStats();}else renderEmptySelection();
   document.dispatchEvent(new CustomEvent('gaiatrack:selection',{detail:{site:state.site,variable:state.variable,year:state.year}}));
   updateForecast(data[state.site],state.variable);
 }
 
+function renderEmptySelection(){
+  const prompt=tx('Choose a province','Elegí una provincia');
+  for(const id of ['metric-value','baseline-difference','slope','significance','pvalue','sample-count','flow-trend','flow-significance'])if($('#'+id))$('#'+id).textContent='—';
+  for(const id of ['point-coordinates','history-quality','chart-label','coverage-note','science-note'])$('#'+id).textContent='';
+  $('#mini-chart').innerHTML='';$('#legend-site').textContent=prompt;$('#insight').textContent=prompt;
+  $('#flow-region').textContent=prompt;$('#verdict-badge').textContent=prompt;$('#stat-popover').textContent=prompt;$('#stat-popover').classList.remove('is-open');$('#sig-help-btn').setAttribute('aria-expanded','false');
+  $('#history-chart').innerHTML=`<text x="50%" y="50%" fill="#a1b0bb" text-anchor="middle">${prompt}</text>`;
+  $('#chart-tooltip').hidden=true;$('#chart-tooltip').classList.remove('is-visible');
+  const verdict=$('#trend-verdict');if(verdict){verdict.classList.remove('is-sig','is-warn');verdict.querySelectorAll('strong,p').forEach(el=>el.textContent=prompt);}
+  $('#province-scan').replaceChildren();
+  for(const province of manifest.provinces){const button=document.createElement('button');button.type='button';button.className='prov-card';button.textContent=province.name;button.onclick=()=>selectSite(province.siteId);$('#province-scan').append(button);}
+}
+
 function renderInspector(){
+  if(!state.site)return;
   const s=data[state.site],points=series(),current=valueAt(state.site,state.year),base=baseline(points),diff=Number.isFinite(current)&&Number.isFinite(base)?current-base:null;
   $('#point-coordinates').textContent=`${s.latitude.toFixed(4)}° N / ${Math.abs(s.longitude).toFixed(4)}° ${tx('W','O')} · ${tx('REFERENCE POINT','PUNTO DE REFERENCIA')}`;
   $('#metric-year').textContent=state.year;$('#metric-value').textContent=format(current);
@@ -97,8 +112,8 @@ function renderMap(){
   const values=manifest.sites.map(s=>valueAt(s.id,state.year)).filter(Number.isFinite),min=Math.min(...values),max=Math.max(...values);
   $('#map-variable').textContent=v().name;$('#map-year').textContent=state.year;$('#map-range').textContent=`${format(min)} — ${format(max)} ${v().unit}`;
   if(!map)return;
-  const province=manifest.sites.find(s=>s.id===state.site).province;
-  if(lastMapSite!==state.site){mapOverview=false;const features=geo.features.filter(f=>f.properties.province===province);map.fitBounds(L.geoJSON({type:'FeatureCollection',features}).getBounds().pad(.12));lastMapSite=state.site;}
+  const province=manifest.sites.find(s=>s.id===state.site)?.province??null;
+  if(lastMapSite!==state.site){mapOverview=!state.site;const features=province?geo.features.filter(f=>f.properties.province===province):geo.features;map.fitBounds(L.geoJSON({type:'FeatureCollection',features}).getBounds().pad(.12));lastMapSite=state.site;}
   for(const s of manifest.sites){
     const visible=mapOverview||s.province===province;
     if(visible&&!map.hasLayer(markers[s.id]))markers[s.id].addTo(map);
@@ -108,7 +123,7 @@ function renderMap(){
     markers[s.id].setTooltipContent(`${s.name} · ${format(value)} ${v().unit}`);
     if(selected)markers[s.id].bringToFront();
   }
-  const selectedSite=manifest.sites.find(s=>s.id===state.site);boundaryLayer.setStyle(f=>{const selected=f.properties.id===state.site||(selectedSite.type==='province'&&f.properties.province===selectedSite.province);return {opacity:mapOverview||f.properties.province===province?1:0,color:selected?'#c3f77a':'#617f85',weight:selected?2:1,fillColor:'#344b48',fillOpacity:mapOverview||f.properties.province===province?(selected?.18:.04):0};});
+  const selectedSite=manifest.sites.find(s=>s.id===state.site);boundaryLayer.setStyle(f=>{const selected=f.properties.id===state.site||(selectedSite?.type==='province'&&f.properties.province===selectedSite.province);return {opacity:mapOverview||f.properties.province===province?1:0,color:selected?'#c3f77a':'#617f85',weight:selected?2:1,fillColor:'#344b48',fillOpacity:mapOverview||f.properties.province===province?(selected?.18:.04):0};});
 }
 
 function paintSeaLabels(){
@@ -122,7 +137,7 @@ function paintSeaLabels(){
 
 function initMap(){
   if(!globalThis.L){$('#map-fallback').hidden=false;return;}
-  map=L.map('map',{zoomControl:false,scrollWheelZoom:false,minZoom:7,maxZoom:14}).fitBounds(L.geoJSON(geo).getBounds().pad(.08));
+  map=L.map('map',{zoomControl:false,scrollWheelZoom:true,minZoom:7,maxZoom:14}).fitBounds(L.geoJSON(geo).getBounds().pad(.08));
   L.control.zoom({position:'bottomright'}).addTo(map);
   const tiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:19}).addTo(map);
   let tileErrors=0;tiles.on('tileerror',()=>{if(++tileErrors===5)showError(tx('Base map is unavailable. Boundaries, points, and scientific data still work.','El mapa base no está disponible. Los límites, puntos y datos científicos siguen funcionando.'));});
@@ -135,6 +150,7 @@ function initMap(){
 }
 
 function renderChart(){
+  if(!state.site)return;
   const all=series();
   const display=s=>s.filter(p=>p.year>=state.start&&p.year<=state.end&&Number.isFinite(p.value)).map(p=>({...p,value:p.value-(state.anomaly?baseline(s):0)}));
   const primary=display(all),secondary=state.compare?display(series(state.compareSite)):[];
@@ -211,6 +227,7 @@ function renderChart(){
 }
 
 function renderStats(){
+  if(!state.site)return;
   const s=data[state.site],points=series().filter(d=>d.year>=state.start&&d.year<=state.end),t=trend(points);
   const slopeDigits=state.variable==='GWETTOP'?3:2;
   const decSlope=t.slope===null?null:t.slope*10;
@@ -320,6 +337,7 @@ function renderMethodContent(){
 function showMethod(){methodTab='all';renderMethodContent();$('#method-dialog').showModal();}
 
 function download(){
+  if(!state.site)return;
   const rows=['# GaiaTrack | NASA POWER | Reference point, not territorial average',`# Variable: ${v().id}; ${v().definition}`,`# Anomaly baseline: 2001-2010; source retrieved: ${data[state.site].sourceRetrievedAt??'not recorded'}`,`# Source query: ${data[state.site].url}`,'territory,latitude,longitude,year,variable,unit,value,anomaly_2001_2010,valid_days,expected_days,coverage_pct,valid_months,estimated_accumulation'];
   const ids=state.compare?[state.site,state.compareSite]:[state.site];
   for(const id of [...new Set(ids)]){
@@ -345,7 +363,7 @@ async function boot(){
     options($('#site-select'),state.site);options($('#compare-site'),state.compareSite);
     for(const id of ['#start-year','#end-year']){$(id).innerHTML=Array.from({length:25},(_,i)=>`<option>${2001+i}</option>`).join('');$(id).onchange=setPeriod;}
     $('#start-year').value=state.start;$('#end-year').value=state.end;
-    $('#site-select').onchange=e=>selectSite(e.target.value);$('#province-select').onchange=e=>selectSite(manifest.provinces.find(p=>p.id===e.target.value).siteId);
+    $('#site-select').onchange=e=>selectSite(e.target.value);$('#province-select').onchange=e=>selectSite(manifest.provinces.find(p=>p.id===e.target.value)?.siteId??null);
     $('#year-slider').oninput=e=>{stop();setYear(e.target.value);};
     $('#compare').onchange=e=>{state.compare=e.target.checked;renderChart();};
     $('#compare-site').onchange=e=>{state.compareSite=e.target.value;state.compare=true;$('#compare').checked=true;renderChart();};

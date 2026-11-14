@@ -2,7 +2,7 @@ import * as THREE from './vendor/three.module.js';
 import {cantonsOf,provinceOptionsHtml,territoryOptionsHtml,territoryBounds} from './territories.js';
 import {getLang,tx} from './i18n.js';
 
-export function createProvinceExplorer({host,manifest,geo,meshes,beacons,borders,root,camera,coords,onSelect,onFocus,initial='heredia'}) {
+export function createProvinceExplorer({host,manifest,geo,meshes,beacons,borders,root,camera,coords,onSelect,onFocus,initial=null}) {
   let province=null,selected=null,labels=[];
   const navigation=document.createElement('nav');
   navigation.className='territory-browser';
@@ -71,7 +71,7 @@ export function createProvinceExplorer({host,manifest,geo,meshes,beacons,borders
     navigation.setAttribute('aria-label',tx('Territory navigation','Navegación territorial'));
     navigation.replaceChildren();
     const breadcrumb=document.createElement('div');breadcrumb.className='territory-breadcrumb';
-    const back=document.createElement('button');back.type='button';back.textContent=province?'← Costa Rica':'COSTA RICA';back.onclick=country;
+    const back=document.createElement('button');back.type='button';back.textContent=province?'← Costa Rica':'COSTA RICA';back.onclick=()=>country();
     breadcrumb.append(back);
     if(province){const text=document.createElement('span');text.textContent='/ '+name(province);breadcrumb.append(text);}
     navigation.append(breadcrumb);
@@ -103,12 +103,12 @@ export function createProvinceExplorer({host,manifest,geo,meshes,beacons,borders
 
   function sync(id){
     const site=sites.get(id);
-    if(!site||id===selected)return;
+    if(!site){if(selected!==null||province!==null)country(false);return;}if(id===selected)return;
     selected=id;province=site.province;
     render();host.querySelector('.flight-panel').scrollTop=0;setVisibility();focus();
   }
 
-  function country(){province=null;render();setVisibility();focus();}
+  function country(notify=true){selected=null;province=null;render();setVisibility();focus();if(notify===true)onSelect(null);}
 
   function updateLabels(){
     if(!root.visible||document.body.classList.contains('lab-open')||document.body.classList.contains('intro-playing')){
@@ -129,6 +129,6 @@ export function createProvinceExplorer({host,manifest,geo,meshes,beacons,borders
     }
   }
 
-  sync(initial);
+  if(initial&&sites.has(initial))sync(initial);else country(false);
   return {sync,render,focus,country,updateLabels,selectMesh(mesh){activate(province===mesh.userData.province?mesh.userData.id:mesh.userData.province);}};
 }
