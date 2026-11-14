@@ -1,0 +1,5 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {normalizeCurrent} from '../scripts/openweather-service.mjs';
+test('Current weather preserves timestamp and leaves unreported rain unknown',()=>{const raw={dt:1794672000,main:{temp:22,feels_like:23,humidity:82},wind:{speed:0},weather:[{description:'nubes'}]};const d=normalizeCurrent(raw,{id:'heredia',name:'Heredia',latitude:10,longitude:-84},new Date('2026-11-14T17:00:00Z'));assert.equal(d.temperature,22);assert.equal(d.windSpeed,0);assert.equal(d.rainLastHour,null);assert.equal(d.pressure,null);assert.equal(d.observedAt,new Date(raw.dt*1000).toISOString());assert.equal(d.description,'nubes');assert.ok(!JSON.stringify(d).includes('appid'));assert.ok(!JSON.stringify(d).includes('API_KEY'));});
+test('Current weather rejects missing temperature and missing source timestamp',()=>{assert.throws(()=>normalizeCurrent({main:{temp:null},dt:100},{id:'x'}));assert.throws(()=>normalizeCurrent({main:{temp:20}},{id:'x'}));});

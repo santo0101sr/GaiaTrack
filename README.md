@@ -58,3 +58,7 @@ Proyecto independiente, no oficial de NASA. No emite alertas oficiales.
 ## Experiencia 3D
 Entrada inmersiva WebGL con Three.js 0.160.1, geometría cantonal real extruida de forma decorativa, vista orbital con países Natural Earth, selección por clic, cámara al arrastrar y zoom con rueda. Laboratorio y pronósticos se abren sobre la escena. Animación opcional, respeto por movimiento reducido y botón de pantalla completa. Las alturas y partículas son escenografía; no simulan relieve o meteorología. Three.js: MIT; Natural Earth: dominio público.
 
+
+## OpenWeather: condiciones actuales
+Copiar .env.example a .env y definir OPENWEATHER_API_KEY. La clave solo se lee en el servidor; .env está excluido de Git y fuera del directorio público. El endpoint /api/current?site=heredia consulta Current Weather con unidades métricas e idioma español, valida el cantón y conserva los resultados en memoria por diez minutos. La web muestra fecha del dato del proveedor y de consulta; no presenta los mínimos/máximos espaciales de Current Weather como extremos diarios. Valores no reportados no se convierten en cero. Si la clave es rechazada (401), el error se muestra sin inventar condiciones. OpenWeather aporta condiciones actuales; NASA POWER y Open-Meteo mantienen histórico y pronósticos de las variables que no cubre este endpoint. Documentación: https://openweathermap.org/current
+
