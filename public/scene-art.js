@@ -16,7 +16,10 @@ export function addSceneAtmosphere(scene,root){
 const hemisphere=new THREE.HemisphereLight(0x9cd8ee,0x07101f,1.6);scene.add(hemisphere);
 const base=new THREE.Mesh(new THREE.CircleGeometry(13,96),new THREE.MeshStandardMaterial({color:0x030c14,roughness:.85,metalness:.3,transparent:true,opacity:.75}));base.rotation.x=-Math.PI/2;base.position.y=-.5;base.receiveShadow=true;root.add(base);
 const halo=new THREE.Mesh(new THREE.RingGeometry(5.4,5.42,180),new THREE.MeshBasicMaterial({color:0x3d91a3,side:THREE.DoubleSide,transparent:true,opacity:.23}));halo.rotation.x=-Math.PI/2;halo.position.y=-.38;root.add(halo);
+const sweepGeo=new THREE.RingGeometry(5.38,5.46,96,1,0,Math.PI*.45);
+const sweep=new THREE.Mesh(sweepGeo,new THREE.MeshBasicMaterial({color:0xa8ebcc,side:THREE.DoubleSide,transparent:true,opacity:.22,depthWrite:false}));
+sweep.rotation.x=-Math.PI/2;sweep.position.y=-.375;root.add(sweep);
 const beams=[];for(let i=0;i<3;i++){const ring=new THREE.Mesh(new THREE.RingGeometry(6+i*1.6,6.008+i*1.6,128),new THREE.MeshBasicMaterial({color:0x4b82ae,side:THREE.DoubleSide,transparent:true,opacity:.08}));ring.rotation.x=-Math.PI/2;ring.position.y=-.42;root.add(ring);beams.push(ring);}
-const dustGeo=new THREE.BufferGeometry(),points=new Float32Array(170*3);for(let i=0;i<170;i++)points.set([(Math.random()-.5)*18,.5+Math.random()*4,(Math.random()-.5)*16],i*3);dustGeo.setAttribute('position',new THREE.BufferAttribute(points,3));const dust=new THREE.Points(dustGeo,new THREE.PointsMaterial({color:0x83dce6,size:.018,transparent:true,opacity:.38,depthWrite:false}));root.add(dust);
-return {animate(time,moving){if(!moving)return;dust.rotation.y=Math.sin(time*.000025)*.08;beams.forEach((r,i)=>r.material.opacity=.065+Math.sin(time*.0004+i)*.025);}};
+const dustGeo=new THREE.BufferGeometry(),points=new Float32Array(220*3);for(let i=0;i<220;i++)points.set([(Math.random()-.5)*18,.4+Math.random()*4.4,(Math.random()-.5)*16],i*3);dustGeo.setAttribute('position',new THREE.BufferAttribute(points,3));const dust=new THREE.Points(dustGeo,new THREE.PointsMaterial({color:0x83dce6,size:.022,transparent:true,opacity:.42,depthWrite:false}));root.add(dust);
+return {animate(time,moving){if(!moving)return;dust.rotation.y=Math.sin(time*.00003)*.12;dust.position.y=Math.sin(time*.0004)*.06;sweep.rotation.z=-time*.00028;beams.forEach((r,i)=>{r.material.opacity=.065+Math.sin(time*.0004+i)*.028;const s=1+Math.sin(time*.0003+i*1.4)*.008;r.scale.set(s,s,1);});}};
 }

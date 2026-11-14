@@ -4,13 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node scripts/serve.mjs",
-    "start": "node scripts/serve.mjs",
+    "dev": "node --env-file-if-exists=.env.local scripts/serve.mjs",
+    "start": "node --env-file-if-exists=.env.local scripts/serve.mjs",
     "data": "node scripts/fetch-data.mjs",
     "test": "node --test tests/*.test.mjs",
     "build": "node scripts/validate-deploy.mjs",
     "deploy": "vercel",
-    "deploy:prod": "vercel --prod"
+    "deploy:prod": "vercel --prod",
+    "data:refresh": "node scripts/fetch-data.mjs --refresh"
   },
   "engines": {
     "node": "24.x"

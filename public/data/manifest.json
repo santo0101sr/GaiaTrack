@@ -1,5 +1,6 @@
 {
   "retrievedAt": "2026-11-14T17:04:10.222Z",
+  "generatedAt": "2026-11-14T19:00:51.804Z",
   "start": 2001,
   "end": 2025,
   "source": "NASA POWER Daily API",
@@ -42,61 +43,71 @@
       "id": "heredia",
       "name": "Heredia",
       "longitude": -84.03922966873245,
-      "latitude": 10.12856348019119
+      "latitude": 10.12856348019119,
+      "sourceRetrievedAt": null
     },
     {
       "id": "barva",
       "name": "Barva",
       "longitude": -84.11553353526293,
-      "latitude": 10.073480159335872
+      "latitude": 10.073480159335872,
+      "sourceRetrievedAt": null
     },
     {
       "id": "santo-domingo",
       "name": "Santo Domingo",
       "longitude": -84.06813936279605,
-      "latitude": 9.988053504466762
+      "latitude": 9.988053504466762,
+      "sourceRetrievedAt": null
     },
     {
       "id": "santa-barbara",
       "name": "Santa Bárbara",
       "longitude": -84.1474214939546,
-      "latitude": 10.082212019727507
+      "latitude": 10.082212019727507,
+      "sourceRetrievedAt": null
     },
     {
       "id": "san-rafael",
       "name": "San Rafael",
       "longitude": -84.08154923964028,
-      "latitude": 10.059791904252762
+      "latitude": 10.059791904252762,
+      "sourceRetrievedAt": null
     },
     {
       "id": "san-isidro",
       "name": "San Isidro",
       "longitude": -84.04318998617993,
-      "latitude": 10.029508507749938
+      "latitude": 10.029508507749938,
+      "sourceRetrievedAt": null
     },
     {
       "id": "belen",
       "name": "Belén",
       "longitude": -84.17685400217081,
-      "latitude": 9.98547136272839
+      "latitude": 9.98547136272839,
+      "sourceRetrievedAt": null
     },
     {
       "id": "flores",
       "name": "Flores",
       "longitude": -84.15390899511812,
-      "latitude": 10.005629996249208
+      "latitude": 10.005629996249208,
+      "sourceRetrievedAt": null
     },
     {
       "id": "san-pablo",
       "name": "San Pablo",
       "longitude": -84.09360389228718,
-      "latitude": 9.991882744355049
+      "latitude": 9.991882744355049,
+      "sourceRetrievedAt": null
     },
     {
       "id": "sarapiqui",
       "name": "Sarapiquí",
       "longitude": -83.93595275239454,
-      "latitude": 10.487786832977406
+      "latitude": 10.487786832977406,
+      "sourceRetrievedAt": null
     }
   ]
 }
