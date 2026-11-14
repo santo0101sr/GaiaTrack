@@ -1,7 +1,6 @@
 import {siteOptionsHtml,provinceOptionsHtml,territoryOptionsHtml} from './territories.js';
-import {annualSeries,trend,baseline,mean,historyCoverage} from './science.js';
+import {annualSeries,trend,baseline,mean,historyCoverage,detrendedCorrelation,benjaminiHochberg} from './science.js';
 import {initForecast,updateForecast} from './forecast.js';
-import {pearsonCorrelation} from './earth-pulse.js';
 import {getLang,locale,tx,applyStaticI18n} from './i18n.js';
 
 const $=s=>document.querySelector(s);
@@ -219,11 +218,10 @@ function renderChart(){
 
   let corrText='';
   if(state.compare&&primary.length&&secondary.length){
-    const mapB=new Map(secondary.map(p=>[p.year,p.value]));
-    const xs=[],ys=[];
-    for(const p of primary)if(mapB.has(p.year)){xs.push(p.value);ys.push(mapB.get(p.year));}
-    const r=pearsonCorrelation(xs,ys);
-    if(Number.isFinite(r))corrText=` · r = ${format(r,2)}`;
+    const corr=detrendedCorrelation(primary,secondary);
+    if(Number.isFinite(corr.r)){
+      corrText=` · r (${tx('detrended','sin tend.')}) = ${format(corr.r,2)}${corr.spuriousWarning?` ⚠ ${tx('raw r','r crudo')} = ${format(corr.rawR,2)}`:''}`;
+    }
   }
 
   const legendWrap=document.querySelector('.chart-legend');
@@ -264,12 +262,18 @@ function renderChart(){
 function renderProvinceScan(slopeDigits){
   const scanEl=$('#province-scan');
   if(!scanEl||!manifest)return;
-  scanEl.innerHTML=PROVINCE_IDS.filter(id=>data[id]).map(id=>{
+  const rows=PROVINCE_IDS.filter(id=>data[id]).map(id=>{
     const pt=trend(series(id).filter(d=>d.year>=state.start&&d.year<=state.end));
+    return {id,pt,p:pt.n>=10?pt.p:null,autocorrelated:pt.autocorrelated};
+  });
+  const bh=benjaminiHochberg(rows,0.05);
+  scanEl.innerHTML=bh.map(({id,pt,q,fdrSignificant})=>{
     const pSig=pt.n>=10&&!pt.autocorrelated&&pt.p<.05;
     const pSlope=pt.slope===null?'—':`${signed(pt.slope*10,slopeDigits)} ${deltaUnit()}`;
-    const tag=pt.n<10?`< 10${tx('y','a')}`:pt.autocorrelated?tx('autocorr.','autocorr.'):pSig?`p ${pt.p<.001?'<0.001':'='+format(pt.p,3)} ★`:`n.s.`;
-    const cls=`prov-card${id===state.site?' is-active':''}${pSig?' is-sig':pt.autocorrelated?' is-warn':''}`;
+    const pStr=Number.isFinite(pt.p)?(pt.p<.001?'<0.001':'='+format(pt.p,3)):'—';
+    const qStr=Number.isFinite(q)?(q<.001?'<0.001':'='+format(q,3)):'—';
+    const tag=pt.n<10?`< 10${tx('y','a')}`:pt.autocorrelated?tx('autocorr.','autocorr.'):fdrSignificant?`p ${pStr} · q ${qStr} ★`:pSig?`p ${pStr} · q ${qStr}`:`n.s.`;
+    const cls=`prov-card${id===state.site?' is-active':''}${fdrSignificant?' is-sig':pt.autocorrelated?' is-warn':''}`;
     return `<button type="button" class="${cls}" data-prov="${id}"><span class="prov-name">${data[id].name}</span><strong class="prov-slope">${pSlope}<small>/${tx('dec','déc')}</small></strong><span class="prov-tag">${tag}</span></button>`;
   }).join('');
   scanEl.querySelectorAll('.prov-card').forEach(btn=>{

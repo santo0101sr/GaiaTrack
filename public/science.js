@@ -14,3 +14,83 @@ export function trend(series){const data=series.filter(d=>Number.isFinite(d.valu
 const residuals=data.map(d=>d.value-(intercept+slope*d.year));const left=[],right=[];for(let i=1;i<n;i++)if(data[i].year===data[i-1].year+1){left.push(residuals[i-1]);right.push(residuals[i]);}const r1=pearson(left,right);const autocorrelated=left.length>=8&&Math.abs(r1)>1.96/Math.sqrt(left.length);
 return {n,slope,intercept,p,s,z,r1,autocorrelated};}
 export function baseline(series,start=2001,end=2010){return mean(series.filter(d=>d.year>=start&&d.year<=end&&Number.isFinite(d.value)).map(d=>d.value));}
+
+export function detrendedResiduals(series) {
+  const data = series.filter(d => Number.isFinite(d.value));
+  const t = trend(data);
+  if (t.slope === null || t.intercept === null) {
+    return { trend: t, residuals: [] };
+  }
+  return {
+    trend: t,
+    residuals: data.map(d => ({
+      year: d.year,
+      value: d.value - (t.intercept + t.slope * d.year),
+      raw: d.value
+    }))
+  };
+}
+
+export function detrendedCorrelation(seriesA, seriesB) {
+  const detA = detrendedResiduals(seriesA);
+  const detB = detrendedResiduals(seriesB);
+  const mapB = new Map(detB.residuals.map(d => [d.year, d]));
+  const shared = detA.residuals.filter(d => mapB.has(d.year));
+  const n = shared.length;
+  if (n < 2) {
+    return { n, r: null, rawR: null, spuriousWarning: false, trendA: detA.trend, trendB: detB.trend };
+  }
+  const rawXs = shared.map(d => d.raw);
+  const rawYs = shared.map(d => mapB.get(d.year).raw);
+  const resXs = shared.map(d => d.value);
+  const resYs = shared.map(d => mapB.get(d.year).value);
+  const rawR = pearson(rawXs, rawYs);
+  const r = pearson(resXs, resYs);
+  const spuriousWarning = n >= 10 && Math.abs(rawR) >= 0.45 && (Math.abs(rawR) - Math.abs(r) >= 0.25 || Math.abs(r) < 0.25);
+  return { n, r, rawR, spuriousWarning, trendA: detA.trend, trendB: detB.trend };
+}
+
+export function benjaminiHochberg(items, alpha = 0.05) {
+  const validIndices = items
+    .map((item, index) => ({ index, p: item.p }))
+    .filter(entry => Number.isFinite(entry.p))
+    .sort((a, b) => a.p - b.p);
+  const m = validIndices.length;
+  const qByIndex = new Array(items.length).fill(null);
+  if (m > 0) {
+    const rawQ = validIndices.map((entry, rankIdx) => (entry.p * m) / (rankIdx + 1));
+    const adjusted = new Array(m);
+    for (let i = m - 1; i >= 0; i--) {
+      adjusted[i] = Math.min(1, i === m - 1 ? rawQ[i] : Math.min(rawQ[i], adjusted[i + 1]));
+      qByIndex[validIndices[i].index] = adjusted[i];
+    }
+  }
+  return items.map((item, index) => {
+    const q = qByIndex[index];
+    return {
+      ...item,
+      m,
+      q,
+      fdrSignificant: q !== null && q <= alpha && !item.autocorrelated
+    };
+  });
+}
+
+export function collapseToUniqueCells(sites, resolution = 0.5) {
+  const groups = new Map();
+  for (const site of sites) {
+    if (!Number.isFinite(site?.latitude) || !Number.isFinite(site?.longitude)) continue;
+    const latBin = Math.floor(site.latitude / resolution);
+    const lonBin = Math.floor(site.longitude / resolution);
+    const cellKey = `${latBin},${lonBin}`;
+    if (!groups.has(cellKey)) groups.set(cellKey, []);
+    groups.get(cellKey).push(site);
+  }
+  return [...groups.entries()].map(([cellKey, memberSites]) => ({
+    cellKey,
+    latitude: memberSites[0].latitude,
+    longitude: memberSites[0].longitude,
+    representativeSite: memberSites[0],
+    memberSites
+  }));
+}

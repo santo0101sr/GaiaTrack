@@ -26,7 +26,7 @@ export function applyStaticI18n(){
   setAttr('.brand','aria-label',es?'GaiaTrack, inicio':'GaiaTrack, home');
   setText('.topbar nav a[href="#explorador"]',es?'Explorador':'Explorer');
   setText('.topbar nav a[href="#tendencias"]',es?'Tendencias':'Trends');
-  setText('.topbar nav a[href="#pronostico"]',es?'Pronóstico':'Forecast');
+  setText('.topbar nav a[href="#pronostico"]',es?'Contexto y pronóstico':'Context & Forecast');
   const methodBtn=document.querySelector('#method-open');
   if(methodBtn)methodBtn.innerHTML=es?'Datos y método <span>↗</span>':'Data & method <span>↗</span>';
   const regionBadge=document.querySelector('.region-badge');
@@ -46,7 +46,7 @@ export function applyStaticI18n(){
   setText('#coverage-label',es?'2001 — 2025 / SERIES HISTÓRICAS':'2001 — 2025 / HISTORICAL SERIES');
 
   const layersLabel=document.querySelector('.layers>.section-label');
-  if(layersLabel)layersLabel.innerHTML=es?'01 / VARIABLES <span>7</span>':'01 / VARIABLES <span>7</span>';
+  if(layersLabel)layersLabel.innerHTML=es?'03 / VARIABLES <span>7</span>':'03 / VARIABLES <span>7</span>';
   const layerHelp=document.querySelector('.layer-help p');
   if(layerHelp)layerHelp.innerHTML=es?'Seguí una señal.<br>Descubrí su historia.':'Follow a signal.<br>Uncover its story.';
   setText('#help-open',es?'Cómo interpretar los datos ↗':'How to read the data ↗');
@@ -68,9 +68,9 @@ export function applyStaticI18n(){
 
   setText('.inspector-cta',es?'Analizar tendencia y significancia ':'Analyze trend & significance ');
   const cta=document.querySelector('.inspector-cta');
-  if(cta){const sp=document.createElement('span');sp.textContent='↓';cta.appendChild(sp);}
+  if(cta){const sp=document.createElement('span');sp.textContent='↑';cta.appendChild(sp);}
 
-  setText('#tendencias .eyebrow',es?'02 / SERIES TEMPORALES Y SIGNIFICANCIA':'02 / TIME SERIES & SIGNIFICANCE');
+  setText('#tendencias .eyebrow',es?'01 / SERIES TEMPORALES Y SIGNIFICANCIA':'01 / TIME SERIES & SIGNIFICANCE');
   const trH2=document.querySelector('#tendencias h2');
   if(trH2)trH2.innerHTML=es?'La historia detrás de la señal<span>.</span>':'The story behind the signal<span>.</span>';
   setText('#download span',es?'Descargar CSV':'Download CSV');
@@ -105,7 +105,7 @@ export function applyStaticI18n(){
   setText('#scan-title',es?'¿DÓNDE ESTÁ CAMBIANDO? · 7 PROVINCIAS DE COSTA RICA':'WHERE IS IT CHANGING? · 7 PROVINCES OF COSTA RICA');
   setText('#scan-hint',es?'Hacé clic en cualquier provincia para inspeccionar su serie':'Click any province to inspect its series');
 
-  setText('#pronostico .eyebrow',es?'03 / MIRÁ LOS PRÓXIMOS DÍAS':'03 / LOOK AHEAD');
+  setText('#pronostico .eyebrow',es?'05 / PERSPECTIVA A 7 DÍAS · CONTEXTO CORTO PLAZO':'05 / 7-DAY METEOROLOGICAL OUTLOOK · SHORT-TERM CONTEXT');
   const fcH2=document.querySelector('#pronostico h2');
   if(fcH2)fcH2.innerHTML=es?'El clima cambia. Anticipá el tiempo<span>.</span>':'Weather shifts. Stay ahead<span>.</span>';
   setText('#forecast-refresh',es?'↻ Actualizar pronóstico':'↻ Refresh forecast');
@@ -116,7 +116,7 @@ export function applyStaticI18n(){
     ?'El mapa superior muestra el histórico NASA. Este panel muestra pronósticos diarios de modelos meteorológicos para el punto seleccionado, con incertidumbre creciente a mayor plazo.'
     :'The map above shows NASA historical records. This panel shows daily weather-model forecasts for the selected point, with growing uncertainty at longer lead times.');
 
-  setText('.research-title .eyebrow',es?'04 / CASOS DETECTIVESCOS':'04 / DETECTIVE CASE STUDIES');
+  setText('.research-title .eyebrow',es?'02 / CASOS DETECTIVESCOS':'02 / DETECTIVE CASE STUDIES');
   setText('.research-title h2',es?'Investigaciones guiadas':'Guided investigations');
   setText('.research-title p',es?'Compará cómo un mismo fenómeno cambia distinto entre regiones de Costa Rica.':'Compare how the same driver trends differently across Costa Rica.');
   const cards=document.querySelectorAll('.research-card');
