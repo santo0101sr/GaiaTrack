@@ -63,7 +63,7 @@ export function applyStaticI18n(){
   const inspLabels=document.querySelectorAll('.inspector>.section-label');
   if(inspLabels[0])inspLabels[0].innerHTML=es?'PUNTO DE INVESTIGACIÓN <span>↗</span>':'RESEARCH POINT <span>↗</span>';
   if(inspLabels[1])inspLabels[1].textContent=es?'LECTURA DEL TERRITORIO':'TERRITORY READING';
-  setAttr('#site-select','aria-label',es?'Seleccionar provincia o cantón':'Select province or canton');
+  setText('label[for="province-select"]',es?'Provincia':'Province');setText('.territory-field-label[for="site-select"]',es?'Cantón / vista provincial':'Canton / province overview');setAttr('#province-select','aria-label',es?'Seleccionar provincia':'Select province');setAttr('#site-select','aria-label',es?'Seleccionar cantón o vista provincial':'Select canton or province overview');
   setText('.comparison-line span',es?'Frente a 2001–2010':'Vs. 2001–2010 baseline');
 
   setText('#pronostico .eyebrow',es?'02 / MIRÁ LOS PRÓXIMOS DÍAS':'02 / LOOK AHEAD');

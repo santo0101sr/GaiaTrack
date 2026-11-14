@@ -119,7 +119,7 @@ async function renderRecs(result){
       try{
         const sites=(await (await fetch('data/manifest.json?v=18')).json()).sites;
         const m=nearestSite(pos.coords.latitude,pos.coords.longitude,sites);
-        if(m){const sel=document.querySelector('#site-select');if(sel){sel.value=m.site.id;sel.dispatchEvent(new Event('change',{bubbles:true}));}b.textContent=`📍 ${m.site.name} (${m.distanceKm.toFixed(1)} km)`;}
+        if(m){document.dispatchEvent(new CustomEvent('gaiatrack:select-site',{detail:{site:m.site.id}}));b.textContent=`📍 ${m.site.name} (${m.distanceKm.toFixed(1)} km)`;}
       }catch{b.textContent=tx('📍 Detect my location','📍 Detectar mi ubicación');}
     },()=>{b.textContent=tx('Permission denied','Permiso denegado');},{timeout:8000});
   };

@@ -1,0 +1,70 @@
+/* Province-first exploration: navigation left, an unobstructed map, readings right. */
+.territory-field-label{display:block;font-size:9px;letter-spacing:1px;color:#8fb2bf;margin:14px 0 6px}
+#province-select{width:100%;padding:10px;border:1px solid var(--line);border-radius:5px;background:var(--panel);color:var(--text)}
+.province-explorer .flight-intro{top:105px;left:3.8%;max-width:300px;pointer-events:none}
+.province-explorer .flight-intro h1{font-size:clamp(28px,3.1vw,42px);margin:10px 0;color:#d8f4e8}
+.province-explorer .flight-intro p{letter-spacing:0;font-size:11px;line-height:1.6;display:block}
+.territory-browser{position:absolute;top:225px;left:3.8%;width:258px;padding:17px;background:linear-gradient(145deg,#102a35eb,#07121bea);border:1px solid #9dd6e02e;border-radius:12px;backdrop-filter:blur(18px);max-height:calc(100dvh - 365px);overflow:auto;scrollbar-width:thin;scrollbar-color:#4b717a transparent;z-index:4}
+.territory-breadcrumb{display:flex;gap:10px;align-items:center;font-size:10px;color:#8caeb7;padding-bottom:15px;border-bottom:1px solid #87c6bd24}
+.territory-breadcrumb button{color:#b9efd1;font-size:10px;padding:3px 0}
+.territory-list-heading{display:flex;align-items:center;justify-content:space-between;margin:16px 0 12px}
+.territory-list-heading strong{font-weight:500;font-size:12px;color:#d5e9e9}
+.territory-list-heading>span{font-size:10px;border-radius:20px;padding:4px 8px;background:#b6efd114;color:#b6efd1}
+.territory-list{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.territory-choice{display:flex;align-items:center;gap:7px;text-align:left;padding:9px 6px;border:1px solid transparent;border-radius:6px;color:#b4cbd2;font-size:11px;line-height:1.4;transition:background .15s,border-color .15s}
+.territory-number{font:9px monospace;color:#5b8899;flex:none}
+.territory-choice:hover,.territory-choice[aria-pressed=true]{background:#a2e8cf10;border-color:#a2e8cf40;color:#d2f8df}
+.territory-choice[aria-pressed=true] .territory-number{color:#c3f77a}
+.territory-overview{width:100%;text-align:left;font-size:10px;color:#b9efd1;border:1px solid #9dd6e02e;border-radius:6px;padding:10px;margin-bottom:8px;background:#a2e8cf08}
+.territory-overview[aria-pressed=true]{border-color:#c3f77a88}
+.territory-map-labels{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2}
+.territory-map-label{position:absolute;left:0;top:0;pointer-events:auto;width:112px;padding:6px 4px;text-align:center;font-size:9px;color:#d7ebe7;text-shadow:0 1px 5px #000;background:#07121aa8;border:1px solid #9cc7c32c;border-radius:4px;backdrop-filter:blur(6px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.territory-map-label:hover,.territory-map-label[aria-pressed=true]{color:#d9ff9b;border-color:#d9ff9b88;background:#0e292be8}
+.territory-map-label[hidden],.territory-map-labels[hidden],.province-explorer [hidden]{display:none!important}
+.province-explorer .flight-panel{top:115px;right:3.8%;width:278px;padding:18px 20px;max-height:calc(100dvh - 245px);overflow:auto}
+.province-explorer .hud-select{margin-top:0;padding:10px;font-size:11px}
+.province-explorer .flight-panel h2{font-size:28px;margin-top:20px}
+.province-explorer .flight-reading{margin:12px 0 4px}
+.province-explorer .flight-reading strong{font-size:45px}
+.province-explorer .flight-rule,.province-explorer .flight-source{display:none}
+.province-explorer .flight-panel .weather-console{position:static;width:auto;margin:18px 0 0;padding:15px 0 0;max-height:none;background:none;border:0;border-top:1px solid #8bc8af30;border-radius:0;box-shadow:none;backdrop-filter:none;overflow:visible;animation:none}
+.province-explorer .weather-console:before{display:none}
+.province-explorer .weather-console button{margin-top:0;width:auto;padding:7px 8px;display:inline-block;font-size:9px}
+.province-explorer .weather-switch{display:flex;gap:5px}
+.province-explorer .weather-readings strong{font-size:14px}
+.province-explorer .wx-tip{display:none}
+.province-explorer .source-integrity{font-size:9px;letter-spacing:0;line-height:1.65;color:#8fb3bd;margin:16px 0 0;padding-top:12px;border-top:1px solid #8bc8af24}
+.province-explorer #weather-clean-view{top:88px;right:3.8%}
+.national-view .flight-panel h2,.national-view .flight-live,.national-view .flight-reading,.national-view #flight-coord,.national-view #flight-variable,.national-view .weather-console,.national-view #flight-investigate{display:none}
+.lab-open .territory-browser,.lab-open .territory-map-labels{display:none}
+.clean-cockpit .territory-browser,.clean-cockpit .territory-map-labels,.intro-playing .territory-browser,.intro-playing .territory-map-labels{visibility:hidden;pointer-events:none}
+.territory-choice:focus-visible,.territory-overview:focus-visible,.territory-map-label:focus-visible,.territory-breadcrumb button:focus-visible{outline:2px solid #c3f77a;outline-offset:2px}
+@media(max-width:1050px) and (min-width:701px){
+  .territory-browser{width:212px;left:3%;padding:14px}
+  .province-explorer .flight-panel{width:232px;right:3%;padding:15px}
+  .province-explorer .flight-intro{left:3%;max-width:245px}
+}
+@media(max-width:700px){
+  .province-explorer .flight-intro{top:88px;left:5%;max-width:88%}
+  .province-explorer .flight-intro .eyebrow{font-size:7px;letter-spacing:1.5px}
+  .province-explorer .flight-intro h1{font-size:29px;margin:8px 0}
+  .province-explorer .flight-intro p{font-size:10px}
+  .territory-browser{top:auto;left:4%;bottom:155px;width:44%;max-height:29dvh;padding:11px}
+  .territory-breadcrumb{padding-bottom:8px;font-size:8px;gap:5px}
+  .territory-breadcrumb button{font-size:9px}
+  .territory-list-heading{margin:9px 0;font-size:10px}
+  .territory-list-heading strong{font-size:10px}
+  .territory-list{grid-template-columns:1fr}.territory-choice{font-size:10px;padding:8px 5px;gap:7px}
+  .territory-overview{font-size:9px;padding:8px}
+  .province-explorer .flight-panel{top:auto;bottom:155px;right:4%;width:44%;padding:12px;max-height:29dvh}
+  .province-explorer .flight-panel h2{font-size:22px;margin-top:12px}
+  .province-explorer .flight-reading strong{font-size:30px}
+  .province-explorer .territory-field-label{font-size:7px;letter-spacing:.5px;margin:10px 0 5px}
+  .province-explorer .hud-select{padding:8px 4px;font-size:10px}
+  .province-explorer .flight-panel .weather-console{padding-top:10px;margin-top:12px}
+  .province-explorer .weather-readings strong{font-size:11px}
+  .province-explorer .source-integrity{font-size:8px}
+  .province-explorer .flight-bottom{bottom:30px}
+  .province-explorer #weather-clean-view{top:90px;font-size:7px}
+  .territory-map-label{font-size:8px;padding:5px 3px}
+}

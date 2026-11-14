@@ -1,4 +1,4 @@
-import {siteOptionsHtml} from './territories.js';
+import {siteOptionsHtml,provinceOptionsHtml,territoryOptionsHtml} from './territories.js';
 import {annualSeries,trend,baseline,mean,historyCoverage} from './science.js';
 import {initForecast,updateForecast} from './forecast.js';
 import {pearsonCorrelation} from './earth-pulse.js';
@@ -30,6 +30,7 @@ const rawVariables=[
 ];
 
 const state={variable:'T2M',site:'heredia',year:2025,start:2001,end:2025,anomaly:false,compare:false,compareSite:'sarapiqui'};
+let lastMapSite=null,mapOverview=false;
 let manifest,geo,data={},map,boundaryLayer,markers={},seaMarkers=[],timer=null;
 const v=()=>{const r=rawVariables.find(x=>x.id===state.variable);const l=r[getLang()];return {id:r.id,icon:r.icon,digits:r.digits,...l};};
 const format=(n,d=v().digits)=>Number.isFinite(n)?new Intl.NumberFormat(locale(),{minimumFractionDigits:d,maximumFractionDigits:d}).format(n):tx('No data','Sin datos');
@@ -41,7 +42,9 @@ const currentColor='#c3f77a';
 
 function showError(message){$('#status').textContent=message;}
 const PROVINCE_IDS=['san-jose','alajuela','cartago','heredia','guanacaste','puntarenas','limon'];
-function options(select,value){select.innerHTML=siteOptionsHtml(manifest,getLang());select.value=value;}
+function options(select,value){const province=manifest.sites.find(s=>s.id===value)?.province;select.innerHTML=select.id==='site-select'?territoryOptionsHtml(manifest,province,getLang()):siteOptionsHtml(manifest,getLang());select.value=value;}
+function selectSite(id){if(!data[id])return;state.site=id;stop();render();}
+document.addEventListener('gaiatrack:select-site',e=>selectSite(e.detail.site));
 
 function buildLayerButtons(){
   $('#layer-buttons').innerHTML=rawVariables.map(p=>{
@@ -58,7 +61,7 @@ function setYear(year){state.year=Number(year);document.dispatchEvent(new Custom
 
 function render(){
   document.querySelectorAll('.layer-button').forEach(b=>{const active=b.dataset.variable===state.variable;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});
-  $('#site-select').value=state.site;$('#compare-site').value=state.compareSite;
+  options($('#site-select'),state.site);$('#province-select').innerHTML=provinceOptionsHtml(manifest);$('#province-select').value=manifest.sites.find(s=>s.id===state.site).province;$('#compare-site').value=state.compareSite;
   $('#metric-name').textContent=v().name;$('#metric-unit').textContent=v().unit;$('#metric-definition').textContent=v().definition;
   $('#resolution-note').textContent=v().resolution+tx(' One point does not represent the entire territory.',' Un punto no representa todo el territorio.');
   renderMap();renderInspector();renderChart();renderStats();
@@ -94,13 +97,18 @@ function renderMap(){
   const values=manifest.sites.map(s=>valueAt(s.id,state.year)).filter(Number.isFinite),min=Math.min(...values),max=Math.max(...values);
   $('#map-variable').textContent=v().name;$('#map-year').textContent=state.year;$('#map-range').textContent=`${format(min)} — ${format(max)} ${v().unit}`;
   if(!map)return;
+  const province=manifest.sites.find(s=>s.id===state.site).province;
+  if(lastMapSite!==state.site){mapOverview=false;const features=geo.features.filter(f=>f.properties.province===province);map.fitBounds(L.geoJSON({type:'FeatureCollection',features}).getBounds().pad(.12));lastMapSite=state.site;}
   for(const s of manifest.sites){
+    const visible=mapOverview||s.province===province;
+    if(visible&&!map.hasLayer(markers[s.id]))markers[s.id].addTo(map);
+    if(!visible&&map.hasLayer(markers[s.id]))map.removeLayer(markers[s.id]);
     const value=valueAt(s.id,state.year),selected=s.id===state.site;
     markers[s.id].setStyle({fillColor:color(value,min,max),color:selected?'#f1ffda':'#10232c',weight:selected?3:1.5,fillOpacity:.95}).setRadius(selected?9:6);
     markers[s.id].setTooltipContent(`${s.name} · ${format(value)} ${v().unit}`);
     if(selected)markers[s.id].bringToFront();
   }
-  const selectedSite=manifest.sites.find(s=>s.id===state.site);boundaryLayer.setStyle(f=>{const selected=f.properties.id===state.site||(selectedSite.type==='province'&&f.properties.province===selectedSite.province);return {color:selected?'#c3f77a':'#617f85',weight:selected?2:1,fillColor:'#344b48',fillOpacity:selected?.18:.04};});
+  const selectedSite=manifest.sites.find(s=>s.id===state.site);boundaryLayer.setStyle(f=>{const selected=f.properties.id===state.site||(selectedSite.type==='province'&&f.properties.province===selectedSite.province);return {opacity:mapOverview||f.properties.province===province?1:0,color:selected?'#c3f77a':'#617f85',weight:selected?2:1,fillColor:'#344b48',fillOpacity:mapOverview||f.properties.province===province?(selected?.18:.04):0};});
 }
 
 function paintSeaLabels(){
@@ -118,10 +126,10 @@ function initMap(){
   L.control.zoom({position:'bottomright'}).addTo(map);
   const tiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:19}).addTo(map);
   let tileErrors=0;tiles.on('tileerror',()=>{if(++tileErrors===5)showError(tx('Base map is unavailable. Boundaries, points, and scientific data still work.','El mapa base no está disponible. Los límites, puntos y datos científicos siguen funcionando.'));});
-  boundaryLayer=L.geoJSON(geo,{style:{color:'#617f85',weight:1,fillOpacity:.04},onEachFeature:(f,l)=>{l.bindTooltip(f.properties.name,{sticky:true});l.on('click',()=>{state.site=f.properties.id;render();});}}).addTo(map);
-  for(const s of manifest.sites){markers[s.id]=L.circleMarker([s.latitude,s.longitude],{radius:6,fillOpacity:.95}).addTo(map).bindTooltip(s.name,{direction:'top',offset:[0,-8]}).on('click',()=>{state.site=s.id;render();});}
+  boundaryLayer=L.geoJSON(geo,{style:{color:'#617f85',weight:1,fillOpacity:.04},onEachFeature:(f,l)=>{l.bindTooltip(f.properties.name,{sticky:true});l.on('click',()=>selectSite(f.properties.id));}}).addTo(map);
+  for(const s of manifest.sites){markers[s.id]=L.circleMarker([s.latitude,s.longitude],{radius:6,fillOpacity:.95}).addTo(map).bindTooltip(s.name,{direction:'top',offset:[0,-8]}).on('click',()=>selectSite(s.id));}
   paintSeaLabels();
-  $('#fit-country').onclick=()=>map.fitBounds(boundaryLayer.getBounds().pad(.08));$('#fit-province').onclick=()=>{const province=manifest.sites.find(s=>s.id===state.site).province;const features=geo.features.filter(f=>f.properties.province===province);map.fitBounds(L.geoJSON({type:'FeatureCollection',features}).getBounds().pad(.08));};
+  $('#fit-country').onclick=()=>{mapOverview=true;renderMap();map.fitBounds(boundaryLayer.getBounds().pad(.08));};$('#fit-province').onclick=()=>{mapOverview=false;renderMap();const province=manifest.sites.find(s=>s.id===state.site).province;const features=geo.features.filter(f=>f.properties.province===province);map.fitBounds(L.geoJSON({type:'FeatureCollection',features}).getBounds().pad(.08));};
   $('#fit-valley').onclick=()=>map.fitBounds([[9.75,-84.45],[10.15,-83.80]]);
   $('#fit-heredia')&&($('#fit-heredia').onclick=()=>map.fitBounds([[9.95,-84.25],[10.80,-83.75]]));
 }
@@ -243,7 +251,7 @@ async function boot(){
     options($('#site-select'),state.site);options($('#compare-site'),state.compareSite);
     for(const id of ['#start-year','#end-year']){$(id).innerHTML=Array.from({length:25},(_,i)=>`<option>${2001+i}</option>`).join('');$(id).onchange=setPeriod;}
     $('#start-year').value=state.start;$('#end-year').value=state.end;
-    $('#site-select').onchange=e=>{state.site=e.target.value;render();};
+    $('#site-select').onchange=e=>selectSite(e.target.value);$('#province-select').onchange=e=>selectSite(manifest.provinces.find(p=>p.id===e.target.value).siteId);
     $('#year-slider').oninput=e=>{stop();setYear(e.target.value);};
     $('#compare').onchange=e=>{state.compare=e.target.checked;renderChart();};
     $('#compare-site').onchange=e=>{state.compareSite=e.target.value;state.compare=true;$('#compare').checked=true;renderChart();};

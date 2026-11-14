@@ -12,6 +12,7 @@ function sceneDocument(){
     classList={toggle(){},contains(){return false;}};
     setAttribute(){}
     append(){}
+    before(){}
     set innerHTML(html){for(const [,id] of html.matchAll(/id="([^"]+)"/g))get('#'+id);}
     querySelector(selector){return get(selector);}
     querySelectorAll(){return [];}
@@ -53,6 +54,11 @@ test('Rain stops immediately when selecting a dry province, and province effects
     assert.equal(rainyProvince.visible,true);
     assert.ok(rainyProvince.children.find(c=>c.isLineSegments).geometry.drawRange.count>0);
     assert.equal(root.getObjectByName('province-weather-limon').visible,false);
+
+    document.dispatchEvent(new CustomEvent('gaiatrack:territory-view',{detail:{province:'limon'}}));
+    scene.animate(1110,true);assert.equal(rainyProvince.visible,false);
+    document.dispatchEvent(new CustomEvent('gaiatrack:territory-view',{detail:{province:null}}));
+    scene.animate(1120,true);assert.equal(rainyProvince.visible,true);
 
     // No current data for this canton must not freeze other provinces' rain.
     document.dispatchEvent(new CustomEvent('gaiatrack:selection',{detail:{site:'unknown-canton'}}));
