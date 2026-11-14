@@ -35,11 +35,11 @@ test('Z-score, stress indicator signs, and IEA equal/normalized weights', () => 
   // All unfavorable (+1 std temp, -1 std rain/ndvi/sm) => all +1
   assert.equal(ind.I_T, 1);
   assert.equal(ind.I_P, 1);
-  assert.equal(ind.I_V, 1);
-  assert.equal(ind.I_S, 1);
+  assert.ok(Math.abs(ind.I_V - 1) < 1e-12);
+  assert.ok(Math.abs(ind.I_S - 1) < 1e-12);
 
   const iea4 = experimentalStressIndex(ind);
-  assert.equal(iea4.iea, 1);
+  assert.ok(Math.abs(iea4.iea - 1) < 1e-12);
   assert.equal(iea4.activeCount, 4);
 
   // When NDVI is unavailable, weights normalize over active indicators and sum to 1
