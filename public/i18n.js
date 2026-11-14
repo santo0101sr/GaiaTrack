@@ -25,8 +25,8 @@ export function applyStaticI18n(){
   setText('.brand small',es?'OBSERVATORIO CLIMÁTICO · COSTA RICA':'CLIMATE OBSERVATORY · COSTA RICA');
   setAttr('.brand','aria-label',es?'GaiaTrack, inicio':'GaiaTrack, home');
   setText('.topbar nav a[href="#explorador"]',es?'Explorador':'Explorer');
-  setText('.topbar nav a[href="#pronostico"]',es?'Pronóstico':'Forecast');
   setText('.topbar nav a[href="#tendencias"]',es?'Tendencias':'Trends');
+  setText('.topbar nav a[href="#pronostico"]',es?'Pronóstico':'Forecast');
   const methodBtn=document.querySelector('#method-open');
   if(methodBtn)methodBtn.innerHTML=es?'Datos y método <span>↗</span>':'Data & method <span>↗</span>';
   const regionBadge=document.querySelector('.region-badge');
@@ -66,29 +66,32 @@ export function applyStaticI18n(){
   setText('label[for="province-select"]',es?'Provincia':'Province');setText('.territory-field-label[for="site-select"]',es?'Cantón / vista provincial':'Canton / province overview');setAttr('#province-select','aria-label',es?'Seleccionar provincia':'Select province');setAttr('#site-select','aria-label',es?'Seleccionar cantón o vista provincial':'Select canton or province overview');
   setText('.comparison-line span',es?'Frente a 2001–2010':'Vs. 2001–2010 baseline');
 
-  setText('#pronostico .eyebrow',es?'02 / MIRÁ LOS PRÓXIMOS DÍAS':'02 / LOOK AHEAD');
-  const fcH2=document.querySelector('#pronostico h2');
-  if(fcH2)fcH2.innerHTML=es?'El clima cambia. Anticipá el tiempo<span>.</span>':'Weather shifts. Stay ahead<span>.</span>';
-  setText('#forecast-refresh',es?'↻ Actualizar pronóstico':'↻ Refresh forecast');
-  setText('.forecast-badge',es?'PRONÓSTICO DE MODELOS':'MODEL FORECAST');
-  setText('.forecast-heading a',es?'Fuentes y método ↗':'Sources & method ↗');
-  setText('#forecast-download',es?'↓ Descargar pronóstico CSV':'↓ Download forecast CSV');
-  setText('#pronostico>.science-note',es
-    ?'El mapa superior muestra el histórico NASA. Este panel muestra pronósticos diarios de modelos meteorológicos para el punto seleccionado, con incertidumbre creciente a mayor plazo.'
-    :'The map above shows NASA historical records. This panel shows daily weather-model forecasts for the selected point, with growing uncertainty at longer lead times.');
+  setText('.inspector-cta',es?'Analizar tendencia y significancia ':'Analyze trend & significance ');
+  const cta=document.querySelector('.inspector-cta');
+  if(cta){const sp=document.createElement('span');sp.textContent='↓';cta.appendChild(sp);}
 
-  setText('#tendencias .eyebrow',es?'03 / EL TIEMPO REVELA EL PATRÓN':'03 / TIME REVEALS THE PATTERN');
+  setText('#tendencias .eyebrow',es?'02 / SERIES TEMPORALES Y SIGNIFICANCIA':'02 / TIME SERIES & SIGNIFICANCE');
   const trH2=document.querySelector('#tendencias h2');
   if(trH2)trH2.innerHTML=es?'La historia detrás de la señal<span>.</span>':'The story behind the signal<span>.</span>';
   setText('#download span',es?'Descargar CSV':'Download CSV');
+  const flowLabels=document.querySelectorAll('#analysis-flow .flow-step small');
+  const flowCopy=es?['VARIABLE','REGIÓN','PERÍODO','TENDENCIA VISUAL','SIGNIFICANCIA']:['VARIABLE','REGION','PERIOD','VISUAL TREND','SIGNIFICANCE'];
+  flowLabels.forEach((el,i)=>{if(flowCopy[i])el.textContent=flowCopy[i];});
   setText('#annual-view',es?'Valores anuales':'Annual values');
   setText('#anomaly-view',es?'Anomalías':'Anomalies');
   const pLabels=document.querySelectorAll('.period-controls label');
   if(pLabels[0]?.firstChild)pLabels[0].firstChild.textContent=es?'Desde ':'From ';
   if(pLabels[1]?.firstChild)pLabels[1].firstChild.textContent=es?'Hasta ':'To ';
+  setText('.period-presets button[data-preset="all"]',es?'Todo':'All');
+  setText('.period-presets button[data-preset="15"]',es?'15 a':'15y');
+  setText('.period-presets button[data-preset="10"]',es?'10 a':'10y');
+  setAttr('#sig-help-btn','title',es?'¿Cómo se evalúa la significancia?':'How is significance tested?');
+  setAttr('#sig-help-btn','aria-label',es?'¿Cómo se evalúa la significancia?':'How is significance tested?');
   const cmpLabel=document.querySelector('.compare-control');
   if(cmpLabel&&cmpLabel.childNodes[1])cmpLabel.childNodes[1].textContent=es?' Comparar con ':' Compare with ';
   setAttr('#compare-site','aria-label',es?'Provincia o cantón para comparar':'Province or canton to compare');
+  const legend=document.querySelector('.chart-legend');
+  if(legend&&legend.lastChild&&legend.lastChild.nodeType===3)legend.lastChild.textContent=es?' Tendencia Sen':' Sen trend';
   const sliderLabel=document.querySelector('.time-control>label');
   if(sliderLabel?.firstChild)sliderLabel.firstChild.textContent=es?'AÑO EN EL MAPA ':'MAP YEAR ';
   setAttr('#play','aria-label',es?'Reproducir evolución temporal':'Play time series');
@@ -99,19 +102,32 @@ export function applyStaticI18n(){
   if(statLabels[2])statLabels[2].textContent=es?'PERÍODO ANALIZADO':'ANALYZED PERIOD';
   const slopeSmall=document.querySelector('.stat-grid>div:first-child small');
   if(slopeSmall)slopeSmall.textContent=es?'Estimador robusto de Theil–Sen':'Theil–Sen robust slope estimator';
+  setText('#scan-title',es?'¿DÓNDE ESTÁ CAMBIANDO? · 7 PROVINCIAS DE COSTA RICA':'WHERE IS IT CHANGING? · 7 PROVINCES OF COSTA RICA');
+  setText('#scan-hint',es?'Hacé clic en cualquier provincia para inspeccionar su serie':'Click any province to inspect its series');
 
-  setText('.research-title .eyebrow',es?'04 / CONECTÁ LAS SEÑALES':'04 / CONNECT THE SIGNALS');
-  setText('.research-title h2',es?'Tu próxima investigación':'Your next investigation');
-  setText('.research-title p',es?'Una pregunta es el primer paso.':'A question is the first step.');
+  setText('#pronostico .eyebrow',es?'03 / MIRÁ LOS PRÓXIMOS DÍAS':'03 / LOOK AHEAD');
+  const fcH2=document.querySelector('#pronostico h2');
+  if(fcH2)fcH2.innerHTML=es?'El clima cambia. Anticipá el tiempo<span>.</span>':'Weather shifts. Stay ahead<span>.</span>';
+  setText('#forecast-refresh',es?'↻ Actualizar pronóstico':'↻ Refresh forecast');
+  setText('.forecast-badge',es?'PRONÓSTICO DE MODELOS':'MODEL FORECAST');
+  setText('.forecast-heading a',es?'Fuentes y método ↗':'Sources & method ↗');
+  setText('#forecast-download',es?'↓ Descargar pronóstico CSV':'↓ Download forecast CSV');
+  setText('#pronostico>.science-note',es
+    ?'El mapa superior muestra el histórico NASA. Este panel muestra pronósticos diarios de modelos meteorológicos para el punto seleccionado, con incertidumbre creciente a mayor plazo.'
+    :'The map above shows NASA historical records. This panel shows daily weather-model forecasts for the selected point, with growing uncertainty at longer lead times.');
+
+  setText('.research-title .eyebrow',es?'04 / CASOS DETECTIVESCOS':'04 / DETECTIVE CASE STUDIES');
+  setText('.research-title h2',es?'Investigaciones guiadas':'Guided investigations');
+  setText('.research-title p',es?'Compará cómo un mismo fenómeno cambia distinto entre regiones de Costa Rica.':'Compare how the same driver trends differently across Costa Rica.');
   const cards=document.querySelectorAll('.research-card');
   const cardData=es?[
-    ['TEMPERATURA','¿Los años recientes<br>han sido más cálidos?','Explorar la serie histórica <b>↗</b>'],
-    ['PRECIPITACIÓN','¿Cómo varía la lluvia<br>entre un año y otro?','Investigar la precipitación <b>↗</b>'],
-    ['HUMEDAD DEL SUELO','¿Qué cuenta el suelo<br>sobre el agua disponible?','Examinar la humedad <b>↗</b>']
+    ['TEMPERATURA · VALLE CENTRAL VS. PACÍFICO NORTE','¿Los años recientes<br>han sido más cálidos?','Comparar Heredia y Guanacaste <b>↗</b>'],
+    ['PRECIPITACIÓN · CARIBE VS. PACÍFICO','¿Las tendencias de lluvia difieren<br>entre vertientes?','Comparar Limón y Guanacaste <b>↗</b>'],
+    ['HUMEDAD DEL SUELO · BOSQUE HÚMEDO VS. SECO','¿Qué cuenta el suelo<br>entre ecosistemas?','Comparar Sarapiquí y Guanacaste <b>↗</b>']
   ]:[
-    ['TEMPERATURE','Have recent years<br>grown warmer?','Explore time series <b>↗</b>'],
-    ['PRECIPITATION','How does rainfall vary<br>from year to year?','Investigate rainfall <b>↗</b>'],
-    ['SOIL MOISTURE','What does soil reveal<br>about water availability?','Examine moisture <b>↗</b>']
+    ['TEMPERATURE · CENTRAL VALLEY VS. NORTH PACIFIC','Have recent years<br>grown warmer?','Compare Heredia & Guanacaste <b>↗</b>'],
+    ['PRECIPITATION · CARIBBEAN VS. PACIFIC','Do rainfall trends differ<br>between coasts?','Compare Limón & Guanacaste <b>↗</b>'],
+    ['SOIL MOISTURE · RAINFOREST VS. DRY FOREST','What does soil reveal<br>across ecosystems?','Compare Sarapiquí & Guanacaste <b>↗</b>']
   ];
   cards.forEach((c,i)=>{
     if(!cardData[i])return;

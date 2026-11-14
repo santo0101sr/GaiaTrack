@@ -105,7 +105,7 @@ export function createProvinceExplorer({host,manifest,geo,meshes,beacons,borders
     const site=sites.get(id);
     if(!site||id===selected)return;
     selected=id;province=site.province;
-    render();setVisibility();focus();
+    render();host.querySelector('.flight-panel').scrollTop=0;setVisibility();focus();
   }
 
   function country(){province=null;render();setVisibility();focus();}

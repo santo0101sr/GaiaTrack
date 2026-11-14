@@ -24,3 +24,139 @@
 .lang-switch button.selected{background:#c3f77a1f;color:var(--accent)}
 .ep-scale-note{display:inline-block;margin-top:2px;font-size:8.5px;color:#7fb3cf;letter-spacing:.3px}
 @media(max-width:850px){.topbar-actions{gap:8px}}
+
+/* Inspector jump CTA */
+.inspector-cta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:14px;padding:10px 12px;border:1px solid #c3f77a4d;border-radius:5px;background:#c3f77a0d;color:var(--accent);font:500 11px var(--display);letter-spacing:.25px;transition:background .18s ease,border-color .18s ease,transform .18s ease}
+.inspector-cta:hover{background:#c3f77a1c;border-color:var(--accent);transform:translateY(-1px)}
+@media(max-width:580px){.inspector-cta{grid-column:1/-1}}
+
+/* 5-Step Earth System Trend Detective Bar */
+.analysis-flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin:20px 0 18px}
+.flow-step{display:flex;align-items:center;gap:9px;padding:10px 11px;border:1px solid var(--line);border-radius:6px;background:#0c151dcc;min-width:0;transition:border-color .2s,background .2s}
+.flow-num{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:1px solid #3c4f5f;font:600 9px var(--display);color:var(--muted);flex-shrink:0}
+.flow-step>div{min-width:0}
+.flow-step small{display:block;font-size:7.5px;letter-spacing:1.1px;color:var(--muted)}
+.flow-step strong{display:block;font:500 11.5px var(--display);color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.flow-step.is-sig{border-color:#c3f77a66;background:#c3f77a0e}
+.flow-step.is-sig .flow-num{border-color:var(--accent);color:var(--accent);background:#c3f77a1c}
+.flow-step.is-sig strong{color:var(--accent)}
+
+/* Quick period presets */
+.period-presets{display:inline-flex;gap:3px;margin-left:6px;padding:2px;background:#0d151d;border:1px solid var(--line);border-radius:4px}
+.preset-btn{font:600 9px var(--font);padding:4px 8px;border-radius:3px;color:var(--muted);transition:background .15s,color .15s}
+.preset-btn:hover{color:var(--text)}
+.preset-btn.selected{background:#c3f77a24;color:var(--accent)}
+
+/* Significance verdict banner & interactive "?" popover */
+.trend-verdict{display:flex;align-items:center;gap:12px;margin:0 0 16px;padding:11px 14px;border:1px solid var(--line);border-radius:6px;background:#0c151dbb;transition:border-color .22s,background .22s}
+.trend-verdict.is-sig{border-color:#c3f77a66;background:linear-gradient(90deg,#c3f77a14,#0c151dbb 55%)}
+.trend-verdict.is-warn{border-color:#f5b94266;background:linear-gradient(90deg,#f5b94214,#0c151dbb 55%)}
+.verdict-badge{font:600 8.5px var(--font);letter-spacing:1px;padding:5px 8px;border-radius:4px;border:1px solid var(--line);color:var(--muted);background:#0f1922;white-space:nowrap;flex-shrink:0}
+.trend-verdict.is-sig .verdict-badge{border-color:#c3f77a66;color:var(--accent);background:#c3f77a14}
+.trend-verdict.is-warn .verdict-badge{border-color:#f5b94266;color:#f5b942;background:#f5b94214}
+.trend-verdict p{margin:0;flex:1;font-size:11.5px;line-height:1.55;color:#dbe5eb}
+.verdict-help{width:24px;height:24px;border-radius:50%;border:1px solid #485b6a;background:#13202b;color:var(--text);font:600 11px var(--display);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .18s,background .18s,transform .18s,color .18s}
+.verdict-help:hover,.verdict-help[aria-expanded="true"]{border-color:var(--accent);color:var(--accent);background:#c3f77a18;transform:scale(1.06)}
+
+.stat-popover{margin:-8px 0 16px;padding:13px 16px;border:1px solid #c3f77a4d;border-radius:7px;background:rgba(12,21,30,.96);backdrop-filter:blur(12px);box-shadow:0 16px 36px rgba(0,0,0,.5);font-size:11px;line-height:1.65;color:#cad7df}
+.stat-popover.is-open{animation:popSpring .2s cubic-bezier(.22,1,.36,1) both}
+.stat-popover strong{display:block;font:500 12.5px var(--display);color:var(--accent);margin-bottom:6px}
+.stat-popover ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.stat-popover b{color:var(--text);font-weight:600}
+@keyframes popSpring{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* 7-Province regional scan ("Where is it changing?") */
+.province-scan-wrap{border-top:1px solid var(--line);padding:18px 0 20px}
+.province-scan-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.province-scan-head .section-label{font-size:8.5px}
+.province-scan-head small{font-size:10px;color:var(--muted)}
+.province-scan{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.prov-card{text-align:left;padding:10px 10px 9px;border:1px solid var(--line);border-radius:6px;background:#0c151dcc;display:flex;flex-direction:column;gap:5px;min-width:0;transition:transform .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease}
+.prov-card:hover{transform:translateY(-2px);border-color:#627a8c;box-shadow:0 8px 20px rgba(0,0,0,.35)}
+.prov-card.is-sig{border-color:#c3f77a4d}
+.prov-card.is-warn{border-color:#f5b9424d}
+.prov-card.is-active{border-color:var(--accent);background:#c3f77a14;box-shadow:0 0 0 1px #c3f77a44}
+.prov-name{font-size:9.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prov-card.is-active .prov-name{color:var(--text)}
+.prov-slope{font:500 13px var(--display);color:var(--text);letter-spacing:-.2px;white-space:nowrap}
+.prov-slope small{font:400 8.5px var(--font);color:var(--muted);margin-left:2px}
+.prov-tag{font-size:8.5px;color:var(--muted);letter-spacing:.3px}
+.prov-card.is-sig .prov-tag{color:var(--accent);font-weight:600}
+.prov-card.is-warn .prov-tag{color:#f5b942}
+
+#stat-significance.is-sig strong{color:var(--accent)}
+
+/* Dynamic popups & tooltips */
+.chart-tooltip{background:rgba(10,18,26,.94);backdrop-filter:blur(12px);border:1px solid #627a8a;border-radius:7px;padding:10px 13px;box-shadow:0 16px 38px rgba(0,0,0,.55);opacity:0;visibility:hidden;transform:translateY(6px) scale(.95);transition:opacity .16s ease,transform .18s cubic-bezier(.22,1,.36,1),left .12s ease-out,top .12s ease-out,visibility .16s;min-width:165px}
+.chart-tooltip.is-visible{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+.chart-tooltip .tt-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:10px;color:var(--muted);margin-bottom:4px}
+.chart-tooltip .tt-head b{color:var(--accent);font-family:var(--display);font-weight:600}
+.chart-tooltip .tt-val{font:600 15px var(--display);color:var(--text)}
+.chart-tooltip .tt-val small{font:400 10px var(--font);color:var(--muted)}
+.chart-tooltip .tt-sub{font-size:10px;color:#b8c8d2;margin-top:3px}
+.chart-tooltip .tt-cmp{font-size:10px;color:var(--blue);margin-top:4px;padding-top:4px;border-top:1px solid #24333f}
+.chart-point{transition:r .15s ease,filter .15s ease;cursor:pointer}
+.chart-point:hover,.chart-point:focus-visible{filter:drop-shadow(0 0 6px #c3f77a99)}
+
+.leaflet-tooltip{background:rgba(11,19,27,.92)!important;backdrop-filter:blur(10px);border:1px solid #4d6272!important;border-radius:6px!important;padding:6px 10px!important;box-shadow:0 10px 26px rgba(0,0,0,.45)!important;transition:opacity .16s ease,transform .16s ease}
+
+/* Interactive tabs inside methodology modal */
+.method-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px;padding:4px;background:#0b131b;border:1px solid var(--line);border-radius:6px}
+.method-tab{font:500 10.5px var(--font);padding:6px 11px;border-radius:4px;color:var(--muted);transition:background .16s,color .16s}
+.method-tab:hover{color:var(--text)}
+.method-tab.selected{background:#c3f77a22;color:var(--accent)}
+.method-section{animation:tabFade .22s ease both}
+@keyframes tabFade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:1100px){
+  .analysis-flow{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .province-scan{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+
+@media(max-width:640px){
+  html{scroll-padding-top:96px}
+  .topbar{height:auto;min-height:60px;padding:8px 12px 7px;gap:6px 10px;flex-wrap:wrap}
+  .brand{font-size:18px;gap:6px}
+  .brand svg{width:25px}
+  .brand small{display:none}
+  .topbar-actions{margin-left:auto;gap:6px}
+  .lang-switch button{padding:4px 6px;font-size:8.5px}
+  .nav-button span{display:none}
+  .topbar nav{order:3;width:100%;justify-content:center;gap:14px;padding-top:5px;border-top:1px solid #25313c66;align-self:auto}
+  .topbar nav a{font-size:10.5px;display:flex!important;padding-bottom:3px}
+
+  /* 2D Lab mobile refinements */
+  .analysis-flow{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:14px 0}
+  .flow-step{padding:8px 9px}
+  .flow-step#flow-sig-step{grid-column:1/-1}
+  .history-controls{gap:10px}
+  .period-controls{flex-wrap:wrap;gap:6px}
+  .period-presets{margin-left:0}
+  .trend-verdict{flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px}
+  .trend-verdict p{flex:1 1 100%;order:3;font-size:11px}
+  .verdict-help{margin-left:auto}
+  .province-scan{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .map-toolbar>div{flex-wrap:wrap;justify-content:flex-end}
+
+  /* 3D HUD mobile layout: eliminate every overlap */
+  .flight-intro{top:88px!important;left:12px!important;right:12px!important;max-width:none!important;width:auto!important;padding:9px 12px!important}
+  .flight-intro h2{font-size:16px!important;margin:2px 0 3px!important}
+  .flight-intro p{font-size:10.5px!important;line-height:1.35!important;margin:0!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .weather-console{left:12px!important;right:auto!important;width:calc(50% - 17px)!important;bottom:112px!important;max-height:30vh!important;overflow-y:auto!important;padding:10px!important}
+  .flight-panel{right:12px!important;left:auto!important;width:calc(50% - 17px)!important;bottom:112px!important;max-height:30vh!important;overflow-y:auto!important;padding:10px!important}
+  #weather-clean-view{top:auto!important;bottom:76px!important;right:12px!important;left:auto!important;padding:5px 9px!important;font-size:9px!important}
+  .flight-bottom{bottom:26px!important;left:12px!important;right:12px!important;gap:6px!important}
+  .flight-controls{width:100%!important;max-width:100%!important;justify-content:center!important;flex-wrap:wrap!important;padding:5px 7px!important;gap:4px!important}
+  .scene-disclaimer{bottom:6px!important;left:12px!important;right:12px!important;text-align:center!important;font-size:8px!important}
+  #close-lab{top:88px!important;right:10px!important;padding:6px 10px!important;font-size:10px!important}
+  .lab-open>main{inset:124px 8px 10px!important}
+}
+
+@media(max-width:640px) and (max-height:700px){
+  .weather-console,.flight-panel{max-height:24vh!important;bottom:106px!important}
+  #weather-clean-view{bottom:70px!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .stat-popover.is-open,.method-section{animation:none!important}
+}
