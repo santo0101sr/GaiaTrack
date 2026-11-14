@@ -60,3 +60,17 @@ test('buildRecommendations integrates real monthly NASA data and Earth Pulse sce
   assert.ok(warmDry.metrics.iea > baseline.metrics.iea);
   assert.ok(warmDry.tips.some(t => /Anomalía térmica/i.test(t.tag)));
 });
+
+test('evaluateTerritoryMetrics aligns 24h forecast mean and supports English output', async () => {
+  const heredia = JSON.parse(await readFile(new URL('../public/data/heredia.json', import.meta.url)));
+  const aligned = buildRecommendations(
+    'heredia',
+    { temperature: 29, precipitation: 0, soilMoisture: 0.3 },
+    [{ T2M: 20.5, PRECTOTCORR: 2 }],
+    { monthly: heredia.monthly, month: 11, lang: 'en' }
+  );
+  assert.equal(aligned.metrics.tempScale, 'daily-24h');
+  assert.equal(aligned.metrics.historyYear, 2025);
+  assert.ok(Math.abs(aligned.metrics.observed.t - 20.5) < 1e-12);
+  assert.ok(aligned.tips.some(t => /Local ecology/i.test(t.tag)));
+});

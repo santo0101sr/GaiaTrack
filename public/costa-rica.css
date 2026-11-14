@@ -17,3 +17,10 @@
 /* Grouped selector readability */
 #site-select optgroup,#compare-site optgroup{font:600 11px var(--font);color:var(--muted);background:var(--panel)}
 @media(max-width:580px){.cr-coverage{gap:6px}.cr-coverage span{font-size:9px;padding:5px 8px}}
+.topbar-actions{display:flex;align-items:center;gap:14px}
+.lang-switch{display:inline-flex;border:1px solid var(--line);border-radius:4px;background:#0d151d;padding:2px;gap:2px}
+.lang-switch button{font:600 9px var(--font);letter-spacing:1px;padding:5px 8px;border-radius:3px;color:var(--muted);transition:background .15s,color .15s}
+.lang-switch button:hover{color:var(--text)}
+.lang-switch button.selected{background:#c3f77a1f;color:var(--accent)}
+.ep-scale-note{display:inline-block;margin-top:2px;font-size:8.5px;color:#7fb3cf;letter-spacing:.3px}
+@media(max-width:850px){.topbar-actions{gap:8px}}
