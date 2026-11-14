@@ -163,7 +163,7 @@ function paintSeaLabels(){
 
 function initMap(){
   if(!globalThis.L){$('#map-fallback').hidden=false;return;}
-  map=L.map('map',{zoomControl:false,scrollWheelZoom:false,minZoom:7,maxZoom:14}).fitBounds(L.geoJSON(geo).getBounds().pad(.08));
+  map=L.map('map',{zoomControl:false,scrollWheelZoom:true,minZoom:7,maxZoom:14}).fitBounds(L.geoJSON(geo).getBounds().pad(.08));
   L.control.zoom({position:'bottomright'}).addTo(map);
   const tiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:19}).addTo(map);
   let tileErrors=0;tiles.on('tileerror',()=>{if(++tileErrors===5)showError(tx('Base map is unavailable. Boundaries, points, and scientific data still work.','El mapa base no está disponible. Los límites, puntos y datos científicos siguen funcionando.'));});

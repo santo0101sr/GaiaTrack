@@ -37,7 +37,7 @@ export function initForecast(){
 export async function updateForecast(site,variable,refresh=false){
   initForecast();
   if(!site){
-    selectedSite=null;forecast=null;
+    selectedSite=null;forecast=null;request++;
     $('#forecast-location').textContent=tx('Costa Rica · Choose a province','Costa Rica · Elegí una provincia');
     $('#forecast-status').textContent=tx('Choose a province or canton in the Explorer to load its 7-day forecast.','Elegí una provincia o cantón en el Explorador para consultar su pronóstico de 7 días.');
     $('#forecast-status').hidden=false;$('#forecast-days').innerHTML='';$('#forecast-detail').innerHTML='';$('#forecast-period').textContent='';$('#forecast-update').textContent='';$('#forecast-refresh').disabled=true;$('#forecast-download').disabled=true;

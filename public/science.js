@@ -15,82 +15,47 @@ const residuals=data.map(d=>d.value-(intercept+slope*d.year));const left=[],righ
 return {n,slope,intercept,p,s,z,r1,autocorrelated};}
 export function baseline(series,start=2001,end=2010){return mean(series.filter(d=>d.year>=start&&d.year<=end&&Number.isFinite(d.value)).map(d=>d.value));}
 
-export function detrendedResiduals(series) {
-  const data = series.filter(d => Number.isFinite(d.value));
-  const t = trend(data);
-  if (t.slope === null || t.intercept === null) {
-    return { trend: t, residuals: [] };
-  }
-  return {
-    trend: t,
-    residuals: data.map(d => ({
-      year: d.year,
-      value: d.value - (t.intercept + t.slope * d.year),
-      raw: d.value
-    }))
+// Keep the same robust linear estimator used by the trend panel.
+export function detrendedResiduals(series){
+  const data=[...new Map(series.filter(d=>Number.isFinite(d.year)&&Number.isFinite(d.value)).map(d=>[d.year,d])).values()].sort((a,b)=>a.year-b.year);
+  const fit=trend(data);
+  return {trend:fit,residuals:Number.isFinite(fit.slope)?data.map(d=>({year:d.year,value:d.value-fit.intercept-fit.slope*d.year})):[]};
+}
+
+export function detrendedCorrelation(a,b){
+  const right=new Map(b.filter(d=>Number.isFinite(d.year)&&Number.isFinite(d.value)).map(d=>[d.year,d]));
+  const left=[...new Map(a.filter(d=>Number.isFinite(d.year)&&Number.isFinite(d.value)&&right.has(d.year)).map(d=>[d.year,d])).values()].sort((x,y)=>x.year-y.year);
+  const aligned=left.map(d=>right.get(d.year)),n=left.length;
+  const correlate=(x,y)=>{
+    if(x.length<3||y.length!==x.length)return null;
+    const scale=Math.max(1,...x.map(Math.abs),...y.map(Math.abs));
+    if(Math.max(...x)-Math.min(...x)<=Number.EPSILON*scale*64||Math.max(...y)-Math.min(...y)<=Number.EPSILON*scale*64)return null;
+    return Math.max(-1,Math.min(1,pearson(x,y)));
   };
+  const rawR=correlate(left.map(d=>d.value),aligned.map(d=>d.value));
+  const r=correlate(detrendedResiduals(left).residuals.map(d=>d.value),detrendedResiduals(aligned).residuals.map(d=>d.value));
+  // Descriptive screening flag, not an additional significance test.
+  return {n,rawR,r,spuriousWarning:Number.isFinite(rawR)&&Number.isFinite(r)&&Math.abs(rawR)>=.7&&Math.abs(rawR)-Math.abs(r)>=.3};
 }
 
-export function detrendedCorrelation(seriesA, seriesB) {
-  const detA = detrendedResiduals(seriesA);
-  const detB = detrendedResiduals(seriesB);
-  const mapB = new Map(detB.residuals.map(d => [d.year, d]));
-  const shared = detA.residuals.filter(d => mapB.has(d.year));
-  const n = shared.length;
-  if (n < 2) {
-    return { n, r: null, rawR: null, spuriousWarning: false, trendA: detA.trend, trendB: detB.trend };
-  }
-  const rawXs = shared.map(d => d.raw);
-  const rawYs = shared.map(d => mapB.get(d.year).raw);
-  const resXs = shared.map(d => d.value);
-  const resYs = shared.map(d => mapB.get(d.year).value);
-  const rawR = pearson(rawXs, rawYs);
-  const r = pearson(resXs, resYs);
-  const spuriousWarning = n >= 10 && Math.abs(rawR) >= 0.45 && (Math.abs(rawR) - Math.abs(r) >= 0.25 || Math.abs(r) < 0.25);
-  return { n, r, rawR, spuriousWarning, trendA: detA.trend, trendB: detB.trend };
+export function benjaminiHochberg(items,alpha=.05){
+  const ranked=items.map((item,index)=>({item,index})).filter(({item})=>Number.isFinite(item.p)&&item.p>=0&&item.p<=1).sort((a,b)=>a.item.p-b.item.p);
+  const m=ranked.length,adjusted=new Map();let minimum=1;
+  for(let i=m-1;i>=0;i--){minimum=Math.min(minimum,ranked[i].item.p*m/(i+1));adjusted.set(ranked[i].index,minimum);}
+  return items.map((item,index)=>{const q=adjusted.get(index)??null;return {...item,q,m,fdrSignificant:q!==null&&q<=alpha&&!item.autocorrelated};});
 }
 
-export function benjaminiHochberg(items, alpha = 0.05) {
-  const validIndices = items
-    .map((item, index) => ({ index, p: item.p }))
-    .filter(entry => Number.isFinite(entry.p))
-    .sort((a, b) => a.p - b.p);
-  const m = validIndices.length;
-  const qByIndex = new Array(items.length).fill(null);
-  if (m > 0) {
-    const rawQ = validIndices.map((entry, rankIdx) => (entry.p * m) / (rankIdx + 1));
-    const adjusted = new Array(m);
-    for (let i = m - 1; i >= 0; i--) {
-      adjusted[i] = Math.min(1, i === m - 1 ? rawQ[i] : Math.min(rawQ[i], adjusted[i + 1]));
-      qByIndex[validIndices[i].index] = adjusted[i];
-    }
+// Approximate MERRA-2 reference-grid grouping. Returned provider cell coordinates are preferable
+// when available; this grouping does not imply independent observations or a finer resolution.
+export function collapseToUniqueCells(sites,latitudeResolution=.5,longitudeResolution=.625){
+  if(!(latitudeResolution>0&&longitudeResolution>0))throw Error('Grid resolution must be positive.');
+  const cells=new Map();
+  for(const site of sites){
+    if(!Number.isFinite(site.latitude)||!Number.isFinite(site.longitude))continue;
+    const latitude=+(Math.round(site.latitude/latitudeResolution)*latitudeResolution).toFixed(6),longitude=+(Math.round(site.longitude/longitudeResolution)*longitudeResolution).toFixed(6);
+    const cellKey=`${latitude},${longitude}`;
+    if(!cells.has(cellKey))cells.set(cellKey,{cellKey,latitude,longitude,representativeSite:site,memberSites:[],approximate:true});
+    cells.get(cellKey).memberSites.push(site);
   }
-  return items.map((item, index) => {
-    const q = qByIndex[index];
-    return {
-      ...item,
-      m,
-      q,
-      fdrSignificant: q !== null && q <= alpha && !item.autocorrelated
-    };
-  });
-}
-
-export function collapseToUniqueCells(sites, resolution = 0.5) {
-  const groups = new Map();
-  for (const site of sites) {
-    if (!Number.isFinite(site?.latitude) || !Number.isFinite(site?.longitude)) continue;
-    const latBin = Math.floor(site.latitude / resolution);
-    const lonBin = Math.floor(site.longitude / resolution);
-    const cellKey = `${latBin},${lonBin}`;
-    if (!groups.has(cellKey)) groups.set(cellKey, []);
-    groups.get(cellKey).push(site);
-  }
-  return [...groups.entries()].map(([cellKey, memberSites]) => ({
-    cellKey,
-    latitude: memberSites[0].latitude,
-    longitude: memberSites[0].longitude,
-    representativeSite: memberSites[0],
-    memberSites
-  }));
+  return [...cells.values()];
 }

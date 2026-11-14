@@ -33,6 +33,10 @@
 .province-explorer .weather-switch{display:flex;gap:5px}
 .province-explorer .weather-readings strong{font-size:14px}
 #wx-rain-rate{display:block;color:#8fb3bd;font-size:9px;line-height:1.5}
+.province-explorer .flight-guidance{flex-wrap:wrap;justify-content:center;gap:8px;max-width:94vw}
+#world-canvas canvas{cursor:grab;touch-action:none}
+#world-canvas canvas:active{cursor:grabbing}
+#world-canvas canvas:focus-visible{outline:2px solid #a2e8cf;outline-offset:-4px}
 .province-explorer .wx-tip{display:none}
 .province-explorer .source-integrity{font-size:9px;letter-spacing:0;line-height:1.65;color:#8fb3bd;margin:16px 0 0;padding-top:12px;border-top:1px solid #8bc8af24}
 .province-explorer #weather-clean-view{top:88px;right:3.8%}

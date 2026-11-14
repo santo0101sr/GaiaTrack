@@ -102,7 +102,7 @@ export function createProvinceExplorer({host,manifest,geo,meshes,beacons,borders
   }
 
   function sync(id){
-    if(!id){country(false);return;}
+    if(!id){if(selected!==null||province!==null)country(false);return;}
     const site=sites.get(id);
     if(!site||(id===selected&&province===site.province))return;
     selected=id;province=site.province;

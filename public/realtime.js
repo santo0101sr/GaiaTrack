@@ -10,7 +10,7 @@ function buildSectionShell(){
 }
 buildSectionShell();
 
-const $=s=>document.querySelector(s),cache=new Map(),pending=new Map();let site=document.querySelector('#site-select')?.value||null,sequence=0;
+const $=s=>document.querySelector(s),cache=new Map(),pending=new Map();let site=null,sequence=0;
 const download=document.createElement('button');download.className='outline-button';download.disabled=true;
 function attachDownload(){
   download.textContent=tx('↓ Export conditions CSV','↓ Exportar condiciones CSV');
