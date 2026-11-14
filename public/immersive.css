@@ -32,7 +32,7 @@ body.immersive-mode{overflow:hidden;background:#03090f}.immersive-mode>.topbar{p
 .flight-panel button:hover{color:#e8fff5;border-bottom-color:#c3f77a;transform:translateX(2px)}
 .weather-console button{transition:color .2s,background .2s,border-color .2s,transform .18s}
 .weather-console button:hover{transform:translateY(-1px)}
-.clean-cockpit .flight-intro,.clean-cockpit .flight-panel,.clean-cockpit .weather-console{display:block;opacity:0;pointer-events:none;transform:translateY(10px) scale(.985)}
+.clean-cockpit .flight-intro,.clean-cockpit .flight-panel,.clean-cockpit .weather-console,.intro-playing .flight-intro,.intro-playing .flight-panel,.intro-playing .weather-console,.intro-playing .flight-bottom,.intro-playing #weather-clean-view{display:block;opacity:0;pointer-events:none;transform:translateY(10px) scale(.985)}
 .lab-open>main{animation:labSlideIn .38s cubic-bezier(.22,1,.36,1) both}
 .value-pop{animation:valuePop .42s cubic-bezier(.22,1,.36,1)}
 @keyframes arriveBottom{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}
