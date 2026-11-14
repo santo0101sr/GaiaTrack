@@ -1,0 +1,8 @@
+import http from 'node:http';
+import {readFile} from 'node:fs/promises';
+import path from 'node:path';
+import {getForecast} from './forecast-service.mjs';
+const root=path.resolve('public');
+const types={'.html':'text/html; charset=utf-8','.css':'text/css','.js':'text/javascript','.json':'application/json','.svg':'image/svg+xml'};
+const server=http.createServer(async(req,res)=>{try{const url=new URL(req.url,'http://localhost');const pathname=decodeURIComponent(url.pathname);if(pathname==='/api/forecast'){try{const manifest=JSON.parse(await readFile(path.join(root,'data','manifest.json'),'utf8'));const site=manifest.sites.find(s=>s.id===url.searchParams.get('site'));if(!site){res.writeHead(400,{'Content-Type':'application/json'});return res.end(JSON.stringify({error:'Cantón inválido'}));}const forecast=await getForecast(site,url.searchParams.get('refresh')==='1');res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});return res.end(JSON.stringify(forecast));}catch(e){res.writeHead(503,{'Content-Type':'application/json'});return res.end(JSON.stringify({error:'El pronóstico no está disponible en este momento. Reintentá la consulta.',detail:e.message}));}}const file=path.resolve(root,'.'+(pathname==='/'?'/index.html':pathname));if(!file.startsWith(root+path.sep)){res.writeHead(403);return res.end();}const body=await readFile(file);res.writeHead(200,{'Content-Type':types[path.extname(file)]||'application/octet-stream','Cache-Control':'no-cache'});res.end(body);}catch{res.writeHead(404);res.end('No encontrado');}});
+server.listen(Number(process.env.PORT)||4173,'127.0.0.1',()=>console.log('GaiaTrack: http://127.0.0.1:4173'));

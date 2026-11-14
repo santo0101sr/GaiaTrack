@@ -1,0 +1,102 @@
+{
+  "retrievedAt": "2026-11-14T17:04:10.222Z",
+  "start": 2001,
+  "end": 2025,
+  "source": "NASA POWER Daily API",
+  "boundary": {
+    "boundaryID": "CRI-ADM2-36466004",
+    "boundaryName": "Costa Rica",
+    "boundaryISO": "CRI",
+    "boundaryYearRepresented": "2020",
+    "boundaryType": "ADM2",
+    "boundaryCanonical": "Cantons",
+    "boundarySource": "geoBoundaries, Wikimedia Commons",
+    "boundaryLicense": "CC0 1.0 Universal (CC0 1.0) Public Domain Dedication",
+    "licenseDetail": "nan",
+    "licenseSource": "commons.wikimedia.org/wiki/File",
+    "boundarySourceURL": "commons.wikimedia.org/wiki/File",
+    "sourceDataUpdateDate": "Thu Jan 19 07:31:04 2023",
+    "buildDate": "Dec 12, 2023",
+    "Continent": "Latin America and the Caribbean",
+    "UNSDG-region": "Latin America and the Caribbean",
+    "UNSDG-subregion": "Central America",
+    "worldBankIncomeGroup": "Upper-middle-income Countries",
+    "admUnitCount": "83",
+    "meanVertices": "3201.0",
+    "minVertices": "230",
+    "maxVertices": "14876",
+    "meanPerimeterLengthKM": "138.56717625425765",
+    "minPerimeterLengthKM": "13.268977983106817",
+    "maxPerimeterLengthKM": "590.8233818392314",
+    "meanAreaSqKM": "618.8974158369535",
+    "minAreaSqKM": "6.760403951406345",
+    "maxAreaSqKM": "3357.0676314794223",
+    "staticDownloadLink": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/CRI/ADM2/geoBoundaries-CRI-ADM2-all.zip",
+    "gjDownloadURL": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/CRI/ADM2/geoBoundaries-CRI-ADM2.geojson",
+    "tjDownloadURL": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/CRI/ADM2/geoBoundaries-CRI-ADM2.topojson",
+    "imagePreview": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/CRI/ADM2/geoBoundaries-CRI-ADM2-PREVIEW.png",
+    "simplifiedGeometryGeoJSON": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/CRI/ADM2/geoBoundaries-CRI-ADM2_simplified.geojson"
+  },
+  "sites": [
+    {
+      "id": "heredia",
+      "name": "Heredia",
+      "longitude": -84.03922966873245,
+      "latitude": 10.12856348019119
+    },
+    {
+      "id": "barva",
+      "name": "Barva",
+      "longitude": -84.11553353526293,
+      "latitude": 10.073480159335872
+    },
+    {
+      "id": "santo-domingo",
+      "name": "Santo Domingo",
+      "longitude": -84.06813936279605,
+      "latitude": 9.988053504466762
+    },
+    {
+      "id": "santa-barbara",
+      "name": "Santa Bárbara",
+      "longitude": -84.1474214939546,
+      "latitude": 10.082212019727507
+    },
+    {
+      "id": "san-rafael",
+      "name": "San Rafael",
+      "longitude": -84.08154923964028,
+      "latitude": 10.059791904252762
+    },
+    {
+      "id": "san-isidro",
+      "name": "San Isidro",
+      "longitude": -84.04318998617993,
+      "latitude": 10.029508507749938
+    },
+    {
+      "id": "belen",
+      "name": "Belén",
+      "longitude": -84.17685400217081,
+      "latitude": 9.98547136272839
+    },
+    {
+      "id": "flores",
+      "name": "Flores",
+      "longitude": -84.15390899511812,
+      "latitude": 10.005629996249208
+    },
+    {
+      "id": "san-pablo",
+      "name": "San Pablo",
+      "longitude": -84.09360389228718,
+      "latitude": 9.991882744355049
+    },
+    {
+      "id": "sarapiqui",
+      "name": "Sarapiquí",
+      "longitude": -83.93595275239454,
+      "latitude": 10.487786832977406
+    }
+  ]
+}
