@@ -40,18 +40,19 @@ body.immersive-mode{overflow:hidden;background:#03090f}.immersive-mode>.topbar{p
 @keyframes valuePop{0%{opacity:.45;transform:translateY(4px) scale(.97)}100%{opacity:1;transform:translateY(0) scale(1)}}
 @media(prefers-reduced-motion:reduce){.weather-console,.flight-bottom,#flight-label,#weather-clean-view,.lab-open>main,.value-pop{animation:none!important}.flight-intro,.flight-panel,.weather-console,#weather-clean-view,.flight-controls button,.flight-panel button,.weather-console button{transition:none!important}}
 /* Layout & overflow fixes for Pronóstico 3D and Telemetry panels */
-.flight-intro{top:10.5%}
-.flight-panel{top:19%;max-height:calc(100vh - 230px);overflow-y:auto;padding:20px}
+.flight-intro{top:92px}
+.flight-intro h1{margin:10px 0 8px}
+.flight-intro p{margin:8px 0 0;line-height:1.7}
+#weather-clean-view{top:92px;right:3.8%}
+.flight-panel{top:138px;max-height:calc(100vh - 285px);overflow-y:auto;padding:20px}
 .flight-panel h2{margin-top:16px}
-.flight-reading{margin:18px 0 4px}
-.weather-console{bottom:14%;width:302px;padding:16px 18px;max-height:calc(100vh - 205px)}
-.weather-actions{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:2px}
-.weather-console #weather-focus,.weather-console #weather-demo-rain{font-size:8.5px;padding:6px 9px;color:#94bfc6;border-color:#7bbbc127}
-.weather-console #weather-demo-rain.chosen{color:#9ce7ff;border-color:#7bc7ed88;background:#7bc7ed1a}
+.flight-reading{margin:16px 0 4px}
+#flight-label{right:3.8%;bottom:32px}
+.weather-console{top:290px;bottom:auto;width:302px;padding:16px 18px;max-height:calc(100vh - 405px)}
 .weather-readings{gap:12px 10px;margin-top:12px}
 .weather-readings strong{font-size:14px;line-height:1.35}
 #weather-date{margin:10px 0}
 .weather-console label{margin:12px 0 8px}
 .weather-explainer{margin:10px 0 5px}
-@media(max-width:1100px){.weather-console{max-height:calc(100vh - 210px);width:260px}.flight-panel{top:auto;bottom:23%;max-height:calc(100vh - 250px)}}
+@media(max-width:1100px){.weather-console{top:auto;bottom:23%;max-height:calc(100vh - 250px);width:260px}.flight-panel{top:auto;bottom:23%;max-height:calc(100vh - 250px)}}
 @media(max-width:580px){.weather-console{width:190px;max-height:44vh;bottom:24%}.flight-panel{max-height:38vh}}
