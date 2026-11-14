@@ -1,5 +1,7 @@
 # GaiaTrack
 
+GitHub está conectado al proyecto `gaiatrack` de Vercel. Cada push a `main` dispara un despliegue a producción; las otras ramas generan vistas previas. La variable de servidor `OPENWEATHER_API_KEY` se configura en Vercel para Production y Preview y nunca se guarda en el repositorio. Para publicar cambios: `git add`, `git commit` y `git push`.
+
 Observatorio interactivo de la provincia de Heredia, Costa Rica. Versión local para NASA Space Apps. No utiliza Sites ni está publicado.
 
 ## Abrir
