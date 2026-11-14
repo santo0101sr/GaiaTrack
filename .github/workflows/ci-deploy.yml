@@ -24,3 +24,9 @@ jobs:
 
       - name: Validate build
         run: npm run build
+
+      - name: Trigger Vercel deploy hook (if configured)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push' && env.VERCEL_DEPLOY_HOOK != ''
+        env:
+          VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: curl -fsS -X POST "$VERCEL_DEPLOY_HOOK"

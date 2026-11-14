@@ -1,0 +1,26 @@
+/* Costa Rica national identity layer. Kept in its own file to avoid merge conflicts with styles.css. */
+:root{--cr-blue:#2f5fd0;--cr-red:#e0313f;--cr-white:#f4f7fb}
+/* Thin tricolor stripe (blue · white · red · white · blue) at the very top of the page */
+.topbar{position:relative}
+.topbar:before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(180deg,transparent 0,transparent 100%),linear-gradient(90deg,var(--cr-blue) 0 16.6%,var(--cr-white) 16.6% 25%,var(--cr-red) 25% 75%,var(--cr-white) 75% 83.4%,var(--cr-blue) 83.4% 100%);opacity:.85}
+/* Mini flag chip (horizontal stripes, 1:1:2:1:1) */
+.cr-flag{display:inline-block;width:16px;height:10px;border-radius:2px;flex-shrink:0;background:linear-gradient(180deg,var(--cr-blue) 0 16.66%,var(--cr-white) 16.66% 33.33%,var(--cr-red) 33.33% 66.66%,var(--cr-white) 66.66% 83.33%,var(--cr-blue) 83.33% 100%);box-shadow:0 0 0 1px #ffffff22}
+.region-badge .cr-flag{margin-right:2px}
+.footer-brand{display:inline-flex;align-items:center;gap:8px}
+.footer-brand .cr-flag{width:14px;height:9px}
+/* National coverage chips under the intro */
+.cr-coverage{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.cr-coverage span{display:inline-flex;align-items:baseline;gap:6px;padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:#0d151d;font-size:10px;color:var(--muted);letter-spacing:.3px}
+.cr-coverage strong{font:600 13px var(--display);color:var(--accent)}
+/* Ocean labels on the Leaflet map */
+.sea-label{color:#7fb3cf!important;font-style:italic;letter-spacing:2px;opacity:.75}
+/* Grouped selector readability */
+#site-select optgroup,#compare-site optgroup{font:600 11px var(--font);color:var(--muted);background:var(--panel)}
+@media(max-width:580px){.cr-coverage{gap:6px}.cr-coverage span{font-size:9px;padding:5px 8px}}
+.topbar-actions{display:flex;align-items:center;gap:14px}
+.lang-switch{display:inline-flex;border:1px solid var(--line);border-radius:4px;background:#0d151d;padding:2px;gap:2px}
+.lang-switch button{font:600 9px var(--font);letter-spacing:1px;padding:5px 8px;border-radius:3px;color:var(--muted);transition:background .15s,color .15s}
+.lang-switch button:hover{color:var(--text)}
+.lang-switch button.selected{background:#c3f77a1f;color:var(--accent)}
+.ep-scale-note{display:inline-block;margin-top:2px;font-size:8.5px;color:#7fb3cf;letter-spacing:.3px}
+@media(max-width:850px){.topbar-actions{gap:8px}}
