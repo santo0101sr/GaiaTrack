@@ -1,63 +1,39 @@
-# GaiaTrack
+# GaiaTrack — Costa Rica Environmental Observatory
 
-GitHub está conectado al proyecto `gaiatrack` de Vercel. Cada push a `main` dispara un despliegue a producción; las otras ramas generan vistas previas. Las APIs meteorológicas no requieren claves ni planes de pago. Para publicar cambios: `git add`, `git commit` y `git push`.
+**Earth-System-Trend-Detective** web observatory built with vanilla ES modules, Leaflet, Three.js WebGL, and Node.js weather APIs for all **7 provinces and 83 cantons of Costa Rica** (90 NASA POWER reference points, 2001–2025).
 
-Observatorio interactivo de las siete provincias de Costa Rica y los 83 cantones de la cartografía geoBoundaries incluida. Proyecto para NASA Space Apps. Publicado en https://gaiatrack.vercel.app con despliegue automático desde GitHub.
+> **Bilingual interface:** Starts in **English** with an interactive **EN / ES** toggle in the header and 3D HUD.
+> **Real data only:** Historical series come from NASA POWER (MERRA-2 & CERES); current conditions and 7-day forecasts come from Open-Meteo. No synthetic or simulated environmental series are substituted for missing observations.
 
-## Abrir
+---
 
-Requiere Node.js 26. No requiere instalar paquetes.
+## Alignment with 2026 NASA Space Apps Challenge (*Earth-System-Trend-Detective*)
 
-```powershell
-npm start
-```
+1. **Select Earth science variables (`public/app.js`):** Mean/Min/Max temperature (`T2M`, `T2M_MIN`, `T2M_MAX`), downward solar radiation (`ALLSKY_SFC_SW_DWN`), bias-corrected precipitation (`PRECTOTCORR`), surface soil moisture wetness index (`GWETTOP`), and 2 m relative humidity (`RH2M`), each with plain-language scientific definitions and spatial resolution notes (`0.5° × 0.625°` MERRA-2, `1° × 1°` CERES).
+2. **Focus by territory (`public/territories.js`):** Interactive explorer covering Costa Rica's 7 provinces (`san-jose`, `alajuela`, `cartago`, `heredia`, `guanacaste`, `puntarenas`, `limon`) and 83 cantons (`data/cantons.geojson`), using interior polygon reference points rather than simulated territorial averages.
+3. **Time series & seasonal cycle removal (`public/science.js`):** Daily NASA POWER observations (2001–2025) aggregated monthly (requiring ≥ 90% valid days) and annually (requiring 12 valid months) to dampen intra-annual seasonal cycles, with raw values or anomalies relative to the `2001–2010` internal reference baseline.
+4. **Statistical trend & significance (`#tendencias`):**
+   - **5-step live Detective workflow bar:** Variable → Region → Period → Visual Trend → Significance.
+   - **Theil–Sen robust slope estimator** (rate of change per decade) + **two-sided Mann–Kendall test** (`p < 0.05` threshold, requiring `n ≥ 10` complete years, tie & continuity corrections) + **lag-1 residual autocorrelation check** (`|r| > 1.96/√n`).
+   - **Trend Verdict Banner & interactive `?` explainer** summarizing results and flagging autocorrelation or short windows.
+   - **Regional 7-Province Scan (`Where is it changing?`):** Computes Theil–Sen slope and Mann–Kendall significance simultaneously across all 7 provinces of Costa Rica for the selected variable and period.
+   - **Guided Detective Case Studies:** One-click contrasting regional comparisons (Heredia vs. Guanacaste temperature, Limón vs. Guanacaste rainfall, Sarapiquí vs. Guanacaste soil moisture) plus Pearson correlation (`r`) and Earth Pulse solar irradiance sensitivity exploration (`public/earth-pulse.js`).
 
-Abrir http://127.0.0.1:4173. No abrir `index.html` directamente: el pronóstico necesita el servidor local.
+---
 
-## Funciones
+## Local Development & Verification
 
-- Mapa nacional de 7 provincias y 83 cantones con puntos de referencia y selectores agrupados por provincia. Heredia provincia y Heredia cantón tienen identificadores separados (`heredia` y `heredia-centro`) y comparten el punto histórico conservado.
-- Histórico real NASA POWER 2001–2025: temperatura media, promedio de mínimas diarias, promedio de máximas diarias, radiación solar, precipitación, humedad superficial del suelo y humedad relativa del aire.
-- Pronóstico real de los próximos siete días desde mañana, vía Open-Meteo; consulta actualizable y caché compartida de hasta una hora.
-- Dispersión P10–P90 de temperatura media diaria calculada de 31 miembros GFS vía Open-Meteo. Es otro producto distinto del pronóstico principal de selección automática; no es un intervalo de confianza calibrado.
-- Comparación histórica, anomalías, reproducción temporal, pendiente Theil–Sen, Mann–Kendall exploratorio y exportaciones CSV.
+Requires **Node.js 24+** (`26.x` in CI / `package.json`). No runtime npm dependencies are required.
 
-## Datos y reproducibilidad
+- `npm start` or `npm run dev` — serve static files + `/api/current` & `/api/forecast` locally at `http://127.0.0.1:4173`.
+- `npm test` — run unit tests (`tests/*.test.mjs`) with Node's built-in test runner.
+- `npm run build` — run deployment validation (`scripts/validate-deploy.mjs`), checking JS/MJS syntax and historical JSON integrity for all 90 manifest sites.
+- `npm run data` / `npm run data:refresh` — fetch / refresh historical NASA POWER datasets for manifest sites.
 
-`public/data/manifest.json` conserva procedencia y fecha de consulta. Cada cantón tiene un JSON mensual derivado y `raw-<canton>.json` con la respuesta diaria original de NASA. `public/data/forecast/` conserva respuestas de pronóstico y conjuntos originales junto a las agregaciones mostradas.
+---
 
-Actualizar histórico: `npm run data`. Consultar o actualizar pronósticos: botón de la web; el servidor consulta la fuente y conserva el resultado. Si la fuente falla, solo reutiliza una copia con siete días futuros disponibles y muestra una advertencia. Nunca rellena con datos simulados.
+## Entrada inmersiva 3D
 
-El mapa requiere internet para las teselas OpenStreetMap; los límites y el histórico están incluidos. Las tipografías tienen respaldo del sistema si Google Fonts no está disponible. Leaflet 1.9.4 se incluye localmente, licencia BSD-2-Clause.
-
-## Límites científicos
-
-Un punto interior calculado por cantón no es una cabecera, estación meteorológica ni promedio espacial del cantón. La cuadrícula meteorológica NASA es amplia (0,5° × 0,625°; radiación 1° × 1°), por lo que cantones cercanos pueden compartir datos. La elevación del punto puede diferir de zonas pobladas. La interfaz indica ubicación y resolución. El pronóstico usa ese mismo punto solicitado y muestra la elevación de referencia del proveedor.
-
-NASA POWER es un producto de modelos y observaciones satelitales; no son mediciones locales directas. Los pronósticos son resultados meteorológicos con incertidumbre. No se atribuye una tendencia local al cambio climático global de forma automática.
-
-El índice histórico de humedad `GWETTOP` (0–1) no equivale a la humedad volumétrica 0–1 cm del pronóstico (m³/m³). Las unidades y definiciones se muestran separadas.
-
-El histórico se agrega desde datos diarios, con al menos 90 % de días válidos por mes y 12 meses válidos por año. Temperaturas y otras medias se ponderan por días del mes; lluvia se acumula. Si faltaran días, la acumulación estimaría el mes desde la media de días válidos. Referencia de anomalías 2001–2010, no normal climatológica de 30 años. Mann–Kendall bilateral con empates y continuidad; mínimo 10 años para p. Se marca autocorrelación residual de orden 1 para revisión sin corregir p; sin corrección de comparaciones múltiples.
-
-## Verificación
-
-```powershell
-npm test
-```
-
-## Fuentes y licencias
-
-- NASA POWER: https://power.larc.nasa.gov/docs/ (MERRA-2 y productos solares NASA).
-- Pronóstico Open-Meteo: https://open-meteo.com/en/docs (CC BY 4.0; API gratuita para uso no comercial).
-- GFS ensemble: https://open-meteo.com/en/docs/ensemble-api
-- Límites: geoBoundaries gbOpen CRI ADM2, representación 2020, Wikimedia Commons, CC0 1.0. https://www.geoboundaries.org/api/current/gbOpen/CRI/ADM2/
-- Mapa: © OpenStreetMap contributors. https://www.openstreetmap.org/copyright
-- Leaflet: https://leafletjs.com (BSD-2-Clause).
-
-Proyecto independiente, no oficial de NASA. No emite alertas oficiales.
-
-## Experiencia 3D
 Entrada inmersiva WebGL con Three.js 0.160.1, geometría cantonal real extruida de forma decorativa, vista orbital con países Natural Earth, selección por clic, cámara al arrastrar y zoom con rueda. Laboratorio y pronósticos se abren sobre la escena. Animación opcional, respeto por movimiento reducido y botón de pantalla completa. Las alturas y partículas son escenografía; no simulan relieve o meteorología. Three.js: MIT; Natural Earth: dominio público.
 
 

@@ -147,14 +147,14 @@ function renderChart(){
   const path=pts=>pts.map((p,i)=>`${i?'L':'M'}${x(p.year)},${y(p.value)}`).join(' ');
   if(primary.length){
     html+=`<path d="${path(primary)} L${x(primary.at(-1).year)},${H-bottom} L${x(primary[0].year)},${H-bottom} Z" fill="url(#area)"/><path d="${path(primary)}" stroke="${currentColor}" fill="none" stroke-width="2"/>`;
-    if(primary.length>1)html+=`<path d="M${x(primary[0].year)},${y(displayTrend(primary[0]))} L${x(primary.at(-1).year)},${y(displayTrend(primary.at(-1)))}" stroke="${currentColor}" stroke-width="1.3" stroke-dasharray="6 5" opacity=".6"/>`;
+    if(primary.length>1)html+=`<path d="M${x(primary[0].year)},${y(displayTrend(primary[0]))} L${x(primary.at(-1).year)},${y(displayTrend(primary.at(-1)))}" stroke="${currentColor}" stroke-width="2.2" stroke-dasharray="7 4" opacity=".9"/>`;
   }
   if(secondary.length)html+=`<path d="${path(secondary)}" fill="none" stroke="#62c9ed" stroke-width="2"/>`;
   if(state.year>=state.start&&state.year<=state.end)html+=`<line x1="${x(state.year)}" x2="${x(state.year)}" y1="${top}" y2="${H-bottom}" stroke="#c3f77a" opacity=".25"/>`;
   for(const [kind,pts] of [['main',primary],['compare',secondary]])for(const p of pts){
     const name=kind==='main'?data[state.site].name:data[state.compareSite].name;
     const label=`${name}, ${p.year}: ${signed(p.value)} ${state.anomaly?deltaUnit():v().unit}`;
-    html+=`<circle class="chart-point" data-kind="${kind}" data-year="${p.year}" data-value="${p.value}" cx="${x(p.year)}" cy="${y(p.value)}" r="${mobile?4:3.5}" fill="${kind==='main'?currentColor:'#62c9ed'}" tabindex="0" aria-label="${label}"><title>${label}</title></circle>`;
+    html+=`<circle class="chart-point" data-kind="${kind}" data-year="${p.year}" data-value="${p.value}" cx="${x(p.year)}" cy="${y(p.value)}" r="${mobile?4.5:3.8}" fill="${kind==='main'?currentColor:'#62c9ed'}" tabindex="0" aria-label="${label}"><title>${label}</title></circle>`;
   }
   svg.innerHTML=html;
 
@@ -167,33 +167,107 @@ function renderChart(){
     if(Number.isFinite(r))corrText=` · r = ${format(r,2)}`;
   }
 
-  $('#legend-site').innerHTML=`${data[state.site].name}${state.compare?` / ${data[state.compareSite].name} (${tx('blue','azul')}${corrText})`:''} <i class="dash"></i> ${tx('Sen trend','Tendencia de Sen')}`;
-  // keep legend structure clean when legend-site is text only:
   const legendWrap=document.querySelector('.chart-legend');
   if(legendWrap)legendWrap.innerHTML=`<i></i><span id="legend-site">${data[state.site].name}${state.compare?` / ${data[state.compareSite].name} (${tx('blue','azul')}${corrText})`:''}</span><i class="dash"></i> ${tx('Sen trend','Tendencia de Sen')}`;
 
   $('#chart-label').textContent=`${v().name} · ${state.anomaly?tx('deviation from 2001–2010 · ','desviación respecto a 2001–2010 · '):''}${state.anomaly?deltaUnit():v().unit}`;
   const tooltip=$('#chart-tooltip');
+  tooltip.hidden=false;
+  tooltip.classList.remove('is-visible');
+  tooltip.setAttribute('aria-hidden','true');
+  const mainBase=baseline(series(state.site));
+  const cmpBase=state.compare?baseline(series(state.compareSite)):null;
   svg.querySelectorAll('.chart-point').forEach(el=>{
-    const show=()=>{const p=svg.createSVGPoint();p.x=+el.getAttribute('cx');p.y=+el.getAttribute('cy');const pos=p.matrixTransform(svg.getScreenCTM()),rect=$('.chart-wrap').getBoundingClientRect();tooltip.textContent=el.getAttribute('aria-label');tooltip.hidden=false;tooltip.style.left=Math.min(Math.max(0,pos.x-rect.left-65),Math.max(0,rect.width-tooltip.offsetWidth))+'px';tooltip.style.top=Math.max(0,pos.y-rect.top-38)+'px';};
-    el.addEventListener('pointerenter',show);el.addEventListener('focus',show);el.addEventListener('pointerleave',()=>tooltip.hidden=true);el.addEventListener('blur',()=>tooltip.hidden=true);
+    const show=()=>{
+      const yr=+el.dataset.year,val=+el.dataset.value,kind=el.dataset.kind;
+      const siteId=kind==='main'?state.site:state.compareSite;
+      const base=kind==='main'?mainBase:cmpBase;
+      const unit=state.anomaly?deltaUnit():v().unit;
+      const anom=state.anomaly?val:(Number.isFinite(base)?val-base:null);
+      const otherId=state.compare?(kind==='main'?state.compareSite:state.site):null;
+      const otherRaw=otherId?valueAt(otherId,yr):null;
+      const otherVal=Number.isFinite(otherRaw)?(state.anomaly&&Number.isFinite(kind==='main'?cmpBase:mainBase)?otherRaw-(kind==='main'?cmpBase:mainBase):state.anomaly?null:otherRaw):null;
+      tooltip.innerHTML=`<div class="tt-head"><span>${data[siteId].name}</span><b>${yr}</b></div><div class="tt-val">${state.anomaly?signed(val):format(val)} <small>${unit}</small></div>${Number.isFinite(anom)&&!state.anomaly?`<div class="tt-sub">${tx('vs 2001–2010','vs 2001–2010')}: ${signed(anom)} ${deltaUnit()}</div>`:''}${Number.isFinite(otherVal)?`<div class="tt-cmp">${data[otherId].name}: ${state.anomaly?signed(otherVal):format(otherVal)} ${unit}</div>`:''}`;
+      const p=svg.createSVGPoint();p.x=+el.getAttribute('cx');p.y=+el.getAttribute('cy');
+      const pos=p.matrixTransform(svg.getScreenCTM()),rect=$('.chart-wrap').getBoundingClientRect();
+      tooltip.classList.add('is-visible');
+      tooltip.setAttribute('aria-hidden','false');
+      tooltip.style.left=Math.min(Math.max(4,pos.x-rect.left-tooltip.offsetWidth/2),Math.max(4,rect.width-tooltip.offsetWidth-4))+'px';
+      tooltip.style.top=Math.max(4,pos.y-rect.top-tooltip.offsetHeight-12)+'px';
+    };
+    const hide=()=>{tooltip.classList.remove('is-visible');tooltip.setAttribute('aria-hidden','true');};
+    el.addEventListener('pointerenter',show);el.addEventListener('focus',show);el.addEventListener('pointerleave',hide);el.addEventListener('blur',hide);
     el.addEventListener('click',()=>setYear(+el.dataset.year));
     el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setYear(+el.dataset.year);}});
   });
-  tooltip.hidden=true;
 }
 
 function renderStats(){
-  const points=series().filter(d=>d.year>=state.start&&d.year<=state.end),t=trend(points);
-  $('#slope').textContent=t.slope===null?tx('No data','Sin datos'):`${signed(t.slope*10,state.variable==='GWETTOP'?3:2)} ${deltaUnit()}`;
-  $('#significance').textContent=t.n<10?tx('Period too short','Período insuficiente'):t.autocorrelated?tx('Check dependence','Revisar dependencia'):t.p<.05?tx('Statistical signal','Señal estadística'):tx('Insufficient evidence','Sin evidencia suficiente');
-  $('#significance').style.color=t.n>=10&&!t.autocorrelated&&t.p<.05?'var(--accent)':'var(--text)';
+  const s=data[state.site],points=series().filter(d=>d.year>=state.start&&d.year<=state.end),t=trend(points);
+  const slopeDigits=state.variable==='GWETTOP'?3:2;
+  const decSlope=t.slope===null?null:t.slope*10;
+  const slopeStr=decSlope===null?tx('No data','Sin datos'):`${signed(decSlope,slopeDigits)} ${deltaUnit()}`;
+  const isSig=t.n>=10&&!t.autocorrelated&&t.p<.05;
+  $('#slope').textContent=slopeStr;
+  $('#significance').textContent=t.n<10?tx('Period too short','Período insuficiente'):t.autocorrelated?tx('Check dependence','Revisar dependencia'):isSig?tx('Statistical signal','Señal estadística'):tx('Insufficient evidence','Sin evidencia suficiente');
+  $('#significance').style.color=isSig?'var(--accent)':t.autocorrelated?'#f5b942':'var(--text)';
   $('#pvalue').textContent=t.p===null?tx('At least 10 complete years required','Se requieren al menos 10 años completos'):`p ${t.p<.001?'< 0.001':'= '+format(t.p,3)} · ${tx('Two-sided Mann–Kendall · α = 0.05','Mann–Kendall bilateral · α = 0,05')}`;
   $('#sample-count').textContent=`${t.n} ${tx('years','años')} / ${state.start}–${state.end}`;
   $('#coverage-note').textContent=tx('Daily data aggregation · years with 12 valid months','Agregación de datos diarios · años con 12 meses válidos');
+
+  // 5-step Detective workflow bar
+  $('#flow-variable').textContent=v().short;
+  $('#flow-region').textContent=s.name;
+  $('#flow-period').textContent=`${state.start}–${state.end} (${t.n}${tx('y','a')})`;
+  $('#flow-trend').textContent=decSlope===null?'—':`${signed(decSlope,slopeDigits)} ${deltaUnit()}/${tx('dec','déc')}`;
+  $('#flow-significance').textContent=t.n<10?tx('< 10 yrs','< 10 años'):t.autocorrelated?tx('Check lag-1','Revisar lag-1'):isSig?`p ${t.p<.001?'<0.001':'='+format(t.p,3)} ✓`:`p = ${format(t.p,3)} (n.s.)`;
+  $('#flow-sig-step')?.classList.toggle('is-sig',isSig);
+  $('#stat-significance')?.classList.toggle('is-sig',isSig);
+
+  // Verdict banner
+  const verdictEl=$('#trend-verdict');
+  if(verdictEl){
+    verdictEl.className=`trend-verdict ${isSig?'is-sig':t.autocorrelated?'is-warn':'is-neutral'}`;
+    $('#verdict-badge').textContent=t.n<10?tx('SHORT PERIOD','PERÍODO CORTO'):t.autocorrelated?tx('CHECK DEPENDENCE','REVISAR DEPENDENCIA'):isSig?tx('SIGNIFICANT TREND · α = 0.05','TENDENCIA SIGNIFICATIVA · α = 0,05'):tx('NOT SIGNIFICANT · α = 0.05','SIN SIGNIFICANCIA · α = 0,05');
+    $('#verdict-summary').textContent=t.n<10
+      ?tx(`Select at least 10 complete years in ${s.name} to run the Mann–Kendall significance test.`,`Seleccioná al menos 10 años completos en ${s.name} para ejecutar la prueba de significancia Mann–Kendall.`)
+      :t.autocorrelated
+        ?tx(`${s.name} (${v().short}, ${state.start}–${state.end}): ${slopeStr}/${tx('decade','década')}. Lag-1 residual autocorrelation exceeded |r| > 1.96/√n; treat p ${t.p<.001?'< 0.001':'= '+format(t.p,3)} as exploratory.`,
+            `${s.name} (${v().short}, ${state.start}–${state.end}): ${slopeStr}/década. La autocorrelación residual de orden 1 superó |r| > 1,96/√n; interpretá p ${t.p<.001?'< 0.001':'= '+format(t.p,3)} como exploratorio.`)
+        :isSig
+          ?tx(`${s.name} (${v().short}, ${state.start}–${state.end}): ${decSlope>0?tx('upward','ascendente'):decSlope<0?tx('downward','descendente'):tx('flat','estable')} slope of ${slopeStr}/decade with significant trend evidence (p ${t.p<.001?'< 0.001':'= '+format(t.p,3)}).`,
+              `${s.name} (${v().short}, ${state.start}–${state.end}): tendencia ${decSlope>0?'ascendente':decSlope<0?'descendente':'estable'} de ${slopeStr}/década con evidencia significativa (p ${t.p<.001?'< 0.001':'= '+format(t.p,3)}).`)
+          :tx(`${s.name} (${v().short}, ${state.start}–${state.end}): estimated change of ${slopeStr}/decade, but natural interannual variability keeps p = ${format(t.p,3)} above 0.05.`,
+              `${s.name} (${v().short}, ${state.start}–${state.end}): cambio estimado de ${slopeStr}/década, pero la variabilidad interanual mantiene p = ${format(t.p,3)} por encima de 0,05.`);
+  }
+
+  // Interactive "?" significance explainer popover content
+  const pop=$('#stat-popover');
+  if(pop){
+    pop.innerHTML=getLang()==='es'
+      ?`<strong>¿Cómo interpreta GaiaTrack esta tendencia?</strong><ul><li><b>Pendiente de Theil–Sen:</b> mediana de todas las pendientes entre pares de años (${slopeStr}/década). Resiste valores atípicos extremos.</li><li><b>Prueba de Mann–Kendall (α = 0,05):</b> evalúa si existe un aumento o descenso monótono sostenido sin asumir distribución normal.</li><li><b>Autocorrelación lag-1:</b> ${t.autocorrelated?'Detectada aquí (|r| > 1,96/√n); puede inflar falsos positivos, por lo que no confirmamos significancia.':'Sin dependencia residual relevante en este período.'}</li></ul>`
+      :`<strong>How does GaiaTrack test this trend?</strong><ul><li><b>Theil–Sen slope:</b> median of all pairwise year-to-year slopes (${slopeStr}/decade), resistant to isolated extremes.</li><li><b>Mann–Kendall test (α = 0.05):</b> non-parametric test checking whether values consistently rise or fall over the selected window.</li><li><b>Lag-1 autocorrelation:</b> ${t.autocorrelated?'Detected here (|r| > 1.96/√n); year-to-year persistence can inflate false positives, so significance is held back.':'No strong residual lag-1 dependence detected for this window.'}</li></ul>`;
+  }
+
+  // 7-province regional scan ("Where is it changing?")
+  const scanEl=$('#province-scan');
+  if(scanEl&&manifest){
+    scanEl.innerHTML=PROVINCE_IDS.filter(id=>data[id]).map(id=>{
+      const pt=trend(series(id).filter(d=>d.year>=state.start&&d.year<=state.end));
+      const pSig=pt.n>=10&&!pt.autocorrelated&&pt.p<.05;
+      const pSlope=pt.slope===null?'—':`${signed(pt.slope*10,slopeDigits)} ${deltaUnit()}`;
+      const tag=pt.n<10?`< 10${tx('y','a')}`:pt.autocorrelated?tx('autocorr.','autocorr.'):pSig?`p ${pt.p<.001?'<0.001':'='+format(pt.p,3)} ★`:`n.s.`;
+      const cls=`prov-card${id===state.site?' is-active':''}${pSig?' is-sig':pt.autocorrelated?' is-warn':''}`;
+      return `<button type="button" class="${cls}" data-prov="${id}"><span class="prov-name">${data[id].name}</span><strong class="prov-slope">${pSlope}<small>/${tx('dec','déc')}</small></strong><span class="prov-tag">${tag}</span></button>`;
+    }).join('');
+    scanEl.querySelectorAll('.prov-card').forEach(btn=>{
+      btn.onclick=()=>{state.site=btn.dataset.prov;render();};
+    });
+  }
+
   $('#science-note').textContent=t.autocorrelated
-    ?tx('Lag-1 residual autocorrelation detected. Unadjusted p-value is exploratory and cannot confirm significance.','Se detectó autocorrelación de orden 1 en los residuos. El valor p sin corrección se muestra como exploratorio; no permite confirmar significancia.')
-    :tx('Exploratory test without multiple-comparison correction. Absence of evidence is not evidence of absence. A trend does not establish causes.','Prueba exploratoria sin corrección por comparaciones múltiples. La ausencia de evidencia no demuestra ausencia de cambio. Una tendencia no determina sus causas.');
+    ?tx('Annual aggregation removes seasonal cycles, yet lag-1 residual autocorrelation was detected here. Unadjusted p-value is exploratory and cannot confirm significance.','La agregación anual elimina ciclos estacionales, pero aquí se detectó autocorrelación de orden 1 en los residuos. El valor p sin corrección se muestra como exploratorio; no permite confirmar significancia.')
+    :tx('Annual aggregation removes seasonal cycles to isolate multi-year trends. Exploratory test without multiple-comparison correction; a trend does not establish causes.','La agregación anual elimina ciclos estacionales para aislar tendencias multianuales. Prueba exploratoria sin corrección por comparaciones múltiples; una tendencia no determina sus causas.');
 }
 
 function setPeriod(){
@@ -203,19 +277,39 @@ function setPeriod(){
   $('#year-slider').min=state.start;$('#year-slider').max=state.end;$('#year-slider').value=state.year;$('#selected-year').textContent=state.year;
   const tickYears=[state.start,...[2005,2010,2015,2020].filter(y=>y>state.start&&y<state.end),state.end];
   $('.slider-ticks').innerHTML=[...new Set(tickYears)].map(y=>`<span>${y}</span>`).join('');
+  document.querySelectorAll('.period-presets .preset-btn').forEach(b=>{
+    const p=b.dataset.preset;
+    const match=(p==='all'&&state.start===2001&&state.end===2025)||(p==='15'&&state.start===2011&&state.end===2025)||(p==='10'&&state.start===2016&&state.end===2025);
+    b.classList.toggle('selected',match);
+    b.setAttribute('aria-pressed',String(match));
+  });
   render();
 }
 
+let methodTab='all';
 function renderMethodContent(){
   const s=data[state.site];
   const loc=locale();
   const rows=rawVariables.map(p=>`<tr><td>${p[getLang()].name}<br><small>${p.id}</small></td><td>${p[getLang()].definition}</td></tr>`).join('');
-  $('#method-content').innerHTML=getLang()==='es'
-    ?`<h3>Fuente real y reproducible</h3><p>NASA POWER: series diarias entre 2001 y 2025. Descarga original del punto: ${s.sourceRetrievedAt?new Date(s.sourceRetrievedAt).toLocaleString(loc,{timeZone:'America/Costa_Rica'}):'fecha no registrada en la copia inicial'}. Procesamiento local: ${s.processedAt?new Date(s.processedAt).toLocaleString(loc,{timeZone:'America/Costa_Rica'}):'fecha no registrada'}. Los datos se conservan localmente para que la demostración funcione sin depender de la API. Esta versión no utiliza datos ambientales simulados.</p><p><a href="${s.url}" target="_blank" rel="noopener">Abrir consulta original del punto de ${s.name}</a> · <a href="https://power.larc.nasa.gov/docs/" target="_blank" rel="noopener">Documentación NASA POWER</a></p><h3>Cobertura nacional; muestreo por punto</h3><p>Se incluyen las siete provincias de Costa Rica y los 83 cantones de la cartografía incluida. Cada consulta usa un punto interior calculado a partir de su polígono; no representa una estación meteorológica, la cabecera ni un promedio de toda la provincia o el cantón. Los polígonos sirven para seleccionar el territorio. Los círculos muestran valores de los puntos.</p><p>La meteorología y la humedad provienen del modelo MERRA-2; la radiación de los productos de NASA POWER (CERES en este período). Las celdas son amplias: 0,5° × 0,625° para meteorología y 1° × 1° para radiación. Territorios cercanos pueden tener valores idénticos. No se pueden inferir diferencias entre barrios ni condiciones de una finca.</p><h3>Qué mide cada variable</h3><table><thead><tr><th>Variable</th><th>Definición anual</th></tr></thead><tbody>${rows}</tbody></table><h3>Agregación y referencia</h3><p>Los valores faltantes de NASA se excluyen. Un mes requiere al menos 90 % de días válidos por variable; un año requiere 12 meses válidos. Los promedios se ponderan por los días del mes. La lluvia es la suma de las medias diarias mensuales multiplicadas por los días del mes; con días faltantes es una estimación de acumulación. Temperatura mínima y máxima son promedios de extremos diarios, no récords absolutos.</p><p>Las anomalías usan la media de los valores anuales de 2001–2010 de cada punto. Es una referencia interna de diez años, no una normal climatológica de treinta años. Los períodos inicial y final controlan el análisis; el deslizador cambia el año mostrado en el mapa.</p><h3>Tendencia y evidencia</h3><p>La pendiente es la mediana de las pendientes entre pares de años (Theil–Sen), expresada por década. La prueba bilateral de Mann–Kendall usa corrección por empates, corrección de continuidad y aproximación normal; se muestra p solo con 10 o más años válidos. Se usa α = 0,05. Se revisa la correlación de orden 1 de los residuos sin tendencia y se marca para revisión si |r| &gt; 1,96/√n. Este control es orientativo y no corrige el valor p. No se corrige por múltiples pruebas. La evidencia es exploratoria.</p><p>Una tendencia del período no prueba atribución al cambio climático global. Las variaciones estacionales se reducen mediante agregación anual; la variabilidad interanual permanece. El histórico no se extrapola para pronosticar. El panel de próximos días usa modelos meteorológicos vía Open-Meteo; no se emiten alertas de emergencia.</p><h3>Cartografía y créditos</h3><p>Límites cantonales: <a href="https://www.geoboundaries.org/api/current/gbOpen/CRI/ADM2/" target="_blank" rel="noopener">geoBoundaries gbOpen / Wikimedia Commons</a>, representación de 2020, CC0 1.0. No constituyen cartografía oficial vigente. Mapa base: OpenStreetMap. Pronósticos: Open-Meteo (CC BY 4.0); serie horaria, radiación solar y humedad del suelo, con dispersión GFS independiente. Motor: Leaflet 1.9.4 (BSD-2-Clause). GaiaTrack es un proyecto independiente inspirado en NASA Space Apps; no es una aplicación oficial de NASA.</p>`
-    :`<h3>Real &amp; reproducible source</h3><p>NASA POWER: daily series from 2001 to 2025. Original point retrieval: ${s.sourceRetrievedAt?new Date(s.sourceRetrievedAt).toLocaleString(loc,{timeZone:'America/Costa_Rica'}):'not recorded in initial snapshot'}. Local processing: ${s.processedAt?new Date(s.processedAt).toLocaleString(loc,{timeZone:'America/Costa_Rica'}):'not recorded'}. Data are stored locally so the observatory works reliably offline. This version uses no simulated environmental data.</p><p><a href="${s.url}" target="_blank" rel="noopener">Open original NASA POWER query for ${s.name}</a> · <a href="https://power.larc.nasa.gov/docs/" target="_blank" rel="noopener">NASA POWER documentation</a></p><h3>National coverage; point sampling</h3><p>All seven provinces of Costa Rica are included alongside the 83 cantons in the included boundary dataset. Each query uses an interior point computed from its polygon; it does not represent a weather station, town center, or an area-wide average. Polygons select the territory; circles display point values.</p><p>Meteorology and moisture come from MERRA-2; solar radiation comes from NASA POWER products (CERES for this period). Grid cells are coarse: 0.5° × 0.625° for meteorology and 1° × 1° for radiation. Nearby territories may share identical values. Neighborhood or farm-scale differences cannot be inferred.</p><h3>What each variable measures</h3><table><thead><tr><th>Variable</th><th>Annual definition</th></tr></thead><tbody>${rows}</tbody></table><h3>Aggregation &amp; baseline</h3><p>NASA missing values are excluded. A valid month requires at least 90% valid days per variable; a valid year requires 12 valid months. Annual means are weighted by days per month. Rainfall sums monthly daily means multiplied by days in each month; with missing days it is an estimated accumulation. Minimum and maximum temperatures are averages of daily extremes, not all-time records.</p><p>Anomalies use the 2001–2010 annual mean of each point as a 10-year internal baseline (not a 30-year climatological normal). Start and end selectors control the trend analysis; the slider changes the year shown on the map.</p><h3>Trend &amp; significance</h3><p>Slope is the median of pairwise year slopes (Theil–Sen), expressed per decade. The two-sided Mann–Kendall test applies tie correction, continuity correction, and normal approximation; p is shown only with 10 or more valid years at α = 0.05. Lag-1 autocorrelation of detrended residuals is flagged for review when |r| &gt; 1.96/√n; this check is advisory and does not adjust p. No multiple-testing correction is applied. Evidence is exploratory.</p><p>A period trend does not by itself attribute global climate change. Seasonal cycles are dampened by annual aggregation while interannual variability remains. Historical data are not extrapolated to forecast. The 7-day forecast panel uses Open-Meteo weather models; no emergency alerts are issued.</p><h3>Cartography &amp; credits</h3><p>Boundaries: <a href="https://www.geoboundaries.org/api/current/gbOpen/CRI/ADM2/" target="_blank" rel="noopener">geoBoundaries gbOpen / Wikimedia Commons</a>, 2020 snapshot, CC0 1.0 (not official legal boundaries). Base map: OpenStreetMap. Forecasts: Open-Meteo (CC BY 4.0); hourly timeline, solar radiation, soil moisture, and independent GFS ensemble spread. Map engine: Leaflet 1.9.4 (BSD-2-Clause). GaiaTrack is an independent NASA Space Apps project, not an official NASA application.</p>`;
+  const es=getLang()==='es';
+  const tabs=es
+    ?[['all','Todo'],['sources','Fuentes'],['variables','Variables'],['stats','Tendencia y p'],['credits','Cartografía']]
+    :[['all','All'],['sources','Sources'],['variables','Variables'],['stats','Trend & p-value'],['credits','Cartography']];
+  const nav=`<div class="method-tabs" role="tablist" aria-label="${es?'Secciones del método':'Method sections'}">${tabs.map(([id,lbl])=>`<button type="button" class="method-tab ${methodTab===id?'selected':''}" data-mtab="${id}" role="tab" aria-selected="${methodTab===id}">${lbl}</button>`).join('')}</div>`;
+  const body=es
+    ?`<section class="method-section" data-msec="sources"><h3>Fuente real y reproducible</h3><p>NASA POWER: series diarias entre 2001 y 2025. Descarga original del punto: ${s.sourceRetrievedAt?new Date(s.sourceRetrievedAt).toLocaleString(loc,{timeZone:'America/Costa_Rica'}):'fecha no registrada en la copia inicial'}. Procesamiento local: ${s.processedAt?new Date(s.processedAt).toLocaleString(loc,{timeZone:'America/Costa_Rica'}):'fecha no registrada'}. Los datos se conservan localmente para que la demostración funcione sin depender de la API. Esta versión no utiliza datos ambientales simulados.</p><p><a href="${s.url}" target="_blank" rel="noopener">Abrir consulta original del punto de ${s.name}</a> · <a href="https://power.larc.nasa.gov/docs/" target="_blank" rel="noopener">Documentación NASA POWER</a></p><h3>Cobertura nacional; muestreo por punto</h3><p>Se incluyen las siete provincias de Costa Rica y los 83 cantones de la cartografía incluida. Cada consulta usa un punto interior calculado a partir de su polígono; no representa una estación meteorológica, la cabecera ni un promedio de toda la provincia o el cantón. Los polígonos sirven para seleccionar el territorio. Los círculos muestran valores de los puntos.</p><p>La meteorología y la humedad provienen del modelo MERRA-2; la radiación de los productos de NASA POWER (CERES en este período). Las celdas son amplias: 0,5° × 0,625° para meteorología y 1° × 1° para radiación. Territorios cercanos pueden tener valores idénticos. No se pueden inferir diferencias entre barrios ni condiciones de una finca.</p></section><section class="method-section" data-msec="variables"><h3>Qué mide cada variable</h3><table><thead><tr><th>Variable</th><th>Definición anual</th></tr></thead><tbody>${rows}</tbody></table><h3>Agregación y referencia</h3><p>Los valores faltantes de NASA se excluyen. Un mes requiere al menos 90 % de días válidos por variable; un año requiere 12 meses válidos. Los promedios se ponderan por los días del mes. La lluvia es la suma de las medias diarias mensuales multiplicadas por los días del mes; con días faltantes es una estimación de acumulación. Temperatura mínima y máxima son promedios de extremos diarios, no récords absolutos.</p><p>Las anomalías usan la media de los valores anuales de 2001–2010 de cada punto. Es una referencia interna de diez años, no una normal climatológica de treinta años. Los períodos inicial y final controlan el análisis; el deslizador cambia el año mostrado en el mapa.</p></section><section class="method-section" data-msec="stats"><h3>Tendencia y evidencia</h3><p>La pendiente es la mediana de las pendientes entre pares de años (Theil–Sen), expresada por década. La prueba bilateral de Mann–Kendall usa corrección por empates, corrección de continuidad y aproximación normal; se muestra p solo con 10 o más años válidos. Se usa α = 0,05. Se revisa la correlación de orden 1 de los residuos sin tendencia y se marca para revisión si |r| &gt; 1,96/√n. Este control es orientativo y no corrige el valor p. No se corrige por múltiples pruebas. La evidencia es exploratoria.</p><p>Una tendencia del período no prueba atribución al cambio climático global. Las variaciones estacionales se reducen mediante agregación anual; la variabilidad interanual permanece. El histórico no se extrapola para pronosticar. El panel de próximos días usa modelos meteorológicos vía Open-Meteo; no se emiten alertas de emergencia.</p></section><section class="method-section" data-msec="credits"><h3>Cartografía y créditos</h3><p>Límites cantonales: <a href="https://www.geoboundaries.org/api/current/gbOpen/CRI/ADM2/" target="_blank" rel="noopener">geoBoundaries gbOpen / Wikimedia Commons</a>, representación de 2020, CC0 1.0. No constituyen cartografía oficial vigente. Mapa base: OpenStreetMap. Pronósticos: Open-Meteo (CC BY 4.0); serie horaria, radiación solar y humedad del suelo, con dispersión GFS independiente. Motor: Leaflet 1.9.4 (BSD-2-Clause). GaiaTrack es un proyecto independiente inspirado en NASA Space Apps; no es una aplicación oficial de NASA.</p></section>`
+    :`<section class="method-section" data-msec="sources"><h3>Real &amp; reproducible source</h3><p>NASA POWER: daily series from 2001 to 2025. Original point retrieval: ${s.sourceRetrievedAt?new Date(s.sourceRetrievedAt).toLocaleString(loc,{timeZone:'America/Costa_Rica'}):'not recorded in initial snapshot'}. Local processing: ${s.processedAt?new Date(s.processedAt).toLocaleString(loc,{timeZone:'America/Costa_Rica'}):'not recorded'}. Data are stored locally so the observatory works reliably offline. This version uses no simulated environmental data.</p><p><a href="${s.url}" target="_blank" rel="noopener">Open original NASA POWER query for ${s.name}</a> · <a href="https://power.larc.nasa.gov/docs/" target="_blank" rel="noopener">NASA POWER documentation</a></p><h3>National coverage; point sampling</h3><p>All seven provinces of Costa Rica are included alongside the 83 cantons in the included boundary dataset. Each query uses an interior point computed from its polygon; it does not represent a weather station, town center, or an area-wide average. Polygons select the territory; circles display point values.</p><p>Meteorology and moisture come from MERRA-2; solar radiation comes from NASA POWER products (CERES for this period). Grid cells are coarse: 0.5° × 0.625° for meteorology and 1° × 1° for radiation. Nearby territories may share identical values. Neighborhood or farm-scale differences cannot be inferred.</p></section><section class="method-section" data-msec="variables"><h3>What each variable measures</h3><table><thead><tr><th>Variable</th><th>Annual definition</th></tr></thead><tbody>${rows}</tbody></table><h3>Aggregation &amp; baseline</h3><p>NASA missing values are excluded. A valid month requires at least 90% valid days per variable; a valid year requires 12 valid months. Annual means are weighted by days per month. Rainfall sums monthly daily means multiplied by days in each month; with missing days it is an estimated accumulation. Minimum and maximum temperatures are averages of daily extremes, not all-time records.</p><p>Anomalies use the 2001–2010 annual mean of each point as a 10-year internal baseline (not a 30-year climatological normal). Start and end selectors control the trend analysis; the slider changes the year shown on the map.</p></section><section class="method-section" data-msec="stats"><h3>Trend &amp; significance</h3><p>Slope is the median of pairwise year slopes (Theil–Sen), expressed per decade. The two-sided Mann–Kendall test applies tie correction, continuity correction, and normal approximation; p is shown only with 10 or more valid years at α = 0.05. Lag-1 autocorrelation of detrended residuals is flagged for review when |r| &gt; 1.96/√n; this check is advisory and does not adjust p. No multiple-testing correction is applied. Evidence is exploratory.</p><p>A period trend does not by itself attribute global climate change. Seasonal cycles are dampened by annual aggregation while interannual variability remains. Historical data are not extrapolated to forecast. The 7-day forecast panel uses Open-Meteo weather models; no emergency alerts are issued.</p></section><section class="method-section" data-msec="credits"><h3>Cartography &amp; credits</h3><p>Boundaries: <a href="https://www.geoboundaries.org/api/current/gbOpen/CRI/ADM2/" target="_blank" rel="noopener">geoBoundaries gbOpen / Wikimedia Commons</a>, 2020 snapshot, CC0 1.0 (not official legal boundaries). Base map: OpenStreetMap. Forecasts: Open-Meteo (CC BY 4.0); hourly timeline, solar radiation, soil moisture, and independent GFS ensemble spread. Map engine: Leaflet 1.9.4 (BSD-2-Clause). GaiaTrack is an independent NASA Space Apps project, not an official NASA application.</p></section>`;
+  const box=$('#method-content');
+  box.innerHTML=nav+body;
+  const applyFilter=()=>{
+    box.querySelectorAll('.method-tab').forEach(t=>{const on=t.dataset.mtab===methodTab;t.classList.toggle('selected',on);t.setAttribute('aria-selected',String(on));});
+    box.querySelectorAll('.method-section').forEach(sec=>{sec.hidden=methodTab!=='all'&&sec.dataset.msec!==methodTab;});
+  };
+  applyFilter();
+  box.querySelectorAll('.method-tab').forEach(btn=>btn.onclick=()=>{methodTab=btn.dataset.mtab;applyFilter();});
 }
 
-function showMethod(){renderMethodContent();$('#method-dialog').showModal();}
+function showMethod(){methodTab='all';renderMethodContent();$('#method-dialog').showModal();}
 
 function download(){
   const rows=['# GaiaTrack | NASA POWER | Reference point, not territorial average',`# Variable: ${v().id}; ${v().definition}`,`# Anomaly baseline: 2001-2010; source retrieved: ${data[state.site].sourceRetrievedAt??'not recorded'}`,`# Source query: ${data[state.site].url}`,'territory,latitude,longitude,year,variable,unit,value,anomaly_2001_2010,valid_days,expected_days,coverage_pct,valid_months,estimated_accumulation'];
@@ -259,7 +353,27 @@ async function boot(){
     $('#method-close').onclick=$('#method-done').onclick=()=>$('#method-dialog').close();
     $('#method-dialog').addEventListener('click',e=>{if(e.target===$('#method-dialog')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();}});
     $('#download').onclick=download;
-    document.querySelectorAll('[data-investigate]').forEach(b=>b.onclick=()=>{stop();state.start=2001;state.end=2025;$('#start-year').value=2001;$('#end-year').value=2025;setVariable(b.dataset.investigate);setPeriod();$('#explorador').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});});
+    document.querySelectorAll('.period-presets .preset-btn').forEach(btn=>btn.onclick=()=>{
+      const p=btn.dataset.preset;
+      $('#end-year').value='2025';
+      $('#start-year').value=p==='10'?'2016':p==='15'?'2011':'2001';
+      setPeriod();
+    });
+    const helpBtn=$('#sig-help-btn'),pop=$('#stat-popover');
+    if(helpBtn&&pop){
+      const togglePop=open=>{pop.hidden=!open;pop.classList.toggle('is-open',open);helpBtn.setAttribute('aria-expanded',String(open));};
+      helpBtn.onclick=e=>{e.stopPropagation();togglePop(pop.hidden);};
+      document.addEventListener('click',e=>{if(!pop.hidden&&!pop.contains(e.target)&&e.target!==helpBtn)togglePop(false);});
+    }
+    document.querySelectorAll('[data-investigate]').forEach(b=>b.onclick=()=>{
+      stop();
+      if(b.dataset.site&&data[b.dataset.site])state.site=b.dataset.site;
+      if(b.dataset.compare&&data[b.dataset.compare]){state.compareSite=b.dataset.compare;state.compare=true;$('#compare').checked=true;}
+      state.variable=b.dataset.investigate;
+      $('#start-year').value='2001';$('#end-year').value='2025';
+      setPeriod();
+      $('#tendencias').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+    });
     initMap();render();$('#status').textContent='';
     document.addEventListener('gaiatrack:lang',()=>{
       buildLayerButtons();
