@@ -10,7 +10,7 @@ function buildSectionShell(){
 }
 buildSectionShell();
 
-const $=s=>document.querySelector(s),cache=new Map(),pending=new Map();let site='heredia',sequence=0;
+const $=s=>document.querySelector(s),cache=new Map(),pending=new Map();let site=document.querySelector('#site-select')?.value||null,sequence=0;
 const download=document.createElement('button');download.className='outline-button';download.disabled=true;
 function attachDownload(){
   download.textContent=tx('↓ Export conditions CSV','↓ Exportar condiciones CSV');
@@ -55,7 +55,14 @@ function paint(result){
 }
 
 async function load(){
-  download.disabled=true;const requested=site,token=++sequence,stored=cache.get(requested);
+  download.disabled=true;
+  if(!site){
+    sequence++;
+    $('#current-status').textContent=tx('Choose a province or canton to query local telemetry. National summary below:','Elegí una provincia o cantón para consultar su telemetría local. Resumen nacional abajo:');
+    $('#current-values').replaceChildren();$('#current-time').textContent='';recSection.replaceChildren();$('#current-refresh').disabled=false;
+    return;
+  }
+  const requested=site,token=++sequence,stored=cache.get(requested);
   if(stored&&Date.now()-stored.time<900000){
     if(stored.error){$('#current-status').textContent=stored.error;hud(tx('TELEMETRY · UNAVAILABLE','TELEMETRÍA · NO DISPONIBLE'));}
     else paint(stored.value);
@@ -169,7 +176,7 @@ document.addEventListener('gaiatrack:lang',()=>{
   paintCountrySummary();
 });
 
-document.addEventListener('gaiatrack:selection',e=>{const changed=site!==e.detail.site;site=e.detail.site;if(changed)load();});
+document.addEventListener('gaiatrack:selection',e=>{const next=e.detail.site||null;const changed=site!==next;site=next;if(changed)load();});
 setInterval(()=>{if(!document.hidden){load();loadCountry();}},900000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){load();loadCountry();}});
 load();loadCountry();
