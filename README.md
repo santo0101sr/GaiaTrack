@@ -1,12 +1,12 @@
 # GaiaTrack
 
-GitHub está conectado al proyecto `gaiatrack` de Vercel. Cada push a `main` dispara un despliegue a producción; las otras ramas generan vistas previas. La variable de servidor `OPENWEATHER_API_KEY` se configura en Vercel para Production y Preview y nunca se guarda en el repositorio. Para publicar cambios: `git add`, `git commit` y `git push`.
+GitHub está conectado al proyecto `gaiatrack` de Vercel. Cada push a `main` dispara un despliegue a producción; las otras ramas generan vistas previas. Las APIs meteorológicas no requieren claves ni planes de pago. Para publicar cambios: `git add`, `git commit` y `git push`.
 
-Observatorio interactivo de la provincia de Heredia, Costa Rica. Versión local para NASA Space Apps. No utiliza Sites ni está publicado.
+Observatorio interactivo de la provincia de Heredia, Costa Rica. Proyecto para NASA Space Apps. Publicado en https://gaiatrack.vercel.app con despliegue automático desde GitHub.
 
 ## Abrir
 
-Requiere Node.js 20 o superior. No requiere instalar paquetes.
+Requiere Node.js 24. No requiere instalar paquetes.
 
 ```powershell
 npm start
@@ -18,7 +18,7 @@ Abrir http://127.0.0.1:4173. No abrir `index.html` directamente: el pronóstico 
 
 - Mapa de los diez cantones con puntos de referencia interiores y selector accesible.
 - Histórico real NASA POWER 2001–2025: temperatura media, promedio de mínimas diarias, promedio de máximas diarias, radiación solar, precipitación, humedad superficial del suelo y humedad relativa del aire.
-- Pronóstico real de los próximos siete días desde mañana, vía Open-Meteo; consulta actualizable y caché de 30 minutos.
+- Pronóstico real de los próximos siete días desde mañana, vía Open-Meteo; consulta actualizable y caché compartida de hasta una hora.
 - Dispersión P10–P90 de temperatura media diaria calculada de 31 miembros GFS vía Open-Meteo. Es otro producto distinto del pronóstico principal de selección automática; no es un intervalo de confianza calibrado.
 - Comparación histórica, anomalías, reproducción temporal, pendiente Theil–Sen, Mann–Kendall exploratorio y exportaciones CSV.
 
@@ -61,12 +61,17 @@ Proyecto independiente, no oficial de NASA. No emite alertas oficiales.
 Entrada inmersiva WebGL con Three.js 0.160.1, geometría cantonal real extruida de forma decorativa, vista orbital con países Natural Earth, selección por clic, cámara al arrastrar y zoom con rueda. Laboratorio y pronósticos se abren sobre la escena. Animación opcional, respeto por movimiento reducido y botón de pantalla completa. Las alturas y partículas son escenografía; no simulan relieve o meteorología. Three.js: MIT; Natural Earth: dominio público.
 
 
-## OpenWeather: condiciones actuales
-Copiar .env.example a .env y definir OPENWEATHER_API_KEY. La clave solo se lee en el servidor; .env está excluido de Git y fuera del directorio público. El endpoint /api/current?site=heredia consulta Current Weather con unidades métricas e idioma español, valida el cantón y conserva los resultados en memoria por diez minutos. La web muestra fecha del dato del proveedor y de consulta; no presenta los mínimos/máximos espaciales de Current Weather como extremos diarios. Valores no reportados no se convierten en cero. Si la clave es rechazada (401), el error se muestra sin inventar condiciones. OpenWeather aporta condiciones actuales; NASA POWER y Open-Meteo mantienen histórico y pronósticos de las variables que no cubre este endpoint. Documentación: https://openweathermap.org/current
-
-
 ## Vercel
 El proyecto incluye vercel.json, funciones Node.js para /api/current y /api/forecast y validación con npm run build. Vercel sirve public/ como salida estática. Las funciones incluyen los datos cantonales necesarios; la caché de pronóstico usa memoria y no escribe en el sistema de archivos de Vercel.
 
-Vincular cuenta: vercel login. Vincular proyecto: vercel link. Configurar OPENWEATHER_API_KEY como variable del servidor en Vercel para Preview y Production; no subir .env. Despliegue de prueba: npm run deploy. Producción: npm run deploy:prod. La carpeta .vercel/ contiene la vinculación local y está ignorada por Git. Para despliegues automáticos desde GitHub, conectar el repositorio privado en el proyecto de Vercel.
+Vincular cuenta: vercel login. Vincular proyecto: vercel link. No se requieren variables secretas ni suscripciones meteorológicas. Despliegue de prueba: npm run deploy. Producción: npm run deploy:prod. La carpeta .vercel/ contiene la vinculación local y está ignorada por Git. Para despliegues automáticos desde GitHub, conectar el repositorio privado en el proyecto de Vercel.
 
+
+## Datos sin suscripción y caché compartida
+- NASA POWER: histórico descargado de antemano, sin consultas meteorológicas al abrir la web; archivos estáticos con caché de una hora.
+- Open-Meteo: condiciones actuales cada 15 minutos y pronósticos/conjunto GFS cada 60 minutos. Las condiciones son estimaciones de modelos, no una transmisión desde una estación local.
+- CDN de Vercel: comparte cada respuesta por cantón entre visitantes. Navegador: hasta 60 segundos por respuesta HTTP y caché por cantón en la aplicación. Memoria de función: solicitudes simultáneas agrupadas, más espera de 15 minutos ante HTTP 429.
+- El botón de actualización respeta la vigencia; parámetros para saltar la caché redirigen a la URL canónica. Los errores no se almacenan en el CDN. El pronóstico no se conserva más allá de medianoche de Costa Rica.
+- Los endpoints omiten las matrices de origen de pronóstico para reducir transferencia; las fuentes y sus enlaces siguen disponibles y las respuestas originales de referencia permanecen en public/data/forecast.
+- Los datos actuales indican el intervalo real de precipitación (normalmente 15 minutos), radiación en W/m² y contenido volumétrico de humedad del suelo en m³/m³. Estas magnitudes no se confunden con las agregaciones diarias o anuales.
+- Sin base de datos, cron ni APIs de pago. Uso educativo/no comercial sujeto a las cuotas gratuitas de Open-Meteo y Vercel Hobby, con atribución CC BY 4.0. La caché CDN puede evictarse o variar por región; reduce solicitudes, pero no garantiza disponibilidad ilimitada ni un máximo absoluto global.
