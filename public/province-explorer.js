@@ -16,7 +16,7 @@ export function createProvinceExplorer({host,manifest,geo,meshes,beacons,borders
   const name=id=>manifest.provinces.find(p=>p.id===id)?.name??'Costa Rica';
   const activate=id=>{selected=null;onSelect(id);};
 
-  provinceSelect.onchange=()=>provinceSelect.value?activate(provinceSelect.value):country();
+  provinceSelect.onchange=()=>provinceSelect.value?activate(provinceSelect.value):country(true);
   cantonSelect.onchange=()=>activate(cantonSelect.value);
 
   function focus(){
@@ -71,7 +71,7 @@ export function createProvinceExplorer({host,manifest,geo,meshes,beacons,borders
     navigation.setAttribute('aria-label',tx('Territory navigation','Navegación territorial'));
     navigation.replaceChildren();
     const breadcrumb=document.createElement('div');breadcrumb.className='territory-breadcrumb';
-    const back=document.createElement('button');back.type='button';back.textContent=province?'← Costa Rica':'COSTA RICA';back.onclick=()=>country();
+    const back=document.createElement('button');back.type='button';back.textContent=province?'← Costa Rica':'COSTA RICA';back.onclick=()=>country(true);
     breadcrumb.append(back);
     if(province){const text=document.createElement('span');text.textContent='/ '+name(province);breadcrumb.append(text);}
     navigation.append(breadcrumb);
@@ -102,13 +102,18 @@ export function createProvinceExplorer({host,manifest,geo,meshes,beacons,borders
   }
 
   function sync(id){
+    if(!id){if(selected!==null||province!==null)country(false);return;}
     const site=sites.get(id);
-    if(!site){if(selected!==null||province!==null)country(false);return;}if(id===selected)return;
+    if(!site||(id===selected&&province===site.province))return;
     selected=id;province=site.province;
     render();host.querySelector('.flight-panel').scrollTop=0;setVisibility();focus();
   }
 
-  function country(notify=true){selected=null;province=null;render();setVisibility();focus();if(notify===true)onSelect(null);}
+  function country(notify=false){
+    province=null;selected=null;
+    render();host.querySelector('.flight-panel').scrollTop=0;setVisibility();focus();
+    if(notify)onSelect(null);
+  }
 
   function updateLabels(){
     if(!root.visible||document.body.classList.contains('lab-open')||document.body.classList.contains('intro-playing')){
@@ -129,6 +134,6 @@ export function createProvinceExplorer({host,manifest,geo,meshes,beacons,borders
     }
   }
 
-  if(initial&&sites.has(initial))sync(initial);else country(false);
+  if(initial)sync(initial);else country(false);
   return {sync,render,focus,country,updateLabels,selectMesh(mesh){activate(province===mesh.userData.province?mesh.userData.id:mesh.userData.province);}};
 }

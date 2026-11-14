@@ -32,7 +32,7 @@ test('Explorer opens unselected, selects only after input, and returning to coun
     assert.equal(buttons().length,2);assert.ok(buttons().every(b=>b.attributes.get('aria-pressed')==='false'));
     const select=host.querySelector('#hud-province-select');select.value='heredia';select.onchange();
     assert.deepEqual(choices,['heredia']);assert.equal(select.value,'heredia');assert.equal(meshes[1].visible,false);
-    explorer.country();
+    explorer.country(true);
     assert.deepEqual(choices,['heredia',null]);assert.equal(select.value,'');assert.ok(meshes.every(m=>m.visible));
     assert.ok(buttons().every(b=>b.attributes.get('aria-pressed')==='false'));
   }finally{globalThis.document=previous;}

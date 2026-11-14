@@ -35,15 +35,28 @@ let manifest,geo,data={},map,boundaryLayer,markers={},seaMarkers=[],timer=null;
 const v=()=>{const r=rawVariables.find(x=>x.id===state.variable);const l=r[getLang()];return {id:r.id,icon:r.icon,digits:r.digits,...l};};
 const format=(n,d=v().digits)=>Number.isFinite(n)?new Intl.NumberFormat(locale(),{minimumFractionDigits:d,maximumFractionDigits:d}).format(n):tx('No data','Sin datos');
 const signed=(n,d=v().digits)=>(n>0?'+':'')+format(n,d);
-const series=(id=state.site)=>annualSeries(data[id]?.monthly??[],state.variable);
+const series=(id=state.site)=>annualSeries(data[id].monthly,state.variable);
 const valueAt=(id,year)=>series(id).find(d=>d.year===year)?.value;
 const deltaUnit=()=>state.variable==='RH2M'?tx('pp','p.p.'):v().unit;
 const currentColor='#c3f77a';
 
 function showError(message){$('#status').textContent=message;}
 const PROVINCE_IDS=['san-jose','alajuela','cartago','heredia','guanacaste','puntarenas','limon'];
-function options(select,value){const province=manifest.sites.find(s=>s.id===value)?.province;select.innerHTML=select.id==='site-select'?(province?territoryOptionsHtml(manifest,province,getLang()):`<option value="">${tx('Choose a province first','Primero elegí una provincia')}</option>`):siteOptionsHtml(manifest,getLang());select.value=value??'';}
-function selectSite(id){if(id!=null&&!data[id])return;state.site=id??null;stop();render();}
+function options(select,value){
+  if(select.id==='site-select'){
+    const province=value?manifest.sites.find(s=>s.id===value)?.province:null;
+    select.innerHTML=province?territoryOptionsHtml(manifest,province,getLang()):`<option value="">${tx('Choose a province first','Elegí primero una provincia')}</option>`;
+    select.value=value||'';
+    return;
+  }
+  select.innerHTML=siteOptionsHtml(manifest,getLang());
+  select.value=value||'';
+}
+function selectSite(id){
+  if(!id){state.site=null;mapOverview=true;stop();render();return;}
+  if(!data[id])return;
+  state.site=id;stop();render();
+}
 document.addEventListener('gaiatrack:select-site',e=>selectSite(e.detail.site));
 
 function buildLayerButtons(){
@@ -57,34 +70,43 @@ function buildLayerButtons(){
 
 function setVariable(id){state.variable=id;render();}
 function stop(){if(timer){clearInterval(timer);timer=null;}$('#play').textContent='▶';$('#play').setAttribute('aria-label',tx('Play time series','Reproducir evolución temporal'));}
-function setYear(year){state.year=Number(year);if(!state.site){render();return;}document.dispatchEvent(new CustomEvent('gaiatrack:selection',{detail:{site:state.site,variable:state.variable,year:state.year}}));renderMap();renderInspector();renderChart();$('#year-slider').value=state.year;$('#selected-year').textContent=state.year;}
+function setYear(year){state.year=Number(year);document.dispatchEvent(new CustomEvent('gaiatrack:selection',{detail:{site:state.site,variable:state.variable,year:state.year}}));renderMap();renderInspector();renderChart();$('#year-slider').value=state.year;$('#selected-year').textContent=state.year;}
 
 function render(){
   document.querySelectorAll('.layer-button').forEach(b=>{const active=b.dataset.variable===state.variable;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});
-  options($('#site-select'),state.site);$('#province-select').innerHTML=`<option value="">${tx('Choose a province','Elegí una provincia')}</option>`+provinceOptionsHtml(manifest);$('#province-select').value=manifest.sites.find(s=>s.id===state.site)?.province??'';$('#compare-site').value=state.compareSite;
+  const selectedSite=state.site?manifest.sites.find(s=>s.id===state.site):null;
+  options($('#site-select'),state.site);
+  $('#site-select').hidden=!selectedSite;
+  const siteLabel=$('.territory-field-label[for="site-select"]');
+  if(siteLabel)siteLabel.hidden=!selectedSite;
+  $('#province-select').innerHTML=`<option value="">${tx('Choose a province','Elegí una provincia')}</option>`+provinceOptionsHtml(manifest);
+  $('#province-select').value=selectedSite?selectedSite.province:'';
+  $('#compare-site').value=state.compareSite;
+  $('#download').disabled=!selectedSite;
+  if($('#fit-province'))$('#fit-province').disabled=!selectedSite;
   $('#metric-name').textContent=v().name;$('#metric-unit').textContent=v().unit;$('#metric-definition').textContent=v().definition;
   $('#resolution-note').textContent=v().resolution+tx(' One point does not represent the entire territory.',' Un punto no representa todo el territorio.');
-  $('#play').disabled=$('#download').disabled=$('#fit-province').disabled=!state.site;
-  renderMap();if(state.site){renderInspector();renderChart();renderStats();}else renderEmptySelection();
+  renderMap();renderInspector();renderChart();renderStats();
   document.dispatchEvent(new CustomEvent('gaiatrack:selection',{detail:{site:state.site,variable:state.variable,year:state.year}}));
-  updateForecast(data[state.site],state.variable);
-}
-
-function renderEmptySelection(){
-  const prompt=tx('Choose a province','Elegí una provincia');
-  for(const id of ['metric-value','baseline-difference','slope','significance','pvalue','sample-count','flow-trend','flow-significance'])if($('#'+id))$('#'+id).textContent='—';
-  for(const id of ['point-coordinates','history-quality','chart-label','coverage-note','science-note'])$('#'+id).textContent='';
-  $('#mini-chart').innerHTML='';$('#legend-site').textContent=prompt;$('#insight').textContent=prompt;
-  $('#flow-region').textContent=prompt;$('#verdict-badge').textContent=prompt;$('#stat-popover').textContent=prompt;$('#stat-popover').classList.remove('is-open');$('#sig-help-btn').setAttribute('aria-expanded','false');
-  $('#history-chart').innerHTML=`<text x="50%" y="50%" fill="#a1b0bb" text-anchor="middle">${prompt}</text>`;
-  $('#chart-tooltip').hidden=true;$('#chart-tooltip').classList.remove('is-visible');
-  const verdict=$('#trend-verdict');if(verdict){verdict.classList.remove('is-sig','is-warn');verdict.querySelectorAll('strong,p').forEach(el=>el.textContent=prompt);}
-  $('#province-scan').replaceChildren();
-  for(const province of manifest.provinces){const button=document.createElement('button');button.type='button';button.className='prov-card';button.textContent=province.name;button.onclick=()=>selectSite(province.siteId);$('#province-scan').append(button);}
+  updateForecast(selectedSite?data[state.site]:null,state.variable);
 }
 
 function renderInspector(){
-  if(!state.site)return;
+  if(!state.site){
+    $('#point-coordinates').textContent=tx('COSTA RICA · 7 PROVINCES · 83 CANTONS','COSTA RICA · 7 PROVINCIAS · 83 CANTONES');
+    $('#metric-year').textContent=state.year;$('#metric-value').textContent='—';
+    $('#history-quality').textContent=tx(
+      'Choose a province on the map or selector to inspect a NASA POWER reference point.',
+      'Elegí una provincia en el mapa o en el selector para inspeccionar un punto de referencia NASA POWER.'
+    );
+    $('#baseline-difference').textContent=tx('Choose a province','Elegí una provincia');
+    $('#insight').textContent=tx(
+      'Showing all of Costa Rica. Select a province or canton on the map to explore its historical evolution.',
+      'Mostrando todo Costa Rica. Seleccioná una provincia o cantón en el mapa para explorar su evolución histórica.'
+    );
+    $('#mini-chart').innerHTML='';
+    return;
+  }
   const s=data[state.site],points=series(),current=valueAt(state.site,state.year),base=baseline(points),diff=Number.isFinite(current)&&Number.isFinite(base)?current-base:null;
   $('#point-coordinates').textContent=`${s.latitude.toFixed(4)}° N / ${Math.abs(s.longitude).toFixed(4)}° ${tx('W','O')} · ${tx('REFERENCE POINT','PUNTO DE REFERENCIA')}`;
   $('#metric-year').textContent=state.year;$('#metric-value').textContent=format(current);
@@ -112,10 +134,15 @@ function renderMap(){
   const values=manifest.sites.map(s=>valueAt(s.id,state.year)).filter(Number.isFinite),min=Math.min(...values),max=Math.max(...values);
   $('#map-variable').textContent=v().name;$('#map-year').textContent=state.year;$('#map-range').textContent=`${format(min)} — ${format(max)} ${v().unit}`;
   if(!map)return;
-  const province=manifest.sites.find(s=>s.id===state.site)?.province??null;
-  if(lastMapSite!==state.site){mapOverview=!state.site;const features=province?geo.features.filter(f=>f.properties.province===province):geo.features;map.fitBounds(L.geoJSON({type:'FeatureCollection',features}).getBounds().pad(.12));lastMapSite=state.site;}
+  const selectedSite=state.site?manifest.sites.find(s=>s.id===state.site):null;
+  const province=selectedSite?.province??null;
+  if(!selectedSite){
+    if(lastMapSite!==null){mapOverview=true;lastMapSite=null;map.fitBounds(boundaryLayer.getBounds().pad(.08));}
+  }else if(lastMapSite!==state.site){
+    mapOverview=false;const features=geo.features.filter(f=>f.properties.province===province);map.fitBounds(L.geoJSON({type:'FeatureCollection',features}).getBounds().pad(.12));lastMapSite=state.site;
+  }
   for(const s of manifest.sites){
-    const visible=mapOverview||s.province===province;
+    const visible=mapOverview||!province||s.province===province;
     if(visible&&!map.hasLayer(markers[s.id]))markers[s.id].addTo(map);
     if(!visible&&map.hasLayer(markers[s.id]))map.removeLayer(markers[s.id]);
     const value=valueAt(s.id,state.year),selected=s.id===state.site;
@@ -123,7 +150,7 @@ function renderMap(){
     markers[s.id].setTooltipContent(`${s.name} · ${format(value)} ${v().unit}`);
     if(selected)markers[s.id].bringToFront();
   }
-  const selectedSite=manifest.sites.find(s=>s.id===state.site);boundaryLayer.setStyle(f=>{const selected=f.properties.id===state.site||(selectedSite?.type==='province'&&f.properties.province===selectedSite.province);return {opacity:mapOverview||f.properties.province===province?1:0,color:selected?'#c3f77a':'#617f85',weight:selected?2:1,fillColor:'#344b48',fillOpacity:mapOverview||f.properties.province===province?(selected?.18:.04):0};});
+  boundaryLayer.setStyle(f=>{const selected=Boolean(selectedSite)&&(f.properties.id===state.site||(selectedSite.type==='province'&&f.properties.province===selectedSite.province));const shown=mapOverview||!province||f.properties.province===province;return {opacity:shown?1:0,color:selected?'#c3f77a':'#617f85',weight:selected?2:1,fillColor:'#344b48',fillOpacity:shown?(selected?.18:.04):0};});
 }
 
 function paintSeaLabels(){
@@ -144,20 +171,28 @@ function initMap(){
   boundaryLayer=L.geoJSON(geo,{style:{color:'#617f85',weight:1,fillOpacity:.04},onEachFeature:(f,l)=>{l.bindTooltip(f.properties.name,{sticky:true});l.on('click',()=>selectSite(f.properties.id));}}).addTo(map);
   for(const s of manifest.sites){markers[s.id]=L.circleMarker([s.latitude,s.longitude],{radius:6,fillOpacity:.95}).addTo(map).bindTooltip(s.name,{direction:'top',offset:[0,-8]}).on('click',()=>selectSite(s.id));}
   paintSeaLabels();
-  $('#fit-country').onclick=()=>{mapOverview=true;renderMap();map.fitBounds(boundaryLayer.getBounds().pad(.08));};$('#fit-province').onclick=()=>{mapOverview=false;renderMap();const province=manifest.sites.find(s=>s.id===state.site).province;const features=geo.features.filter(f=>f.properties.province===province);map.fitBounds(L.geoJSON({type:'FeatureCollection',features}).getBounds().pad(.08));};
+  $('#fit-country').onclick=()=>{mapOverview=true;renderMap();map.fitBounds(boundaryLayer.getBounds().pad(.08));};$('#fit-province').onclick=()=>{if(!state.site){mapOverview=true;renderMap();map.fitBounds(boundaryLayer.getBounds().pad(.08));return;}mapOverview=false;renderMap();const province=manifest.sites.find(s=>s.id===state.site).province;const features=geo.features.filter(f=>f.properties.province===province);map.fitBounds(L.geoJSON({type:'FeatureCollection',features}).getBounds().pad(.08));};
   $('#fit-valley').onclick=()=>map.fitBounds([[9.75,-84.45],[10.15,-83.80]]);
   $('#fit-heredia')&&($('#fit-heredia').onclick=()=>map.fitBounds([[9.95,-84.25],[10.80,-83.75]]));
 }
 
 function renderChart(){
-  if(!state.site)return;
+  const svg=$('#history-chart');
+  const mobile=innerWidth<580,W=mobile?500:1100,H=230,left=mobile?48:64,right=18,top=16,bottom=32;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  if(!state.site){
+    svg.innerHTML=`<text x="50%" y="50%" fill="#a1b0bb" text-anchor="middle">${tx('Choose a province above or in the regional scan below to plot its 2001–2025 series.','Elegí una provincia arriba o en el escaneo regional de abajo para graficar su serie 2001–2025.')}</text>`;
+    $('#chart-label').textContent=`${v().name} · Costa Rica`;
+    const legendWrap=document.querySelector('.chart-legend');
+    if(legendWrap)legendWrap.innerHTML=`<i></i><span id="legend-site">${tx('Choose a province','Elegí una provincia')}</span><i class="dash"></i> ${tx('Sen trend','Tendencia de Sen')}`;
+    const tooltip=$('#chart-tooltip');
+    if(tooltip){tooltip.hidden=true;tooltip.classList.remove('is-visible');tooltip.setAttribute('aria-hidden','true');}
+    return;
+  }
   const all=series();
   const display=s=>s.filter(p=>p.year>=state.start&&p.year<=state.end&&Number.isFinite(p.value)).map(p=>({...p,value:p.value-(state.anomaly?baseline(s):0)}));
   const primary=display(all),secondary=state.compare?display(series(state.compareSite)):[];
   const combined=[...primary,...secondary];
-  const svg=$('#history-chart');
-  const mobile=innerWidth<580,W=mobile?500:1100,H=230,left=mobile?48:64,right=18,top=16,bottom=32;
-  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
   if(!combined.length){svg.innerHTML=`<text x="50%" y="50%" fill="#a1b0bb" text-anchor="middle">${tx('No complete years available.','No hay años completos disponibles.')}</text>`;return;}
   let min=Math.min(...combined.map(p=>p.value)),max=Math.max(...combined.map(p=>p.value));
   const padding=(max-min||1)*.18;min-=padding;max+=padding;
@@ -226,10 +261,58 @@ function renderChart(){
   });
 }
 
+function renderProvinceScan(slopeDigits){
+  const scanEl=$('#province-scan');
+  if(!scanEl||!manifest)return;
+  scanEl.innerHTML=PROVINCE_IDS.filter(id=>data[id]).map(id=>{
+    const pt=trend(series(id).filter(d=>d.year>=state.start&&d.year<=state.end));
+    const pSig=pt.n>=10&&!pt.autocorrelated&&pt.p<.05;
+    const pSlope=pt.slope===null?'—':`${signed(pt.slope*10,slopeDigits)} ${deltaUnit()}`;
+    const tag=pt.n<10?`< 10${tx('y','a')}`:pt.autocorrelated?tx('autocorr.','autocorr.'):pSig?`p ${pt.p<.001?'<0.001':'='+format(pt.p,3)} ★`:`n.s.`;
+    const cls=`prov-card${id===state.site?' is-active':''}${pSig?' is-sig':pt.autocorrelated?' is-warn':''}`;
+    return `<button type="button" class="${cls}" data-prov="${id}"><span class="prov-name">${data[id].name}</span><strong class="prov-slope">${pSlope}<small>/${tx('dec','déc')}</small></strong><span class="prov-tag">${tag}</span></button>`;
+  }).join('');
+  scanEl.querySelectorAll('.prov-card').forEach(btn=>{
+    btn.onclick=()=>selectSite(btn.dataset.prov);
+  });
+}
+
 function renderStats(){
-  if(!state.site)return;
-  const s=data[state.site],points=series().filter(d=>d.year>=state.start&&d.year<=state.end),t=trend(points);
   const slopeDigits=state.variable==='GWETTOP'?3:2;
+  if(!state.site){
+    $('#slope').textContent='—';
+    $('#significance').textContent=tx('Choose a province','Elegí una provincia');
+    $('#significance').style.color='var(--text)';
+    $('#pvalue').textContent=tx('Select a province or canton to compute Mann–Kendall','Seleccioná una provincia o cantón para calcular Mann–Kendall');
+    $('#sample-count').textContent=`— / ${state.start}–${state.end}`;
+    $('#coverage-note').textContent=tx('Daily data aggregation · years with 12 valid months','Agregación de datos diarios · años con 12 meses válidos');
+    $('#flow-variable').textContent=v().short;
+    $('#flow-region').textContent=tx('Costa Rica (choose)','Costa Rica (elegí)');
+    $('#flow-period').textContent=`${state.start}–${state.end}`;
+    $('#flow-trend').textContent='—';
+    $('#flow-significance').textContent='—';
+    $('#flow-sig-step')?.classList.toggle('is-sig',false);
+    $('#stat-significance')?.classList.toggle('is-sig',false);
+    const verdictEl=$('#trend-verdict');
+    if(verdictEl){
+      verdictEl.className='trend-verdict is-neutral';
+      $('#verdict-badge').textContent=tx('NATIONAL OVERVIEW','VISTA NACIONAL');
+      $('#verdict-summary').textContent=tx(
+        'Choose a province in the Explorer or click any province card below to inspect its Theil–Sen slope and Mann–Kendall test.',
+        'Elegí una provincia en el Explorador o hacé clic en cualquier provincia abajo para inspeccionar su pendiente Theil–Sen y prueba Mann–Kendall.'
+      );
+    }
+    const pop=$('#stat-popover');
+    if(pop){
+      pop.innerHTML=getLang()==='es'
+        ?`<strong>¿Cómo interpreta GaiaTrack esta tendencia?</strong><ul><li><b>Pendiente de Theil–Sen:</b> mediana de todas las pendientes entre pares de años, resistente a valores atípicos.</li><li><b>Prueba de Mann–Kendall (α = 0,05):</b> evalúa aumentos o descensos monótonos sostenidos.</li><li><b>Selección territorial:</b> elegí una provincia para ver los resultados de su punto de referencia.</li></ul>`
+        :`<strong>How does GaiaTrack test this trend?</strong><ul><li><b>Theil–Sen slope:</b> median of pairwise year-to-year slopes, resistant to isolated extremes.</li><li><b>Mann–Kendall test (α = 0.05):</b> non-parametric test for sustained monotonic increases or decreases.</li><li><b>Territory selection:</b> choose a province to inspect its reference point results.</li></ul>`;
+    }
+    renderProvinceScan(slopeDigits);
+    $('#science-note').textContent=tx('Annual aggregation removes seasonal cycles to isolate multi-year trends. Exploratory test without multiple-comparison correction; a trend does not establish causes.','La agregación anual elimina ciclos estacionales para aislar tendencias multianuales. Prueba exploratoria sin corrección por comparaciones múltiples; una tendencia no determina sus causas.');
+    return;
+  }
+  const s=data[state.site],points=series().filter(d=>d.year>=state.start&&d.year<=state.end),t=trend(points);
   const decSlope=t.slope===null?null:t.slope*10;
   const slopeStr=decSlope===null?tx('No data','Sin datos'):`${signed(decSlope,slopeDigits)} ${deltaUnit()}`;
   const isSig=t.n>=10&&!t.autocorrelated&&t.p<.05;
@@ -275,20 +358,7 @@ function renderStats(){
   }
 
   // 7-province regional scan ("Where is it changing?")
-  const scanEl=$('#province-scan');
-  if(scanEl&&manifest){
-    scanEl.innerHTML=PROVINCE_IDS.filter(id=>data[id]).map(id=>{
-      const pt=trend(series(id).filter(d=>d.year>=state.start&&d.year<=state.end));
-      const pSig=pt.n>=10&&!pt.autocorrelated&&pt.p<.05;
-      const pSlope=pt.slope===null?'—':`${signed(pt.slope*10,slopeDigits)} ${deltaUnit()}`;
-      const tag=pt.n<10?`< 10${tx('y','a')}`:pt.autocorrelated?tx('autocorr.','autocorr.'):pSig?`p ${pt.p<.001?'<0.001':'='+format(pt.p,3)} ★`:`n.s.`;
-      const cls=`prov-card${id===state.site?' is-active':''}${pSig?' is-sig':pt.autocorrelated?' is-warn':''}`;
-      return `<button type="button" class="${cls}" data-prov="${id}"><span class="prov-name">${data[id].name}</span><strong class="prov-slope">${pSlope}<small>/${tx('dec','déc')}</small></strong><span class="prov-tag">${tag}</span></button>`;
-    }).join('');
-    scanEl.querySelectorAll('.prov-card').forEach(btn=>{
-      btn.onclick=()=>{state.site=btn.dataset.prov;render();};
-    });
-  }
+  renderProvinceScan(slopeDigits);
 
   $('#science-note').textContent=t.autocorrelated
     ?tx('Annual aggregation removes seasonal cycles, yet lag-1 residual autocorrelation was detected here. Unadjusted p-value is exploratory and cannot confirm significance.','La agregación anual elimina ciclos estacionales, pero aquí se detectó autocorrelación de orden 1 en los residuos. El valor p sin corrección se muestra como exploratorio; no permite confirmar significancia.')
@@ -313,7 +383,7 @@ function setPeriod(){
 
 let methodTab='all';
 function renderMethodContent(){
-  const s=data[state.site];
+  const s=state.site?data[state.site]:data['san-jose'];
   const loc=locale();
   const rows=rawVariables.map(p=>`<tr><td>${p[getLang()].name}<br><small>${p.id}</small></td><td>${p[getLang()].definition}</td></tr>`).join('');
   const es=getLang()==='es';
@@ -363,7 +433,7 @@ async function boot(){
     options($('#site-select'),state.site);options($('#compare-site'),state.compareSite);
     for(const id of ['#start-year','#end-year']){$(id).innerHTML=Array.from({length:25},(_,i)=>`<option>${2001+i}</option>`).join('');$(id).onchange=setPeriod;}
     $('#start-year').value=state.start;$('#end-year').value=state.end;
-    $('#site-select').onchange=e=>selectSite(e.target.value);$('#province-select').onchange=e=>selectSite(manifest.provinces.find(p=>p.id===e.target.value)?.siteId??null);
+    $('#site-select').onchange=e=>selectSite(e.target.value);$('#province-select').onchange=e=>{if(!e.target.value){selectSite(null);return;}const p=manifest.provinces.find(x=>x.id===e.target.value);if(p)selectSite(p.siteId);};
     $('#year-slider').oninput=e=>{stop();setYear(e.target.value);};
     $('#compare').onchange=e=>{state.compare=e.target.checked;renderChart();};
     $('#compare-site').onchange=e=>{state.compareSite=e.target.value;state.compare=true;$('#compare').checked=true;renderChart();};

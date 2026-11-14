@@ -20,18 +20,30 @@ const dateText=(day,opts={day:'numeric',month:'short'})=>new Date(day+'T12:00:00
 
 export function initForecast(){
   if(initialized)return;initialized=true;
-  $('#forecast-refresh').onclick=()=>updateForecast(selectedSite,selectedVariable,true);
+  $('#forecast-refresh').onclick=()=>{if(selectedSite)updateForecast(selectedSite,selectedVariable,true);};
   $('#forecast-download').onclick=download;
   const refresh=()=>{if(!document.hidden&&selectedSite)updateForecast(selectedSite,selectedVariable);};
   setInterval(refresh,60000);document.addEventListener('visibilitychange',refresh);window.addEventListener('online',refresh);
   document.addEventListener('gaiatrack:lang',()=>{
     if(selectedSite)$('#forecast-location').textContent=`${selectedSite.name} · ${tx('reference point','punto de referencia')}`;
+    else{
+      $('#forecast-location').textContent=tx('Costa Rica · Choose a province','Costa Rica · Elegí una provincia');
+      $('#forecast-status').textContent=tx('Choose a province or canton in the Explorer to load its 7-day forecast.','Elegí una provincia o cantón en el Explorador para consultar su pronóstico de 7 días.');
+    }
     if(forecast)render();
   });
 }
 
 export async function updateForecast(site,variable,refresh=false){
-  if(!site){selectedSite=null;forecast=null;request++;$('#forecast-location').textContent=tx('Choose a province','Elegí una provincia');for(const id of ['forecast-days','forecast-detail','forecast-period','forecast-update'])$('#'+id).textContent='';$('#forecast-status').hidden=false;$('#forecast-status').textContent=tx('Choose a province to see its forecast.','Elegí una provincia para ver su pronóstico.');$('#forecast-refresh').disabled=true;$('#forecast-download').disabled=true;return;}initForecast();
+  initForecast();
+  if(!site){
+    selectedSite=null;forecast=null;request++;
+    $('#forecast-location').textContent=tx('Costa Rica · Choose a province','Costa Rica · Elegí una provincia');
+    $('#forecast-status').textContent=tx('Choose a province or canton in the Explorer to load its 7-day forecast.','Elegí una provincia o cantón en el Explorador para consultar su pronóstico de 7 días.');
+    $('#forecast-status').hidden=false;$('#forecast-days').innerHTML='';$('#forecast-detail').innerHTML='';$('#forecast-period').textContent='';$('#forecast-update').textContent='';$('#forecast-refresh').disabled=true;$('#forecast-download').disabled=true;
+    return;
+  }
+  $('#forecast-refresh').disabled=false;
   const changed=site.id!==selectedSite?.id;selectedSite=site;selectedVariable=variable;
   $('#forecast-location').textContent=`${site.name} · ${tx('reference point','punto de referencia')}`;
   if(changed)selectedDay=0;
