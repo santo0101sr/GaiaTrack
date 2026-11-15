@@ -86,3 +86,24 @@ test('Real province rain stays within the original canton polygons, including sh
     }
   }
 });
+
+test('Cloud-bounded rain spawns only underneath rainy clouds and stops at cloud edges',()=>{
+  const domain=createRainDomain([meshFor([square])]);
+  const field=createRainField(domain,{count:80,random:randomSource()});
+  const cells=[{x:.5,y:.26,z:.5,effectiveRadius:.25,rain:.8},{x:1.5,y:.26,z:1.5,effectiveRadius:.25,rain:0}];
+  field.setCells(cells);
+  field.setWeather({precipitation:10,weatherCode:65,windSpeed:12});
+  assert.ok(field.geometry.drawRange.count>0);
+  for(let frame=0;frame<120;frame++){
+    field.animate(.05);
+    checkDrops(field,new THREE.Vector3(),(a,b)=>{
+      for(const p of [a,b]){
+        assert.ok((p.x-.5)**2+(p.z-.5)**2<=.25**2+1e-6,'rain escaped rainy cloud cell');
+        assert.ok((p.x-1.5)**2+(p.z-1.5)**2>.25**2,'rain spawned under dry cloud');
+      }
+    });
+  }
+  field.setCells([{x:.5,y:.26,z:.5,effectiveRadius:.25,rain:0}]);
+  assert.equal(field.geometry.drawRange.count,0);
+  assert.equal(field.mesh.visible,false);
+});

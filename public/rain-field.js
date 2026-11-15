@@ -134,14 +134,43 @@ export function createRainField(initialDomain,{count=1200,random=Math.random}={}
   mesh.add(streaks);material.visible=false;
   // Buffers change as drops respawn; avoid a stale bounding sphere culling a different territory.
   mesh.frustumCulled=false;
-  let domain=null,drops=[],appearance=rainAppearance({},count);
+  let domain=null,drops=[],appearance=rainAppearance({},count),cells=null;
+  function pickCell(){
+    if(!cells||!cells.length)return null;
+    const total=cells.reduce((s,c)=>s+c.weight,0);
+    let r=random()*total;
+    for(const c of cells){r-=c.weight;if(r<=0)return c;}
+    return cells[cells.length-1];
+  }
   function spawn(){
+    if(cells){
+      if(!cells.length)return null;
+      for(let attempt=0;attempt<16;attempt++){
+        const cell=pickCell(),rad=cell.radius*Math.sqrt(random()),ang=random()*Math.PI*2;
+        const px=cell.x+Math.cos(ang)*rad,pz=cell.z+Math.sin(ang)*rad;
+        const point={x:px,y:cell.y,z:pz};
+        if(!domain?.contains(point))continue;
+        let tail=Math.min(.02,domain.shortSpan*.03);
+        for(let i=0;i<8&&(!domain.containsSegment(point,{x:point.x+tail,z:point.z})||(point.x+tail-cell.x)**2+(point.z-cell.z)**2>cell.radius*cell.radius);i++)tail/=2;
+        if(!domain.containsSegment(point,{x:point.x+tail,z:point.z})||(point.x+tail-cell.x)**2+(point.z-cell.z)**2>cell.radius*cell.radius)tail=0;
+        return {...point,tail,ground:point.y,y:point.y+.06+random()*.78,cell};
+      }
+      return null;
+    }
     const point=domain?.sample(random);
     if(!point)return null;
     let tail=Math.min(.02,domain.shortSpan*.03);
     for(let i=0;i<8&&!domain.containsSegment(point,{x:point.x+tail,z:point.z});i++)tail/=2;
     if(!domain.containsSegment(point,{x:point.x+tail,z:point.z}))tail=0;
-    return {...point,tail,ground:point.y,y:point.y+.12+random()*.88};
+    return {...point,tail,ground:point.y,y:point.y+.12+random()*.88,cell:null};
+  }
+  function refillDrops(){
+    drops=[];
+    for(let i=0;i<count;i++){const d=spawn();if(d)drops.push(d);}
+    drops.forEach((d,i)=>write(i,d));geometry.attributes.position.needsUpdate=true;dropBuffer.needsUpdate=true;
+    geometry.setDrawRange(0,Math.min(drops.length,appearance.count)*2);
+    ribbons.instanceCount=Math.min(drops.length,appearance.count);
+    mesh.visible=ribbons.instanceCount>0;
   }
   function write(i,d){
     const length=appearance.length*(.7+(i%7)*.1);
@@ -149,12 +178,15 @@ export function createRainField(initialDomain,{count=1200,random=Math.random}={}
   }
   function setDomain(next){
     if(domain===next)return;
-    domain=next;drops=[];
-    for(let i=0;i<count;i++){const d=spawn();if(d)drops.push(d);}
-    drops.forEach((d,i)=>write(i,d));geometry.attributes.position.needsUpdate=true;dropBuffer.needsUpdate=true;
-    geometry.setDrawRange(0,Math.min(drops.length,appearance.count)*2);
-    ribbons.instanceCount=Math.min(drops.length,appearance.count);
-    mesh.visible=ribbons.instanceCount>0;
+    domain=next;refillDrops();
+  }
+  function setCells(nextCells=null){
+    if(nextCells===null){cells=null;return;}
+    cells=nextCells.filter(c=>(c.rain??1)>0).map(c=>{
+      const r=Math.max(1e-4,c.effectiveRadius??c.radius??.05);
+      return {x:c.x,y:c.y??0,z:c.z,radius:r,weight:r*r*(c.rain??1)};
+    });
+    if(domain)refillDrops();
   }
   function setOrigin(next){origin.copy(next);drops.forEach((d,i)=>write(i,d));geometry.attributes.position.needsUpdate=true;dropBuffer.needsUpdate=true;}
   function setWeather(data){
@@ -176,17 +208,18 @@ export function createRainField(initialDomain,{count=1200,random=Math.random}={}
       let d=drops[i];
       const fall=appearance.speed*(.82+(i%7)*.055)*dt;
       const previousX=d.x;d.x-=fall*.08*appearance.wind;d.y-=fall;
-      // Wind stops at the edge; it never pushes a drop through another province or an inland hole.
-      if(!domain.containsSegment(d,{x:d.x+d.tail,z:d.z}))d.x=previousX;
+      // Wind stops at the edge of both the territory and its parent cloud cell.
+      const outOfCloud=d.cell&&((d.x-d.cell.x)**2+(d.z-d.cell.z)**2>d.cell.radius*d.cell.radius||(d.x+d.tail-d.cell.x)**2+(d.z-d.cell.z)**2>d.cell.radius*d.cell.radius);
+      if(outOfCloud||!domain.containsSegment(d,{x:d.x+d.tail,z:d.z}))d.x=previousX;
       if(d.y<d.ground){
         const replacement=spawn();
         if(replacement)d=drops[i]=replacement;
-        else {geometry.setDrawRange(0,0);ribbons.instanceCount=0;return;}
+        else {geometry.setDrawRange(0,0);ribbons.instanceCount=0;mesh.visible=false;return;}
       }
       write(i,d);
     }
     geometry.attributes.position.needsUpdate=true;dropBuffer.needsUpdate=true;
   }
   setDomain(initialDomain);
-  return {mesh,geometry,setDomain,setOrigin,setWeather,setFlash,animate,get domain(){return domain;},get appearance(){return appearance;}};
+  return {mesh,geometry,setDomain,setCells,setOrigin,setWeather,setFlash,animate,get domain(){return domain;},get appearance(){return appearance;}};
 }

@@ -1,6 +1,8 @@
-const stores={current:new Map(),forecast:new Map()};
+const stores={current:new Map(),forecast:new Map(),sectors:new Map()};
 export function publishWeather(kind,data){if(stores[kind].get(data.site)===data)return false;stores[kind].set(data.site,data);document.dispatchEvent(new CustomEvent('gaiatrack:weather-data',{detail:{kind,site:data.site}}));return true;}
 export const readWeather=(kind,site)=>stores[kind].get(site);
+export function publishSectors(parent,list){stores.sectors.set(parent,list);document.dispatchEvent(new CustomEvent('gaiatrack:weather-sectors',{detail:{parent}}));}
+export const readSectors=parent=>stores.sectors.get(parent)??null;
 // Current effects expire with the source time, even if a refresh fails.
 export function weatherForScene(kind,site,raw,now=Date.now()){
   if(!raw)return null;

@@ -97,7 +97,7 @@ export function createSkyField(initialDomain,{maxClusters=20,marchSteps=16,showS
       float angle=atan(disk.y,disk.x);float rays=.88+.12*sin(angle*6.+time*1.2)*smoothstep(.15,.8,r);
       float alpha=pow(max(0.,1.-r),2.1)*strength*rays;gl_FragColor=vec4(1.,.82,.44,alpha);}`}));
   halo.rotation.x=-Math.PI/2;halo.name='territory-sun-halo';halo.renderOrder=1;group.add(halo);
-  let domain=null,appearance=skyAppearance({}),anchor=null,radius=0,clusterLayout=[];
+  let domain=null,appearance=skyAppearance({}),anchor=null,radius=0,clusterLayout=[],activeClusters=[];
 
   function placeSun(){
     anchor=null;radius=Number.isFinite(domain?.area)?Math.min(.12,domain.shortSpan*.08,Math.sqrt(domain.area)*.035):0;
@@ -116,23 +116,32 @@ export function createSkyField(initialDomain,{maxClusters=20,marchSteps=16,showS
   function buildClouds(){
     clusters=[];clusterLayout=[];let seed=5719;
     const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+    const baseR=Math.min(domain.shortSpan*.45,Math.sqrt(domain.area/maxClusters)*1.2);
+    const minR=baseR*.25;
     for(let i=0;i<maxClusters;i++){
-      let r=Math.min(domain.shortSpan*.42,Math.sqrt(domain.area/maxClusters)*1.15),point=null;
-      for(let attempt=0;attempt<10&&r>1e-5;attempt++,r*=.6){point=domain.sample(random,r);if(point)break;}
+      let r=baseR,point=null;
+      for(let attempt=0;attempt<7&&r>=minR;attempt++,r*=.8){
+        for(let tries=0;tries<3;tries++){point=domain.sample(random,r);if(point)break;}
+        if(point)break;
+      }
+      if(!point&&!clusters.length){
+        for(let attempt=0,rf=minR*.8;attempt<8&&rf>1e-5;attempt++,rf*=.65){point=domain.sample(random,rf);if(point){r=rf;break;}}
+      }
       if(point){
         clusters.push({...point,radius:r});
-        clusterLayout.push({rotY:(i*2.39996)%(Math.PI*2),variance:.88+(i%4)*.04});
+        clusterLayout.push({rotY:(i*2.39996)%(Math.PI*2),variance:.90+(i%4)*.035});
       }
     }
   }
   function applyLayout(){
-    const activeCount=cloud.count/puffs.length;
+    const activeCount=activeClusters.length;
     const cov=appearance.cover??0,stm=appearance.storm??0;
-    const coverSpread=.62+.38*cov;
-    const coverHeight=.68+.44*cov+stm*.16;
-    const altDrop=cov*.08+stm*.10;
     for(let i=0;i<activeCount;i++){
-      const c=clusters[i],lay=clusterLayout[i],r=c.radius,cos=Math.cos(lay.rotY),sin=Math.sin(lay.rotY);
+      const item=activeClusters[i],c=item.cluster,lay=item.layout,r=c.radius,cos=Math.cos(lay.rotY),sin=Math.sin(lay.rotY);
+      const cCov=item.cover,cStm=item.rain;
+      const coverSpread=.76+.24*cCov;
+      const coverHeight=.68+.44*cCov+cStm*.16;
+      const altDrop=cCov*.08+cStm*.10;
       const spread=coverSpread*lay.variance;
       const yBase=c.y+.88+r*.25-altDrop;
       for(const [j,p] of puffs.entries()){
@@ -162,13 +171,13 @@ export function createSkyField(initialDomain,{maxClusters=20,marchSteps=16,showS
     material.uniforms.time.value=time*.00012;
     mistMat.uniforms.time.value=time*.00015;
     halo.material.uniforms.time.value=time*.0004;
-    const activeCount=cloud.count/puffs.length;
+    const activeCount=activeClusters.length;
     if(!activeCount)return;
-    const cov=appearance.cover??0,stm=appearance.storm??0;
-    const coverHeight=.68+.44*cov+stm*.16;
-    const altDrop=cov*.08+stm*.10;
     for(let i=0;i<activeCount;i++){
-      const c=clusters[i],r=c.radius,bob=Math.sin(time*.00035+i*2.1)*r*.08;
+      const item=activeClusters[i],c=item.cluster,r=c.radius,bob=Math.sin(time*.00035+i*2.1)*r*.08;
+      const cCov=item.cover,cStm=item.rain;
+      const coverHeight=.68+.44*cCov+cStm*.16;
+      const altDrop=cCov*.08+cStm*.10;
       const yBase=c.y+.88+r*.25-altDrop+bob;
       for(let j=0;j<puffs.length;j++){
         const idx=i*puffs.length+j;
@@ -177,8 +186,31 @@ export function createSkyField(initialDomain,{maxClusters=20,marchSteps=16,showS
     }
     cloud.instanceMatrix.needsUpdate=true;
   }
-  function applyCloudCount(){
-    cloud.count=appearance.cover>0?Math.min(clusters.length,Math.max(1,Math.round(appearance.cover*clusters.length)))*puffs.length:0;
+  function applyCloudCount(sectors=null){
+    activeClusters=[];
+    if(sectors&&sectors.length&&clusters.length){
+      const bySector=new Map(sectors.map((s,idx)=>[idx,[]]));
+      for(let i=0;i<clusters.length;i++){
+        const c=clusters[i];let best=0,bestD=Infinity;
+        for(let s=0;s<sectors.length;s++){const d=(c.x-sectors[s].x)**2+(c.z-sectors[s].z)**2;if(d<bestD){bestD=d;best=s;}}
+        bySector.get(best).push(i);
+      }
+      for(const [sIdx,indices] of bySector){
+        const sec=sectors[sIdx],secApp=skyAppearance(sec);
+        const sCov=secApp.cover??appearance.cover??0,sRain=secApp.storm??appearance.storm??0;
+        if(sCov<=0&&sRain<=0)continue;
+        const effCov=sCov>0?sCov:Math.min(.75,.35+sRain*.4);
+        const keep=Math.min(indices.length,Math.max(1,Math.round(effCov*indices.length)));
+        for(let k=0;k<keep;k++){
+          const idx=indices[k];
+          activeClusters.push({cluster:clusters[idx],layout:clusterLayout[idx],cover:effCov,rain:sRain});
+        }
+      }
+    }else if(appearance.cover>0&&clusters.length){
+      const count=Math.min(clusters.length,Math.max(1,Math.round(appearance.cover*clusters.length)));
+      for(let i=0;i<count;i++)activeClusters.push({cluster:clusters[i],layout:clusterLayout[i],cover:appearance.cover,rain:appearance.storm??0});
+    }
+    cloud.count=activeClusters.length*puffs.length;
     cloud.visible=cloud.count>0;
     applyLayout();
     animate(lastTime);
@@ -188,23 +220,25 @@ export function createSkyField(initialDomain,{maxClusters=20,marchSteps=16,showS
   }
   function setOrigin(next){if(origin.equals(next))return;origin.copy(next);placeSun();applyLayout();animate(lastTime);}
   function setFlash(value){material.uniforms.flash.value=Math.max(0,Math.min(1,value));}
-  function setWeather(data){
+  function setWeather(data,sectors=null){
     appearance=skyAppearance(data);
     const cov=appearance.cover??0,stm=appearance.storm??0,isNight=appearance.night;
     const showMist=Boolean(clusters.length&&(appearance.fog>0||stm>.28||(appearance.humidity!==null&&appearance.humidity>=.90&&cov>=.75)));
     mist.visible=showMist;
     mistMat.uniforms.opacity.value=showMist?Math.min(.28,.08+appearance.fog*.18+stm*.14):0;
     mistMat.uniforms.tint.value.setRGB(isNight?.32:.62,isNight?.42:.74,isNight?.56:.84);
-    applyCloudCount();
-    const overcastTone=Math.max(0,(cov-.45)/.55);
-    const dark=Math.min(1,Math.sqrt(stm)*.75+overcastTone*.22+(isNight?.42:0));
-    material.uniforms.cover.value=cov;
-    material.uniforms.storm.value=stm;
+    applyCloudCount(sectors);
+    const maxCov=activeClusters.length?Math.max(cov,...activeClusters.map(a=>a.cover)):cov;
+    const maxStm=activeClusters.length?Math.max(stm,...activeClusters.map(a=>a.rain)):stm;
+    const overcastTone=Math.max(0,(maxCov-.45)/.55);
+    const dark=Math.min(1,Math.sqrt(maxStm)*.75+overcastTone*.22+(isNight?.42:0));
+    material.uniforms.cover.value=maxCov;
+    material.uniforms.storm.value=maxStm;
     material.uniforms.wind.value=appearance.wind;
     material.uniforms.daylight.value=isNight?0:1;
     material.uniforms.cloudTop.value.setRGB(.96-dark*.44,.98-dark*.40,1.-dark*.32);
     material.uniforms.cloudBase.value.setRGB(.58-dark*.38,.70-dark*.40,.82-dark*.38);
-    cloud.material.opacity=appearance.cover===null?0:Math.min(.92,(.18+cov*.52+stm*.14)*(clusters.length?Math.min(1,.55+Math.sqrt(clusters[0].radius/.09)*.45):1));
+    cloud.material.opacity=appearance.cover===null&&!activeClusters.length?0:Math.min(.92,(.18+maxCov*.52+maxStm*.14)*(clusters.length?Math.min(1,.55+Math.sqrt(clusters[0].radius/.09)*.45):1));
     material.uniforms.opacity.value=cloud.material.opacity;
     sun.visible=showSun&&!!anchor&&appearance.sun>0;halo.visible=sun.visible;
     sun.material.uniforms.opacity.value=Math.min(1,appearance.sun*1.9);
@@ -212,5 +246,5 @@ export function createSkyField(initialDomain,{maxClusters=20,marchSteps=16,showS
     group.userData.cloudCover=appearance.cover;group.userData.sunStrength=appearance.sun;
   }
   setDomain(initialDomain);setWeather({});
-  return {group,layers,sun,halo,setDomain,setOrigin,setWeather,setFlash,animate,get appearance(){return appearance;},get cloudFootprints(){return clusters.slice(0,cloud.count/puffs.length).map(c=>({...c}));},get footprint(){return anchor?{...anchor,radius:radius*2.5}:null;}};
+  return {group,layers,sun,halo,setDomain,setOrigin,setWeather,setFlash,animate,get appearance(){return appearance;},get cloudFootprints(){return activeClusters.map(({cluster,cover,rain})=>({...cluster,effectiveRadius:cluster.radius*(.76+.24*cover)*.90,rain}));},get footprint(){return anchor?{...anchor,radius:radius*2.5}:null;}};
 }

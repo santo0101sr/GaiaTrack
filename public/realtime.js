@@ -1,5 +1,5 @@
 import {loadHistory} from './data-client.js';
-import {publishWeather,readWeather} from './weather-state.js';
+import {publishWeather,readWeather,publishSectors} from './weather-state.js';
 import {buildRecommendations} from './recommendations.js';
 import {getLang,locale,tx} from './i18n.js';
 
@@ -202,6 +202,11 @@ async function loadCountry(){
         const prev=cache.get(d.site);
         if(!hasFullTelemetry(d)&&prev&&Date.now()-prev.time<900000&&hasFullTelemetry(prev.value))continue;
         cache.set(d.site,{time:Date.parse(d.retrievedAt),value:d});publishWeather('current',d);if(d.site===site)paint(d);
+      }
+      if(Array.isArray(batch.sectors)){
+        const byParent=new Map();
+        for(const s of batch.sectors){if(!byParent.has(s.parent))byParent.set(s.parent,[]);byParent.get(s.parent).push(s);}
+        for(const [parent,list] of byParent)publishSectors(parent,list);
       }
     }
   }catch{}

@@ -1,0 +1,418 @@
+{
+  "perez-zeledon": [
+    {
+      "id": "perez-zeledon__s1",
+      "parent": "perez-zeledon",
+      "latitude": 9.4415,
+      "longitude": -83.9441
+    },
+    {
+      "id": "perez-zeledon__s2",
+      "parent": "perez-zeledon",
+      "latitude": 9.1274,
+      "longitude": -83.4869
+    },
+    {
+      "id": "perez-zeledon__s3",
+      "parent": "perez-zeledon",
+      "latitude": 9.5462,
+      "longitude": -83.6011
+    },
+    {
+      "id": "perez-zeledon__s4",
+      "parent": "perez-zeledon",
+      "latitude": 9.2321,
+      "longitude": -83.7155
+    }
+  ],
+  "san-carlos": [
+    {
+      "id": "san-carlos__s1",
+      "parent": "san-carlos",
+      "latitude": 10.4707,
+      "longitude": -84.6513
+    },
+    {
+      "id": "san-carlos__s2",
+      "parent": "san-carlos",
+      "latitude": 10.9201,
+      "longitude": -84.371
+    },
+    {
+      "id": "san-carlos__s3",
+      "parent": "san-carlos",
+      "latitude": 10.6205,
+      "longitude": -84.2309
+    },
+    {
+      "id": "san-carlos__s4",
+      "parent": "san-carlos",
+      "latitude": 10.3209,
+      "longitude": -84.371
+    }
+  ],
+  "upala": [
+    {
+      "id": "upala__s1",
+      "parent": "upala",
+      "latitude": 10.8681,
+      "longitude": -85.3922
+    },
+    {
+      "id": "upala__s2",
+      "parent": "upala",
+      "latitude": 10.947,
+      "longitude": -84.9367
+    },
+    {
+      "id": "upala__s3",
+      "parent": "upala",
+      "latitude": 10.7104,
+      "longitude": -85.0506
+    },
+    {
+      "id": "upala__s4",
+      "parent": "upala",
+      "latitude": 11.0259,
+      "longitude": -85.1645
+    }
+  ],
+  "los-chiles": [
+    {
+      "id": "los-chiles__s1",
+      "parent": "los-chiles",
+      "latitude": 10.8572,
+      "longitude": -84.8517
+    },
+    {
+      "id": "los-chiles__s2",
+      "parent": "los-chiles",
+      "latitude": 10.9478,
+      "longitude": -84.4957
+    },
+    {
+      "id": "los-chiles__s3",
+      "parent": "los-chiles",
+      "latitude": 10.6759,
+      "longitude": -84.5847
+    },
+    {
+      "id": "los-chiles__s4",
+      "parent": "los-chiles",
+      "latitude": 11.0384,
+      "longitude": -84.6737
+    }
+  ],
+  "turrialba": [
+    {
+      "id": "turrialba__s1",
+      "parent": "turrialba",
+      "latitude": 10.0238,
+      "longitude": -83.7687
+    },
+    {
+      "id": "turrialba__s2",
+      "parent": "turrialba",
+      "latitude": 9.544,
+      "longitude": -83.5659
+    },
+    {
+      "id": "turrialba__s3",
+      "parent": "turrialba",
+      "latitude": 9.9039,
+      "longitude": -83.3631
+    },
+    {
+      "id": "turrialba__s4",
+      "parent": "turrialba",
+      "latitude": 9.7839,
+      "longitude": -83.5659
+    }
+  ],
+  "sarapiqui": [
+    {
+      "id": "sarapiqui__s1",
+      "parent": "sarapiqui",
+      "latitude": 10.3658,
+      "longitude": -84.1161
+    },
+    {
+      "id": "sarapiqui__s2",
+      "parent": "sarapiqui",
+      "latitude": 10.7317,
+      "longitude": -83.7558
+    },
+    {
+      "id": "sarapiqui__s3",
+      "parent": "sarapiqui",
+      "latitude": 10.7317,
+      "longitude": -84.1161
+    },
+    {
+      "id": "sarapiqui__s4",
+      "parent": "sarapiqui",
+      "latitude": 10.4878,
+      "longitude": -83.8458
+    }
+  ],
+  "liberia": [
+    {
+      "id": "liberia__s1",
+      "parent": "liberia",
+      "latitude": 10.801,
+      "longitude": -85.6583
+    },
+    {
+      "id": "liberia__s2",
+      "parent": "liberia",
+      "latitude": 10.4744,
+      "longitude": -85.4951
+    },
+    {
+      "id": "liberia__s3",
+      "parent": "liberia",
+      "latitude": 10.801,
+      "longitude": -85.3319
+    },
+    {
+      "id": "liberia__s4",
+      "parent": "liberia",
+      "latitude": 10.6921,
+      "longitude": -85.4951
+    }
+  ],
+  "nicoya": [
+    {
+      "id": "nicoya__s1",
+      "parent": "nicoya",
+      "latitude": 9.9083,
+      "longitude": -85.6462
+    },
+    {
+      "id": "nicoya__s2",
+      "parent": "nicoya",
+      "latitude": 10.298,
+      "longitude": -85.3417
+    },
+    {
+      "id": "nicoya__s3",
+      "parent": "nicoya",
+      "latitude": 10.1031,
+      "longitude": -85.4432
+    },
+    {
+      "id": "nicoya__s4",
+      "parent": "nicoya",
+      "latitude": 10.1031,
+      "longitude": -85.2402
+    }
+  ],
+  "santa-cruz": [
+    {
+      "id": "santa-cruz__s1",
+      "parent": "santa-cruz",
+      "latitude": 10.236,
+      "longitude": -85.8283
+    },
+    {
+      "id": "santa-cruz__s2",
+      "parent": "santa-cruz",
+      "latitude": 10.3368,
+      "longitude": -85.4527
+    },
+    {
+      "id": "santa-cruz__s3",
+      "parent": "santa-cruz",
+      "latitude": 10.0345,
+      "longitude": -85.6405
+    },
+    {
+      "id": "santa-cruz__s4",
+      "parent": "santa-cruz",
+      "latitude": 10.4376,
+      "longitude": -85.7344
+    }
+  ],
+  "bagaces": [
+    {
+      "id": "bagaces__s1",
+      "parent": "bagaces",
+      "latitude": 10.5121,
+      "longitude": -85.3958
+    },
+    {
+      "id": "bagaces__s2",
+      "parent": "bagaces",
+      "latitude": 10.7231,
+      "longitude": -85.1719
+    },
+    {
+      "id": "bagaces__s3",
+      "parent": "bagaces",
+      "latitude": 10.3011,
+      "longitude": -85.2465
+    },
+    {
+      "id": "bagaces__s4",
+      "parent": "bagaces",
+      "latitude": 10.5121,
+      "longitude": -85.1719
+    }
+  ],
+  "la-cruz": [
+    {
+      "id": "la-cruz__s1",
+      "parent": "la-cruz",
+      "latitude": 10.8413,
+      "longitude": -85.7395
+    },
+    {
+      "id": "la-cruz__s2",
+      "parent": "la-cruz",
+      "latitude": 11.0931,
+      "longitude": -85.3017
+    },
+    {
+      "id": "la-cruz__s3",
+      "parent": "la-cruz",
+      "latitude": 11.177,
+      "longitude": -85.5935
+    },
+    {
+      "id": "la-cruz__s4",
+      "parent": "la-cruz",
+      "latitude": 11.0091,
+      "longitude": -85.4477
+    }
+  ],
+  "buenos-aires": [
+    {
+      "id": "buenos-aires__s1",
+      "parent": "buenos-aires",
+      "latitude": 9.0786,
+      "longitude": -83.5039
+    },
+    {
+      "id": "buenos-aires__s2",
+      "parent": "buenos-aires",
+      "latitude": 9.0786,
+      "longitude": -83.0292
+    },
+    {
+      "id": "buenos-aires__s3",
+      "parent": "buenos-aires",
+      "latitude": 9.3218,
+      "longitude": -83.2665
+    },
+    {
+      "id": "buenos-aires__s4",
+      "parent": "buenos-aires",
+      "latitude": 8.8354,
+      "longitude": -83.1479
+    }
+  ],
+  "osa": [
+    {
+      "id": "osa__s1",
+      "parent": "osa",
+      "latitude": 8.5824,
+      "longitude": -83.682
+    },
+    {
+      "id": "osa__s2",
+      "parent": "osa",
+      "latitude": 9.2024,
+      "longitude": -83.682
+    },
+    {
+      "id": "osa__s3",
+      "parent": "osa",
+      "latitude": 8.8924,
+      "longitude": -83.3854
+    },
+    {
+      "id": "osa__s4",
+      "parent": "osa",
+      "latitude": 8.7374,
+      "longitude": -83.5337
+    }
+  ],
+  "limon-centro": [
+    {
+      "id": "limon-centro__s1",
+      "parent": "limon-centro",
+      "latitude": 9.776,
+      "longitude": -83.3219
+    },
+    {
+      "id": "limon-centro__s2",
+      "parent": "limon-centro",
+      "latitude": 9.6592,
+      "longitude": -82.9339
+    },
+    {
+      "id": "limon-centro__s3",
+      "parent": "limon-centro",
+      "latitude": 10.0097,
+      "longitude": -83.0632
+    },
+    {
+      "id": "limon-centro__s4",
+      "parent": "limon-centro",
+      "latitude": 9.8929,
+      "longitude": -83.1926
+    }
+  ],
+  "pococi": [
+    {
+      "id": "pococi__s1",
+      "parent": "pococi",
+      "latitude": 10.1511,
+      "longitude": -83.8868
+    },
+    {
+      "id": "pococi__s2",
+      "parent": "pococi",
+      "latitude": 10.8532,
+      "longitude": -83.6451
+    },
+    {
+      "id": "pococi__s3",
+      "parent": "pococi",
+      "latitude": 10.3266,
+      "longitude": -83.4034
+    },
+    {
+      "id": "pococi__s4",
+      "parent": "pococi",
+      "latitude": 10.5022,
+      "longitude": -83.7659
+    }
+  ],
+  "talamanca": [
+    {
+      "id": "talamanca__s1",
+      "parent": "talamanca",
+      "latitude": 9.4219,
+      "longitude": -83.3958
+    },
+    {
+      "id": "talamanca__s2",
+      "parent": "talamanca",
+      "latitude": 9.5602,
+      "longitude": -82.646
+    },
+    {
+      "id": "talamanca__s3",
+      "parent": "talamanca",
+      "latitude": 9.2836,
+      "longitude": -83.0209
+    },
+    {
+      "id": "talamanca__s4",
+      "parent": "talamanca",
+      "latitude": 9.5602,
+      "longitude": -83.0209
+    }
+  ]
+}

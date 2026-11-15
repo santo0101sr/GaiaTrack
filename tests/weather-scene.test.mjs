@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from '../public/vendor/three.module.js';
 import {createWeatherExperience} from '../public/weather-experience.js';
-import {publishWeather} from '../public/weather-state.js';
+import {publishWeather,publishSectors} from '../public/weather-state.js';
 
 // Minimal DOM/canvas shell; geometry, materials and animation use the real Three.js module.
 function sceneDocument(){
@@ -144,6 +144,45 @@ test('Overview territories hide floating sun markers and reflect per-location cl
     assert.ok(limonClouds.material.opacity>herediaClouds.material.opacity);
     publishWeather('current',raw('heredia-centro',90,0));
     assert.ok(herediaClouds.count>limonClouds.count*.5);
+    await Promise.resolve();
+  }finally{globalThis.document=originalDocument;globalThis.fetch=originalFetch;}
+});
+
+test('Sub-sectors localize clouds and rain strictly to the wet part of a large canton',async()=>{
+  const originalDocument=globalThis.document,originalFetch=globalThis.fetch;
+  globalThis.document=sceneDocument();globalThis.fetch=async()=>({ok:true,json:async()=>({monthly:[]})});
+  try{
+    const root=new THREE.Group(),light=new THREE.DirectionalLight(),coords=(lon,lat)=>new THREE.Vector3(lon,0,lat);
+    const mesh=new THREE.Mesh(new THREE.BoxGeometry(6,.26,6),new THREE.MeshStandardMaterial());
+    mesh.userData={id:'sarapiqui',name:'Sarapiquí',province:'heredia'};root.add(mesh);
+    const now=new Date().toISOString();
+    publishWeather('current',{site:'sarapiqui',name:'Sarapiquí',precipitation:0,intervalSeconds:900,weatherCode:1,clouds:10,isDay:true,solarRadiation:700,observedAt:now,requested:{longitude:0,latitude:0}});
+    publishSectors('sarapiqui',[
+      {site:'sarapiqui__s1',parent:'sarapiqui',precipitation:0,intervalSeconds:900,weatherCode:0,clouds:0,isDay:true,observedAt:now,requested:{longitude:-2,latitude:-2}},
+      {site:'sarapiqui__s2',parent:'sarapiqui',precipitation:4,intervalSeconds:900,weatherCode:63,clouds:95,isDay:true,observedAt:now,requested:{longitude:2,latitude:2}}
+    ]);
+    const scene=createWeatherExperience({root,meshes:[mesh],light,coords,sites:[{id:'sarapiqui',name:'Sarapiquí',type:'canton',province:'heredia'}]});
+    document.dispatchEvent(new CustomEvent('gaiatrack:territory-view',{detail:{province:null}}));scene.animate(50);
+    const sarapiqui=root.getObjectByName('canton-weather-sarapiqui');
+    const sky=sarapiqui.getObjectByName('territory-sky');
+    const rain=sarapiqui.children.find(c=>c.isLineSegments);
+    assert.ok(rain.geometry.drawRange.count>0,'rain should appear in the wet sector even when center is dry');
+    const cloudLayer=sky.getObjectByName('bounded-cloud-layer');
+    assert.ok(cloudLayer.count>0);
+    const cloudMat=cloudLayer.instanceMatrix.array;
+    const dropPos=rain.geometry.attributes.position.array;
+    let sumX=0,sumZ=0,drops=0;
+    for(let i=0;i<rain.geometry.drawRange.count;i+=2){
+      const x=dropPos[i*3],z=dropPos[i*3+2];
+      sumX+=x;sumZ+=z;drops++;
+      let nearCloud=false;
+      for(let c=0;c<cloudLayer.count;c++){
+        const cx=cloudMat[c*16+12],cz=cloudMat[c*16+14];
+        if((x-cx)**2+(z-cz)**2<=4.5){nearCloud=true;break;}
+      }
+      assert.ok(nearCloud,'rain must stay under the wet sector clouds');
+    }
+    assert.ok(drops>0&&sumX/drops>0&&sumZ/drops>0,'rain center must be localized to the wet sector');
     await Promise.resolve();
   }finally{globalThis.document=originalDocument;globalThis.fetch=originalFetch;}
 });
