@@ -13,11 +13,12 @@ const $=s=>document.querySelector(s);let explorer,cameraControls,radarMode=false
 const focus=new THREE.Vector3(),targetFocus=new THREE.Vector3();document.addEventListener('gaiatrack:focuspoint',e=>{introDone=true;document.body.classList.remove('intro-playing');mode(false);const p=coords(e.detail.longitude,e.detail.latitude);targetFocus.set(p.x,.6,p.z);targetDistance=6.8;});
 function activeSectionAnchor(){
   const sections=['#tendencias','#explorador','#pronostico'];
-  const y=window.scrollY+140;
+  const mainEl=document.querySelector('main');
+  const topOffset=mainEl&&document.body.classList.contains('lab-open')?mainEl.getBoundingClientRect().top+160:140;
   let current='#tendencias';
   for(const id of sections){
     const el=document.querySelector(id==='#pronostico'?'#tiempo-actual':id)||document.querySelector(id);
-    if(el&&el.offsetTop<=y)current=id;
+    if(el&&el.getBoundingClientRect().top<=topOffset)current=id;
   }
   return current;
 }
@@ -31,7 +32,7 @@ function syncNav(forcedAnchor=null){
 }
 function panel(anchor){document.body.classList.add('lab-open');$('#close-lab').hidden=false;syncNav(anchor);requestAnimationFrame(()=>{document.querySelector(anchor)?.scrollIntoView({behavior:'instant'});window.dispatchEvent(new Event('resize'));syncNav(anchor);});}
 function close(){document.body.classList.remove('lab-open');$('#close-lab').hidden=true;syncNav(null);$('.flight-panel').scrollTop=0;explorer?.focus();}
-$('#close-lab').onclick=close;$('#forecast-mode').onclick=()=>panel('#pronostico');$('#lab-mode').onclick=()=>panel('#tendencias');$('#flight-investigate').onclick=()=>panel('#tendencias');document.querySelectorAll('.topbar nav a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();panel(a.getAttribute('href'));}));$('.brand')?.addEventListener('click',e=>{e.preventDefault();close();});$('.inspector-cta')?.addEventListener('click',e=>{e.preventDefault();panel('#tendencias');});window.addEventListener('scroll',()=>{if(document.body.classList.contains('lab-open'))syncNav();},{passive:true});syncNav(null);
+$('#close-lab').onclick=close;$('#forecast-mode').onclick=()=>panel('#pronostico');$('#lab-mode').onclick=()=>panel('#tendencias');$('#flight-investigate').onclick=()=>panel('#tendencias');document.querySelectorAll('.topbar nav a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();panel(a.getAttribute('href'));}));$('.brand')?.addEventListener('click',e=>{e.preventDefault();close();});$('.inspector-cta')?.addEventListener('click',e=>{e.preventDefault();panel('#tendencias');});const onNavScroll=()=>{if(document.body.classList.contains('lab-open'))syncNav();};window.addEventListener('scroll',onNavScroll,{passive:true});document.querySelector('main')?.addEventListener('scroll',onNavScroll,{passive:true});syncNav(null);
 $('#fullscreen-mode').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{$('#fullscreen-mode').textContent=tx('Fullscreen unavailable','Pantalla completa no disponible');}};
 $('#camera-mode').onclick=()=>cameraControls?.setMode(cameraControls.mode==='pan'?'rotate':'pan');$('#camera-reset').onclick=()=>explorer?.focus();
 $('#hud-lang-toggle').onclick=()=>setLang(getLang()==='en'?'es':'en');

@@ -62,7 +62,8 @@ function ensureHistory(id){
 function showError(message){$('#status').textContent=message;}
 const PROVINCE_IDS=['san-jose','alajuela','cartago','heredia','guanacaste','puntarenas','limon'];
 function options(select,value){
-  if(select.id==='site-select'){
+  if(!select)return;
+  if(select.id==='site-select'||select.id==='quick-site-select'){
     const province=value?manifest.sites.find(s=>s.id===value)?.province:null;
     select.innerHTML=province?territoryOptionsHtml(manifest,province,getLang()):`<option value="">${tx('Choose a province first','Elegí primero una provincia')}</option>`;
     select.value=value||'';
@@ -114,11 +115,24 @@ function render(){
   document.querySelectorAll('.layer-button').forEach(b=>{const active=b.dataset.variable===state.variable;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});
   const selectedSite=state.site?manifest.sites.find(s=>s.id===state.site):null;
   options($('#site-select'),state.site);
+  options($('#quick-site-select'),state.site);
   $('#site-select').hidden=!selectedSite;
+  if($('#quick-site-select'))$('#quick-site-select').hidden=!selectedSite;
   const siteLabel=$('.territory-field-label[for="site-select"]');
   if(siteLabel)siteLabel.hidden=!selectedSite;
-  $('#province-select').innerHTML=`<option value="">${tx('Choose a province','Elegí una provincia')}</option>`+provinceOptionsHtml(manifest);
-  $('#province-select').value=selectedSite?selectedSite.province:'';
+  const provHtml=`<option value="">${tx('Choose a province','Elegí una provincia')}</option>`+provinceOptionsHtml(manifest);
+  const provVal=selectedSite?selectedSite.province:'';
+  $('#province-select').innerHTML=provHtml;
+  $('#province-select').value=provVal;
+  if($('#quick-province-select')){
+    $('#quick-province-select').innerHTML=provHtml;
+    $('#quick-province-select').value=provVal;
+    $('#quick-province-select').classList.toggle('has-selection',Boolean(provVal));
+  }
+  if($('#quick-variable-select')){
+    $('#quick-variable-select').innerHTML=rawVariables.map(p=>`<option value="${p.id}">${p[getLang()].short}</option>`).join('');
+    $('#quick-variable-select').value=state.variable;
+  }
   $('#compare-site').value=state.compareSite;
   $('#download').disabled=!selectedSite;
   if($('#fit-province'))$('#fit-province').disabled=!selectedSite;
@@ -560,7 +574,11 @@ async function boot(){
     options($('#site-select'),state.site);options($('#compare-site'),state.compareSite);
     for(const id of ['#start-year','#end-year']){$(id).innerHTML=Array.from({length:25},(_,i)=>`<option>${2001+i}</option>`).join('');$(id).onchange=setPeriod;}
     $('#start-year').value=state.start;$('#end-year').value=state.end;
-    $('#site-select').onchange=e=>selectSite(e.target.value);$('#province-select').onchange=e=>{if(!e.target.value){selectSite(null);return;}const p=manifest.provinces.find(x=>x.id===e.target.value);if(p)selectSite(p.siteId);};
+    const onProvincePick=e=>{if(!e.target.value){selectSite(null);return;}const p=manifest.provinces.find(x=>x.id===e.target.value);if(p)selectSite(p.siteId);};
+    $('#site-select').onchange=e=>selectSite(e.target.value);$('#province-select').onchange=onProvincePick;
+    if($('#quick-site-select'))$('#quick-site-select').onchange=e=>selectSite(e.target.value);
+    if($('#quick-province-select'))$('#quick-province-select').onchange=onProvincePick;
+    if($('#quick-variable-select'))$('#quick-variable-select').onchange=e=>setVariable(e.target.value);
     $('#year-slider').oninput=e=>{stop();setYear(e.target.value);};
     $('#compare').onchange=e=>{state.compare=e.target.checked;renderChart();};
     $('#compare-site').onchange=e=>{state.compareSite=e.target.value;state.compare=true;$('#compare').checked=true;renderChart();};
