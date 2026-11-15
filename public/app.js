@@ -32,7 +32,7 @@ const rawVariables=[
 ];
 
 const state={variable:'T2M',site:null,year:2025,start:2001,end:2025,anomaly:false,compare:false,compareSite:'sarapiqui',radarMode:false};
-let lastMapSite=null,mapOverview=true,ecological=null,riskSummary=null;
+let lastMapSite=null,mapOverview=true,ecological=null,riskSummary=null,provinceDrawerOpen=false,siteDrawerOpen=false;
 const annualCache=new Map(),historyFailures=new Set(),historyLoading=new Map();
 let annual,manifest,geo,data={},map,boundaryLayer,markers={},seaMarkers=[],timer=null;
 const v=()=>{const r=rawVariables.find(x=>x.id===state.variable);const l=r[getLang()];return {id:r.id,icon:r.icon,digits:r.digits,...l};};
@@ -111,11 +111,36 @@ document.addEventListener('gaiatrack:radar-mode',e=>setRadarMode(e.detail?.enabl
 function stop(){if(timer){clearInterval(timer);timer=null;}$('#play').textContent='▶';$('#play').setAttribute('aria-label',tx('Play time series','Reproducir evolución temporal'));}
 function setYear(year){state.year=Number(year);document.dispatchEvent(new CustomEvent('gaiatrack:selection',{detail:{site:state.site,variable:state.variable,year:state.year}}));renderMap();renderInspector();renderChart();$('#year-slider').value=state.year;$('#selected-year').textContent=state.year;}
 
+function syncTerritoryBar(){
+  const selectedSite=state.site?manifest?.sites?.find(s=>s.id===state.site):null;
+  const toggleBtn=$('#territory-toggle-btn'),toggleLabel=$('#territory-toggle-label'),toggleCaret=$('#territory-toggle-caret');
+  const provDrawer=$('#territory-province-drawer'),siteDrawer=$('#territory-site-drawer'),expandBtn=$('#expand-site-btn');
+  if(toggleLabel)toggleLabel.textContent=selectedSite?`${tx('Select territory','Seleccionar territorio')} · ${selectedSite.name}`:tx('Select territory','Seleccionar territorio');
+  if(toggleCaret)toggleCaret.textContent=provinceDrawerOpen?'▴':'▾';
+  if(toggleBtn){
+    toggleBtn.setAttribute('aria-expanded',String(provinceDrawerOpen));
+    toggleBtn.classList.toggle('is-open',provinceDrawerOpen);
+    toggleBtn.classList.toggle('has-selection',Boolean(selectedSite));
+  }
+  if(provDrawer)provDrawer.hidden=!provinceDrawerOpen;
+  if(siteDrawer)siteDrawer.hidden=!(provinceDrawerOpen&&siteDrawerOpen&&Boolean(selectedSite));
+  if(expandBtn){
+    expandBtn.hidden=!(selectedSite&&(!provinceDrawerOpen||!siteDrawerOpen));
+    expandBtn.textContent=tx('▾ Province view','▾ Vista de provincia');
+  }
+  const summaryEl=$('#sticky-site-summary');
+  if(summaryEl)summaryEl.textContent=selectedSite?`${format(valueAt(state.site,state.year))} ${v().unit} (${state.year})`:'';
+  if($('#drawer-prov-kicker'))$('#drawer-prov-kicker').textContent=tx('01 / PROVINCE','01 / PROVINCIA');
+  if($('#drawer-site-kicker'))$('#drawer-site-kicker').textContent=tx('02 / PROVINCE VIEW & CANTONS','02 / VISTA DE PROVINCIA Y CANTONES');
+  if($('#minimize-province-btn'))$('#minimize-province-btn').textContent=tx('▴ Minimize','▴ Minimizar');
+  if($('#minimize-site-btn'))$('#minimize-site-btn').textContent=tx('▴ Minimize view','▴ Minimizar vista');
+}
+
 function render(){
   document.querySelectorAll('.layer-button').forEach(b=>{const active=b.dataset.variable===state.variable;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});
   const selectedSite=state.site?manifest.sites.find(s=>s.id===state.site):null;
   options($('#site-select'),state.site);
-  $('#site-select').hidden=!selectedSite;
+  $('#site-select').hidden=false;
   $('#site-select').classList.toggle('has-selection',Boolean(selectedSite));
   const provHtml=`<option value="">${tx('Choose a province','Elegí una provincia')}</option>`+provinceOptionsHtml(manifest);
   const provVal=selectedSite?selectedSite.province:'';
@@ -126,6 +151,7 @@ function render(){
     $('#quick-variable-select').innerHTML=rawVariables.map(p=>`<option value="${p.id}">${p[getLang()].short}</option>`).join('');
     $('#quick-variable-select').value=state.variable;
   }
+  syncTerritoryBar();
   $('#compare-site').value=state.compareSite;
   $('#download').disabled=!selectedSite;
   if($('#fit-province'))$('#fit-province').disabled=!selectedSite;
@@ -569,9 +595,13 @@ async function boot(){
     options($('#site-select'),state.site);options($('#compare-site'),state.compareSite);
     for(const id of ['#start-year','#end-year']){$(id).innerHTML=Array.from({length:25},(_,i)=>`<option>${2001+i}</option>`).join('');$(id).onchange=setPeriod;}
     $('#start-year').value=state.start;$('#end-year').value=state.end;
-    const onProvincePick=e=>{if(!e.target.value){selectSite(null);return;}const p=manifest.provinces.find(x=>x.id===e.target.value);if(p)selectSite(p.siteId);};
+    const onProvincePick=e=>{if(!e.target.value){siteDrawerOpen=false;selectSite(null);return;}const p=manifest.provinces.find(x=>x.id===e.target.value);if(p){provinceDrawerOpen=true;siteDrawerOpen=true;selectSite(p.siteId);}};
     $('#site-select').onchange=e=>selectSite(e.target.value);$('#province-select').onchange=onProvincePick;
     if($('#quick-variable-select'))$('#quick-variable-select').onchange=e=>setVariable(e.target.value);
+    if($('#territory-toggle-btn'))$('#territory-toggle-btn').onclick=()=>{if(provinceDrawerOpen){provinceDrawerOpen=false;siteDrawerOpen=false;}else{provinceDrawerOpen=true;if(state.site)siteDrawerOpen=true;}syncTerritoryBar();};
+    if($('#minimize-province-btn'))$('#minimize-province-btn').onclick=()=>{provinceDrawerOpen=false;siteDrawerOpen=false;syncTerritoryBar();};
+    if($('#minimize-site-btn'))$('#minimize-site-btn').onclick=()=>{siteDrawerOpen=false;syncTerritoryBar();};
+    if($('#expand-site-btn'))$('#expand-site-btn').onclick=()=>{provinceDrawerOpen=true;siteDrawerOpen=true;syncTerritoryBar();};
     $('#year-slider').oninput=e=>{stop();setYear(e.target.value);};
     $('#compare').onchange=e=>{state.compare=e.target.checked;renderChart();};
     $('#compare-site').onchange=e=>{state.compareSite=e.target.value;state.compare=true;$('#compare').checked=true;renderChart();};
