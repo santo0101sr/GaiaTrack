@@ -2,14 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import {
+import * as siteFacts from '../public/site-facts.js';
+const {
   DATA_VARIABLES_COUNT,
   REAL_DATA_SOURCES,
-  MODELED_NBS_SCENARIOS,
   deriveManifestFacts,
   uniqueCellCountForSites,
   computeSiteTrendHighlight
-} from '../public/site-facts.js';
+} = siteFacts;
 
 test('deriveManifestFacts matches actual manifest counts and unique MERRA-2 / CERES cells', async () => {
   const manifest = JSON.parse(await fs.readFile(path.resolve('public/data/manifest.json'), 'utf8'));
@@ -39,14 +39,14 @@ test('deriveManifestFacts matches actual manifest counts and unique MERRA-2 / CE
   assert.equal(uniqueCellCountForSites(provSites, 'ALLSKY_SFC_SW_DWN'), 4);
 });
 
-test('REAL_DATA_SOURCES and MODELED_NBS_SCENARIOS never advertise MODIS, GPM, SMAP, or unverified aggregates', () => {
+test('REAL_DATA_SOURCES never advertise MODIS, GPM, SMAP, or unverified modeled Appendix A estimates', () => {
   const realText = JSON.stringify(REAL_DATA_SOURCES);
   assert.match(realText, /MERRA-2/);
   assert.match(realText, /CERES SYN1DEG/);
   assert.match(realText, /Open-Meteo/);
   assert.match(realText, /GBIF/);
   assert.doesNotMatch(realText, /\b(MODIS|GPM|SMAP)\b/);
-  assert.equal(MODELED_NBS_SCENARIOS.length, 3);
+  assert.equal('MODELED_NBS_SCENARIOS' in siteFacts, false);
 });
 
 test('computeSiteTrendHighlight returns observed Z, 95% CI, and Mann-Kendall p for Heredia and Guanacaste', async () => {

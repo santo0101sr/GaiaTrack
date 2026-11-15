@@ -155,3 +155,13 @@ body.immersive-mode{overflow:hidden;background:var(--bg)}
   .live-dot,.flight-intro,.flight-panel,.weather-console,.flight-bottom,#flight-label,#weather-clean-view,.lab-open>main,.value-pop{animation:none!important}
   .flight-intro,.flight-panel,.weather-console,#weather-clean-view,.flight-controls button,.flight-panel button,.weather-console button{transition:none!important}
 }
+.debug-overlay{position:fixed;top:92px;right:18px;z-index:20;padding:10px 12px;border-radius:8px;background:rgba(4,16,24,.92);border:1px solid rgba(20,197,232,.48);color:#d7eef4;font:600 11px/1.55 var(--mono);pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.45);min-width:190px;white-space:pre}
+body.light-mode .debug-overlay{background:rgba(244,250,247,.94);color:#0f2c34;border-color:rgba(14,119,240,.45)}
+.quality-control{display:inline-flex;align-items:center;gap:6px;font:600 10.5px var(--font);color:var(--muted);padding:5px 9px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface-subtle)}
+.quality-control select{background:transparent;border:0;color:var(--text);font:600 10.5px var(--font);cursor:pointer;outline:none}
+.quality-control select option{background:var(--bg);color:var(--text)}
+.low-quality-offer{position:fixed;bottom:92px;left:50%;transform:translateX(-50%);z-index:15;display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--radius-md);background:var(--surface);border:1px solid var(--border-strong);box-shadow:0 12px 32px rgba(0,0,0,.35);backdrop-filter:blur(10px);font:500 12px/1.4 var(--font);color:var(--text);max-width:min(92vw,540px)}
+.low-quality-offer[hidden]{display:none}
+.low-quality-offer button{padding:6px 12px;border-radius:var(--radius-sm);font:600 11.5px var(--font);cursor:pointer;white-space:nowrap}
+.low-quality-offer #open-2d-explorer{background:var(--accent);color:#03120b;border:0}
+.low-quality-offer #dismiss-2d-offer{background:transparent;color:var(--muted);border:1px solid var(--border);padding:5px 8px}

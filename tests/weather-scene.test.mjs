@@ -41,20 +41,19 @@ test('Rain stops immediately when selecting a dry province, and province effects
     publishWeather('current',raw('limon',0,3,4));
     const scene=createWeatherExperience({root,meshes,light,coords});
     const group=root.getObjectByName('selected-weather');
-    const rain=group.children.find(c=>c.isLineSegments);
+    const rain=group.children.find(c=>c.isPoints);
     const selectedSky=group.getObjectByName('territory-sky');
     assert.equal(selectedSky.userData.cloudCover,1);assert.equal(selectedSky.userData.sunStrength,0);
     for(let t=0;t<1000;t+=33)scene.animate(t,true);
     assert.ok(rain.geometry.drawRange.count>0);
-    // Decorative motion/reduced-motion no longer disables data-driven precipitation.
-    const dropPositions=rain.geometry.attributes.position.array;
-    const positionBefore=dropPositions[1];scene.animate(1020,false);
-    assert.notEqual(dropPositions[1],positionBefore);
+    // Decorative motion/reduced-motion no longer disables data-driven precipitation (uTime advances via shader).
+    const timeBefore=rain.material.uniforms.uTime.value;scene.animate(1020,false);
+    assert.notEqual(rain.material.uniforms.uTime.value,timeBefore);
     document.querySelector('#weather-motion').onclick();
-    const paused=dropPositions.slice();scene.animate(1050,false);
-    assert.deepEqual(dropPositions,paused);
+    const pausedTime=rain.material.uniforms.uTime.value;scene.animate(1050,false);
+    assert.equal(rain.material.uniforms.uTime.value,pausedTime);
     document.querySelector('#weather-motion').onclick();scene.animate(1080,false);
-    assert.notDeepEqual(dropPositions,paused);
+    assert.notEqual(rain.material.uniforms.uTime.value,pausedTime);
 
     document.dispatchEvent(new CustomEvent('gaiatrack:selection',{detail:{site:'limon'}}));
     assert.equal(rain.geometry.drawRange.count,0);
@@ -63,7 +62,7 @@ test('Rain stops immediately when selecting a dry province, and province effects
     assert.equal(rain.geometry.drawRange.count,0);
     const rainyProvince=root.getObjectByName('province-weather-heredia');
     assert.equal(rainyProvince.visible,true);
-    assert.ok(rainyProvince.children.find(c=>c.isLineSegments).geometry.drawRange.count>0);
+    assert.ok(rainyProvince.children.find(c=>c.isPoints).geometry.drawRange.count>0);
     assert.equal(root.getObjectByName('province-weather-limon').visible,false);
     publishWeather('current',{...raw('limon',0,2,4),clouds:10,isDay:true});
     assert.equal(selectedSky.userData.cloudCover,.1);assert.ok(selectedSky.userData.sunStrength>0);
@@ -82,9 +81,9 @@ test('Rain stops immediately when selecting a dry province, and province effects
 
     // No current data for this canton must not freeze other provinces' rain.
     document.dispatchEvent(new CustomEvent('gaiatrack:selection',{detail:{site:'unknown-canton'}}));
-    const positions=rainyProvince.children.find(c=>c.isLineSegments).geometry.attributes.position.array;
-    const before=positions[1];scene.animate(1133,true);
-    assert.equal(group.visible,false);assert.notEqual(positions[1],before);
+    const provPoints=rainyProvince.children.find(c=>c.isPoints);
+    const before=provPoints.material.uniforms.uTime.value;scene.animate(1133,true);
+    assert.equal(group.visible,false);assert.notEqual(provPoints.material.uniforms.uTime.value,before);
 
     // Current province weather must not appear in the hourly forecast scene.
     document.querySelector('#weather-future').onclick();scene.animate(1166,true);
@@ -111,14 +110,14 @@ test('National and provincial views show a wet canton even with a dry provincial
     document.dispatchEvent(new CustomEvent('gaiatrack:territory-view',{detail:{province:null}}));scene.animate(50);
     const wet=root.getObjectByName('canton-weather-heredia-centro'),dry=root.getObjectByName('canton-weather-limon-centro');
     assert.equal(wet.visible,true);assert.equal(dry.visible,true);
-    const wetRain=wet.children.find(item=>item.isLineSegments),dryRain=dry.children.find(item=>item.isLineSegments);
+    const wetRain=wet.children.find(item=>item.isPoints),dryRain=dry.children.find(item=>item.isPoints);
     assert.ok(wetRain.geometry.drawRange.count>0);assert.equal(dryRain.geometry.drawRange.count,0);
     assert.equal(root.getObjectByName('selected-weather').visible,false);
     document.dispatchEvent(new CustomEvent('gaiatrack:territory-view',{detail:{province:'limon'}}));scene.animate(100);assert.equal(wet.visible,false);
     document.dispatchEvent(new CustomEvent('gaiatrack:territory-view',{detail:{province:'heredia'}}));
     document.dispatchEvent(new CustomEvent('gaiatrack:selection',{detail:{site:'heredia-centro'}}));scene.animate(150);
     const selected=root.getObjectByName('selected-weather');assert.equal(selected.visible,true);assert.equal(wet.visible,false);
-    const selectedRain=selected.children.find(item=>item.isLineSegments);assert.ok(selectedRain.geometry.drawRange.count>0);
+    const selectedRain=selected.children.find(item=>item.isPoints);assert.ok(selectedRain.geometry.drawRange.count>0);
     publishWeather('current',raw('heredia-centro',0,0));assert.equal(selectedRain.geometry.drawRange.count,0);
     await Promise.resolve();
   }finally{globalThis.document=originalDocument;globalThis.fetch=originalFetch;}
@@ -165,14 +164,14 @@ test('Sub-sectors localize clouds and rain strictly to the wet part of a large c
     document.dispatchEvent(new CustomEvent('gaiatrack:territory-view',{detail:{province:null}}));scene.animate(50);
     const sarapiqui=root.getObjectByName('canton-weather-sarapiqui');
     const sky=sarapiqui.getObjectByName('territory-sky');
-    const rain=sarapiqui.children.find(c=>c.isLineSegments);
+    const rain=sarapiqui.children.find(c=>c.isPoints);
     assert.ok(rain.geometry.drawRange.count>0,'rain should appear in the wet sector even when center is dry');
     const cloudLayer=sky.getObjectByName('bounded-cloud-layer');
     assert.ok(cloudLayer.count>0);
     const cloudMat=cloudLayer.instanceMatrix.array;
     const dropPos=rain.geometry.attributes.position.array;
     let sumX=0,sumZ=0,drops=0;
-    for(let i=0;i<rain.geometry.drawRange.count;i+=2){
+    for(let i=0;i<rain.geometry.drawRange.count;i++){
       const x=dropPos[i*3],z=dropPos[i*3+2];
       sumX+=x;sumZ+=z;drops++;
       let nearCloud=false;

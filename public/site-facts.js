@@ -42,48 +42,6 @@ export const REAL_DATA_SOURCES = [
   }
 ];
 
-export const MODELED_NBS_SCENARIOS = [
-  {
-    id: 'urban-corridors',
-    areaHa: 450,
-    ieaFrom: 2.25,
-    ieaTo: 1.18,
-    deltaTempC: -2.15,
-    waterMillionM3Yr: 3.2,
-    fireRiskReductionPct: null,
-    nameEn: 'Urban Green Corridors · 450 ha',
-    nameEs: 'Corredores Verdes Urbanos (GAM) · 450 ha',
-    summaryEn: 'Modeled IEA shift 2.25 → 1.18, −2.15 °C surface effect, 3.2M m³/yr infiltration',
-    summaryEs: 'Cambio modelado IEA 2,25 → 1,18, −2,15 °C superficial, 3,2M m³/año infiltrados'
-  },
-  {
-    id: 'agroforestry',
-    areaHa: 1800,
-    ieaFrom: 2.34,
-    ieaTo: 1.29,
-    deltaTempC: -1.75,
-    waterMillionM3Yr: 6.8,
-    fireRiskReductionPct: null,
-    nameEn: 'Agroforestry Systems · 1,800 ha',
-    nameEs: 'Sistemas Agroforestales · 1.800 ha',
-    summaryEn: 'Modeled IEA shift 2.34 → 1.29, −1.75 °C surface effect, 6.8M m³/yr retention',
-    summaryEs: 'Cambio modelado IEA 2,34 → 1,29, −1,75 °C superficial, 6,8M m³/año retenidos'
-  },
-  {
-    id: 'wetlands-coast',
-    areaHa: 1200,
-    ieaFrom: 2.38,
-    ieaTo: 1.35,
-    deltaTempC: -1.90,
-    waterMillionM3Yr: 7.5,
-    fireRiskReductionPct: -74,
-    nameEn: 'Wetlands & Coast · 1,200 ha',
-    nameEs: 'Humedales y Zonas Costeras · 1.200 ha',
-    summaryEn: 'Modeled IEA shift 2.38 → 1.35, −1.90 °C, −74% fire risk, 7.5M m³/yr storage',
-    summaryEs: 'Cambio modelado IEA 2,38 → 1,35, −1,90 °C, −74 % riesgo de fuego, 7,5M m³/año'
-  }
-];
-
 export function deriveManifestFacts(manifest, { districtsCount = null, sectorsCount = null } = {}) {
   const sites = Array.isArray(manifest?.sites) ? manifest.sites : [];
   const provinces = Array.isArray(manifest?.provinces)

@@ -5,7 +5,6 @@ import {
   MERRA2_RES,
   CERES_RES,
   REAL_DATA_SOURCES,
-  MODELED_NBS_SCENARIOS,
   deriveManifestFacts,
   computeSiteTrendHighlight
 } from './site-facts.js';
@@ -298,34 +297,6 @@ function buildBenefitsBlock(){
         <summary>${tx('Inspect verified data sources and physical units','Ver fuentes reales verificadas y unidades físicas')}</summary>
         <ul>${sourceListHtml}</ul>
       </details>
-
-      <div class="lp-modeled-section">
-        <div class="lp-group-head">
-          <span class="lp-badge is-modeled">${tx('MODELED SCENARIO · NOT OBSERVED · TO BE VERIFIED','RESULTADO MODELADO, NO OBSERVADO · POR VERIFICAR')}</span>
-          <h3 class="lp-modeled-heading">${tx('Preliminary Nature-Based Solution estimates (Research Paper Appendix A)','Estimaciones preliminares de Soluciones Basadas en la Naturaleza (Apéndice A)')}</h3>
-        </div>
-        <div class="lp-table-scroll">
-          <table class="lp-modeled-table">
-            <thead>
-              <tr>
-                <th>${tx('Territory / Intervention','Territorio / Intervención')}</th>
-                <th>${tx('Modeled Outcome (Appendix A)','Resultado modelado (Apéndice A)')}</th>
-                <th>${tx('Verification Status','Estado')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${MODELED_NBS_SCENARIOS.map(s=>`
-                <tr>
-                  <td><strong>${tx(s.nameEn,s.nameEs)}</strong></td>
-                  <td>${tx(s.summaryEn,s.summaryEs)}</td>
-                  <td><span class="lp-verify-tag">${tx('to be verified','por verificar')}</span></td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-        <p class="lp-note-sm">${tx('Appendix A NbS projections are modeled literature scenarios separated from telemetry; observed charts and 3D indicators never blend modeled outcomes with real records.','Las cifras del Apéndice A corresponden a escenarios modelados separados de la telemetría; los gráficos y el observatorio 3D nunca mezclan resultados modelados con datos reales.')}</p>
-      </div>
     </div>
   `;
 }

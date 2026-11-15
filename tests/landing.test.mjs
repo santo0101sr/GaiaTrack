@@ -187,11 +187,25 @@ test('Unified slide renders creators carousel with dormant photo support, outsid
     assert.equal(i18nMod.getTheme(), 'dark');
     assert.equal(doc.body.classList.contains('light-mode'), false);
 
-    // Main app static HTML also exposes topbar theme toggle
+    // Main app static HTML also exposes topbar theme toggle and non-AI official logo favicon
     const indexHtml = await fs.readFile(path.resolve('public/index.html'), 'utf8');
     assert.match(indexHtml, /id="topbar-theme-toggle"[^>]*data-theme-toggle/);
+    assert.match(indexHtml, /<link rel="icon" type="image\/png" href="assets\/gaia-eb-final\.png">/);
+    assert.doesNotMatch(indexHtml, /rel="icon" href="data:image\/svg\+xml/);
+    const creditsHtml = await fs.readFile(path.resolve('public/credits.html'), 'utf8');
+    assert.match(creditsHtml, /<link rel="icon" type="image\/png" href="assets\/gaia-eb-final\.png">/);
+    assert.doesNotMatch(creditsHtml, /por verificar|Apéndice A/i);
 
-    // Verify centered brand logo, PDF, demo video, and dynamic observed vs. modeled separation (C1-C6)
+    // Verify brand logo image and Gemini-watermarked demo MP4 exist cleanly on disk
+    const logoStat = await fs.stat(path.resolve('public/assets/gaia-eb-final.png'));
+    assert.ok(logoStat.size > 0);
+    const demoPath = path.resolve('public/assets/gaiatrack-demo.mp4');
+    const demoStat = await fs.stat(demoPath);
+    assert.ok(demoStat.size > 100000);
+    const demoHeader = (await fs.readFile(demoPath)).subarray(0, 12).toString('latin1');
+    assert.equal(demoHeader.slice(4, 8), 'ftyp');
+
+    // Verify centered brand logo, PDF, demo video, and dynamic verified coverage (never unverifiable Appendix A claims)
     assert.match(portal.innerHTML, /assets\/gaia-eb-final\.png/);
     assert.match(portal.innerHTML, /assets\/gaia-eb-research-paper\.pdf/);
     assert.match(portal.innerHTML, /assets\/gaiatrack-demo\.mp4/);
@@ -201,10 +215,10 @@ test('Unified slide renders creators carousel with dormant photo support, outsid
     const sectorsCount = Object.values(sectors).reduce((sum, arr) => sum + (Array.isArray(arr) ? arr.length : 0), 0);
     landingMod.setLandingFacts({ manifest, annual, sectorsCount });
 
-    for (const token of ['2001–2025', '83', '20', '10', '479', 'Z =', '95% CI', 'to be verified']) {
+    for (const token of ['2001–2025', '83', '20', '10', '479', 'Z =', '95% CI']) {
       assert.ok(portal.innerHTML.includes(token), `Missing verified landing token: ${token}`);
     }
-    for (const stale of ['MODIS', 'GPM', 'SMAP', '84 Cantons', '84 cantons', '89%', '−44.8%', '−32.6%']) {
+    for (const stale of ['MODIS', 'GPM', 'SMAP', '84 Cantons', '84 cantons', '89%', '−44.8%', '−32.6%', 'to be verified', 'por verificar', 'Appendix A', '450 ha', '1,800 ha', '1,200 ha', '−74%']) {
       assert.equal(portal.innerHTML.includes(stale), false, `Found prohibited unverified token: ${stale}`);
     }
 
