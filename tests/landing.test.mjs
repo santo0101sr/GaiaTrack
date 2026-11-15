@@ -47,6 +47,7 @@ test('Unified slide renders creators carousel with dormant photo support, outsid
     }
     set innerHTML(html) {
       this._innerHTML = html;
+      if (this.id !== 'landing-portal') return;
       collections.clear();
       collections.set('.lp-giant-slide', []);
       collections.set('[data-enter-app]', []);
@@ -187,9 +188,22 @@ test('Unified slide renders creators carousel with dormant photo support, outsid
     assert.equal(i18nMod.getTheme(), 'dark');
     assert.equal(doc.body.classList.contains('light-mode'), false);
 
-    // Main app static HTML also exposes topbar theme toggle
+    // Main app static HTML also exposes topbar theme toggle with SVG icon (no emoji) and cropped official logo favicon
+    const indexHtml = await fs.readFile(path.resolve('public/index.html'), 'utf8');
     const mapHtml = await fs.readFile(path.resolve('public/map.html'), 'utf8');
+    const creditsHtml = await fs.readFile(path.resolve('public/credits.html'), 'utf8');
     assert.match(mapHtml, /id="topbar-theme-toggle"[^>]*data-theme-toggle/);
+    assert.match(mapHtml, /<button[^>]*id="topbar-theme-toggle"[^>]*><svg class="theme-icon"/);
+    assert.doesNotMatch(mapHtml, /☀️|🌙/);
+    assert.doesNotMatch(get('#lp-theme-toggle').innerHTML, /☀️|🌙/);
+    assert.match(get('#lp-theme-toggle').innerHTML, /<svg class="theme-icon"/);
+
+    for (const [name, html] of [['index.html', indexHtml], ['map.html', mapHtml], ['credits.html', creditsHtml]]) {
+      assert.match(html, /<link rel="icon"[^>]*href="assets\/gaia-favicon\.png"/, `Expected cropped favicon in ${name}`);
+      assert.doesNotMatch(html, /data:image\/svg\+xml/, `Found AI SVG data-URI favicon in ${name}`);
+    }
+    const faviconBytes = await fs.readFile(path.resolve('public/assets/gaia-favicon.png'));
+    assert.equal(faviconBytes.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
 
     // Verify centered brand logo, PDF, demo video, and quantified Trend Detective metrics
     assert.match(portal.innerHTML, /assets\/gaia-eb-final\.png/);

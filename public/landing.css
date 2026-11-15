@@ -49,8 +49,10 @@ body.landing-open>.topbar{opacity:0;pointer-events:none}
   background:linear-gradient(135deg,#2fe6a8,#14b8e6);color:#04141d;
 }
 .lp-corner-lang .lp-theme-btn{
+  display:inline-flex;align-items:center;gap:6px;
   color:#d9f3ff;letter-spacing:.3px;padding:9px 12px;
 }
+.theme-icon{width:14px;height:14px;flex-shrink:0;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .lp-corner-lang .lp-theme-btn:hover{
   background:rgba(47,230,168,.14);color:#ffffff;
 }

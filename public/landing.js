@@ -1,4 +1,4 @@
-import {getLang,getTheme,setLang,toggleTheme,tx} from './i18n.js';
+import {getLang,getTheme,setLang,toggleTheme,themeToggleHtml,tx} from './i18n.js';
 
 // Paste the final Pitch Video URL here when ready; UI stays hidden while empty.
 export const PITCH_VIDEO_URL='';
@@ -230,7 +230,7 @@ function buildContent(){
 
   return `
     <div class="lp-corner-lang" role="group" aria-label="${tx('Language & Theme','Idioma y Tema')}">
-      <button type="button" id="lp-theme-toggle" class="lp-theme-btn" data-theme-toggle data-lp-theme aria-pressed="${light}" aria-label="${light?tx('Switch to dark mode','Cambiar a modo oscuro'):tx('Switch to light mode','Cambiar a modo claro')}">${light?tx('🌙 Dark','🌙 Oscuro'):tx('☀️ Light','☀️ Claro')}</button>
+      <button type="button" id="lp-theme-toggle" class="lp-theme-btn" data-theme-toggle data-lp-theme aria-pressed="${light}" aria-label="${light?tx('Switch to dark mode','Cambiar a modo oscuro'):tx('Switch to light mode','Cambiar a modo claro')}">${themeToggleHtml(light)}</button>
       <span class="lp-corner-sep" aria-hidden="true"></span>
       <button type="button" data-lp-lang="en" class="${lang==='en'?'active':''}" aria-pressed="${lang==='en'}">EN</button>
       <button type="button" data-lp-lang="es" class="${lang==='es'?'active':''}" aria-pressed="${lang==='es'}">ES</button>

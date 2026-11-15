@@ -18,6 +18,14 @@ export function getTheme(){
 export const locale=()=>getLang()==='es'?'es-CR':'en-US';
 export const tx=(en,es)=>getLang()==='es'?es:en;
 
+export function themeToggleHtml(light,es=getLang()==='es'){
+  const icon=light
+    ?'<svg class="theme-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>'
+    :'<svg class="theme-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>';
+  const label=light?(es?'Oscuro':'Dark'):(es?'Claro':'Light');
+  return `${icon}<span>${label}</span>`;
+}
+
 function applyThemeDom(theme=getTheme()){
   if(typeof document==='undefined')return;
   const normalized=theme==='light'?'light':'dark';
@@ -27,10 +35,11 @@ function applyThemeDom(theme=getTheme()){
   document.body?.classList?.toggle?.('light-mode',light);
   const meta=document.querySelector?.('meta[name="theme-color"]');
   meta?.setAttribute?.('content',light?'#f2f7f4':'#071426');
-  const nextLabel=light?(es?'🌙 Oscuro':'🌙 Dark'):(es?'☀️ Claro':'☀️ Light');
+  const nextHtml=themeToggleHtml(light,es);
   const nextAria=light?(es?'Cambiar a modo oscuro':'Switch to dark mode'):(es?'Cambiar a modo claro':'Switch to light mode');
   document.querySelectorAll?.('[data-theme-toggle]')?.forEach?.(btn=>{
-    btn.textContent=nextLabel;
+    if('innerHTML' in btn)btn.innerHTML=nextHtml;
+    else btn.textContent=light?(es?'Oscuro':'Dark'):(es?'Claro':'Light');
     btn.setAttribute?.('aria-pressed',String(light));
     btn.setAttribute?.('aria-label',nextAria);
     btn.title=nextAria;

@@ -197,11 +197,13 @@
 
 /* Theme toggle button in header */
 .theme-toggle-btn{
+  display:inline-flex;align-items:center;gap:6px;
   padding:5px 10px;border:1px solid var(--line);border-radius:4px;
   background:#0d151d;color:var(--text);font:600 9.5px var(--font);
   letter-spacing:.5px;white-space:nowrap;transition:border-color .15s,background .15s,color .15s;
 }
 .theme-toggle-btn:hover{border-color:var(--accent);color:var(--accent)}
+.theme-icon{width:13px;height:13px;flex-shrink:0;display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
 /* Logo-Based Light Mode for Main 3D Observatory, Lab, Simulator & Chat */
 html[data-theme="light"]{
