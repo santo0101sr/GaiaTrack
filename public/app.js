@@ -115,8 +115,12 @@ function syncTerritoryBar(){
   const selectedSite=state.site?manifest?.sites?.find(s=>s.id===state.site):null;
   const toggleBtn=$('#territory-toggle-btn'),toggleLabel=$('#territory-toggle-label'),toggleCaret=$('#territory-toggle-caret');
   const provDrawer=$('#territory-province-drawer'),siteDrawer=$('#territory-site-drawer'),expandBtn=$('#expand-site-btn');
-  if(toggleLabel)toggleLabel.textContent=selectedSite?`${tx('Select territory','Seleccionar territorio')} · ${selectedSite.name}`:tx('Select territory','Seleccionar territorio');
-  if(toggleCaret)toggleCaret.textContent=provinceDrawerOpen?'▴':'▾';
+  if(toggleLabel){
+    toggleLabel.textContent=provinceDrawerOpen
+      ?tx('Territory','Territorio')
+      :(selectedSite?`${tx('Select territory','Seleccionar territorio')} · ${selectedSite.name}`:tx('Select territory','Seleccionar territorio'));
+  }
+  if(toggleCaret)toggleCaret.textContent=provinceDrawerOpen?'◂':'▸';
   if(toggleBtn){
     toggleBtn.setAttribute('aria-expanded',String(provinceDrawerOpen));
     toggleBtn.classList.toggle('is-open',provinceDrawerOpen);
@@ -126,14 +130,10 @@ function syncTerritoryBar(){
   if(siteDrawer)siteDrawer.hidden=!(provinceDrawerOpen&&siteDrawerOpen&&Boolean(selectedSite));
   if(expandBtn){
     expandBtn.hidden=!(selectedSite&&(!provinceDrawerOpen||!siteDrawerOpen));
-    expandBtn.textContent=tx('▾ Province view','▾ Vista de provincia');
+    expandBtn.textContent=tx('▸ Province view','▸ Vista provincia');
   }
-  const summaryEl=$('#sticky-site-summary');
-  if(summaryEl)summaryEl.textContent=selectedSite?`${format(valueAt(state.site,state.year))} ${v().unit} (${state.year})`:'';
-  if($('#drawer-prov-kicker'))$('#drawer-prov-kicker').textContent=tx('01 / PROVINCE','01 / PROVINCIA');
-  if($('#drawer-site-kicker'))$('#drawer-site-kicker').textContent=tx('02 / PROVINCE VIEW & CANTONS','02 / VISTA DE PROVINCIA Y CANTONES');
-  if($('#minimize-province-btn'))$('#minimize-province-btn').textContent=tx('▴ Minimize','▴ Minimizar');
-  if($('#minimize-site-btn'))$('#minimize-site-btn').textContent=tx('▴ Minimize view','▴ Minimizar vista');
+  if($('#minimize-province-btn'))$('#minimize-province-btn').textContent='◂';
+  if($('#minimize-site-btn'))$('#minimize-site-btn').textContent='◂';
 }
 
 function render(){
