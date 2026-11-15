@@ -43,7 +43,7 @@ const signed=(n,d=v().digits)=>(n>0?'+':'')+format(n,d);
 const series=(id=state.site)=>{if(!id)return [];const key=id+':'+state.variable;if(!annualCache.has(key))annualCache.set(key,annualPoints(annual,id,state.variable));return annualCache.get(key);};
 const valueAt=(id,year)=>annualValue(annual,id,state.variable,year);
 const deltaUnit=()=>state.variable==='RH2M'?tx('pp','p.p.'):v().unit;
-const currentColor='#18d86b';
+const currentColor='#81e8bf';
 
 function ensureHistory(id){
   if(!data[id])return Promise.reject(Error('Territorio inválido.'));
@@ -279,10 +279,10 @@ function initMap(){
 
 function renderChart(){
   const svg=$('#history-chart');
-  const mobile=innerWidth<580,W=mobile?500:1100,H=230,left=mobile?48:64,right=18,top=16,bottom=32;
+  const mobile=innerWidth<580,W=mobile?440:960,H=300,left=mobile?48:64,right=18,top=16,bottom=32;
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
   if(!state.site){
-    svg.innerHTML=`<text x="50%" y="50%" fill="#a1b0bb" text-anchor="middle">${tx('Choose a province above or in the regional scan below to plot its 2001–2025 series.','Elegí una provincia arriba o en el escaneo regional de abajo para graficar su serie 2001–2025.')}</text>`;
+    svg.innerHTML=`<text x="50%" y="50%" fill="#a1b0bb" text-anchor="middle">${mobile?tx('Select a territory to start','Elegí un territorio para empezar'):tx('Choose a province above or in the regional scan below to plot its 2001–2025 series.','Elegí una provincia arriba o en el escaneo regional de abajo para graficar su serie 2001–2025.')}</text>`;
     $('#chart-label').textContent=`${v().name} · Costa Rica`;
     const legendWrap=document.querySelector('.chart-legend');
     if(legendWrap)legendWrap.innerHTML=`<i></i><span id="legend-site">${tx('Choose a province','Elegí una provincia')}</span><i class="dash"></i> ${tx('Sen trend','Tendencia de Sen')}`;
@@ -301,9 +301,9 @@ function renderChart(){
   const tr=trend(primary),displayTrend=p=>tr.intercept+tr.slope*p.year;
   const ticks=Array.from({length:5},(_,i)=>min+(max-min)*i/4);
   let html=`<defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${currentColor}" stop-opacity=".18"/><stop offset="100%" stop-color="${currentColor}" stop-opacity="0"/></linearGradient></defs>`;
-  for(const tick of ticks){html+=`<line x1="${left}" x2="${W-right}" y1="${y(tick)}" y2="${y(tick)}" stroke="#293641" stroke-dasharray="3 5"/><text x="${left-12}" y="${y(tick)+4}" text-anchor="end" fill="#92a4b2" font-size="${mobile?11:10}" font-family="monospace">${format(tick,state.variable==='GWETTOP'?2:state.variable==='PRECTOTCORR'?0:1)}</text>`;}
+  for(const tick of ticks){html+=`<line x1="${left}" x2="${W-right}" y1="${y(tick)}" y2="${y(tick)}" stroke="#293641" stroke-dasharray="3 5"/><text x="${left-12}" y="${y(tick)+4}" text-anchor="end" fill="#92a4b2" font-size="${mobile?12:11}" font-family="monospace">${format(tick,state.variable==='GWETTOP'?2:state.variable==='PRECTOTCORR'?0:1)}</text>`;}
   const years=Array.from({length:state.end-state.start+1},(_,i)=>state.start+i).filter((yr,i,arr)=>i===0||i===arr.length-1||yr%(mobile?5:3)===0);
-  for(const year of years){if(year!==state.start&&year-state.start<2||year!==state.end&&state.end-year<2)continue;html+=`<text x="${x(year)}" y="${H-8}" text-anchor="middle" fill="#92a4b2" font-size="${mobile?11:10}" font-family="monospace">${year}</text>`;}
+  for(const year of years){if(year!==state.start&&year-state.start<2||year!==state.end&&state.end-year<2)continue;html+=`<text x="${x(year)}" y="${H-8}" text-anchor="middle" fill="#92a4b2" font-size="${mobile?12:11}" font-family="monospace">${year}</text>`;}
   const path=pts=>pts.map((p,i)=>`${i?'L':'M'}${x(p.year)},${y(p.value)}`).join(' ');
   if(primary.length){
     html+=`<path d="${path(primary)} L${x(primary.at(-1).year)},${H-bottom} L${x(primary[0].year)},${H-bottom} Z" fill="url(#area)"/><path d="${path(primary)}" stroke="${currentColor}" fill="none" stroke-width="2"/>`;

@@ -54,7 +54,8 @@ function buildBandSvg(pairs,fill,stroke){
 }
 
 function renderForecastChartSvg(days,varKey,variable){
-  const W=920,H=224,left=54,right=24,top=28,bottom=46,pw=W-left-right,ph=H-top-bottom;
+  const mobile=innerWidth<600;
+  const W=mobile?440:920,H=mobile?300:260,left=mobile?40:54,right=mobile?12:24,top=28,bottom=46,pw=W-left-right,ph=H-top-bottom;
   const colW=pw/Math.max(1,days.length),xAt=i=>left+colW*(i+.5);
   const isTemp=varKey==='T2M'||varKey==='T2M_MIN'||varKey==='T2M_MAX';
   const vals=[];
@@ -87,7 +88,7 @@ function renderForecastChartSvg(days,varKey,variable){
   }
   const yAt=val=>top+((max-val)/(max-min||1))*ph;
 
-  let html=`<defs><linearGradient id="fc-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#18d86b" stop-opacity=".24"/><stop offset="100%" stop-color="#18d86b" stop-opacity=".01"/></linearGradient></defs>`;
+  let html=`<defs><linearGradient id="fc-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#81e8bf" stop-opacity=".24"/><stop offset="100%" stop-color="#81e8bf" stop-opacity=".01"/></linearGradient></defs>`;
   for(let t=0;t<=4;t++){
     const tick=min+(max-min)*t/4,y=yAt(tick);
     html+=`<line x1="${left}" x2="${W-right}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#1d3b5c" stroke-dasharray="3 5"/>`;
@@ -96,7 +97,7 @@ function renderForecastChartSvg(days,varKey,variable){
 
   if(isTemp){
     const tempPairs=days.map((d,i)=>Number.isFinite(d.T2M_MIN)&&Number.isFinite(d.T2M_MAX)?{x:xAt(i),lowY:yAt(d.T2M_MIN),highY:yAt(d.T2M_MAX)}:null);
-    html+=buildBandSvg(tempPairs,'#14b8e61a','#14b8e666');
+    html+=buildBandSvg(tempPairs,'#80bfe81a','#80bfe866');
     if(varKey==='T2M'){
       const ensPairs=days.map((d,i)=>d.ensemble&&Number.isFinite(d.ensemble.p10)&&Number.isFinite(d.ensemble.p90)?{x:xAt(i),lowY:yAt(d.ensemble.p10),highY:yAt(d.ensemble.p90)}:null);
       html+=buildBandSvg(ensPairs,'#f5b3161c','#f5b31677');
@@ -108,7 +109,7 @@ function renderForecastChartSvg(days,varKey,variable){
     days.forEach((d,i)=>{
       if(!Number.isFinite(d.PRECTOTCORR)||d.PRECTOTCORR<=0)return;
       const topY=yAt(d.PRECTOTCORR),h=Math.max(2,baseY-topY);
-      html+=`<rect x="${(xAt(i)-barW/2).toFixed(1)}" y="${topY.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="#14b8e638" stroke="#14b8e699" stroke-width="1"/>`;
+      html+=`<rect x="${(xAt(i)-barW/2).toFixed(1)}" y="${topY.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="#80bfe838" stroke="#80bfe899" stroke-width="1"/>`;
     });
   }
 
@@ -119,7 +120,7 @@ function renderForecastChartSvg(days,varKey,variable){
     html+=`<path d="${area}" fill="url(#fc-area)"/>`;
   }
   const linePath=buildLinePath(pts);
-  if(linePath)html+=`<path d="${linePath}" fill="none" stroke="${varKey==='PRECTOTCORR'?'#14b8e6':'#18d86b'}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
+  if(linePath)html+=`<path d="${linePath}" fill="none" stroke="${varKey==='PRECTOTCORR'?'#80bfe8':'#81e8bf'}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
 
   days.forEach((d,i)=>{
     const x=xAt(i),p=pts[i];
@@ -127,7 +128,7 @@ function renderForecastChartSvg(days,varKey,variable){
     html+=`<text x="${x.toFixed(1)}" y="${H-22}" text-anchor="middle" fill="#a8c2da" font-size="10" font-weight="600">${dayTag}</text>`;
     html+=`<text x="${x.toFixed(1)}" y="${H-8}" text-anchor="middle" fill="#7c9ab8" font-size="9.5" font-family="monospace">${dateText(d.date)}</text>`;
     if(p){
-      const col=varKey==='PRECTOTCORR'?'#14b8e6':'#18d86b';
+      const col=varKey==='PRECTOTCORR'?'#80bfe8':'#81e8bf';
       html+=`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4.5" fill="${col}" stroke="#071426" stroke-width="1.5"/>`;
       html+=`<text x="${p.x.toFixed(1)}" y="${Math.max(14,p.y-10).toFixed(1)}" text-anchor="middle" fill="#edf6fc" font-size="11" font-weight="600">${fmt(p.val,variable.digits)}</text>`;
     }
@@ -171,6 +172,12 @@ function buildSynthesisText(days,summary){
 
 export function initForecast(){
   if(initialized)return;initialized=true;
+  let resizeFrame;
+  window.addEventListener('resize',()=>{
+    if(!forecast)return;
+    cancelAnimationFrame(resizeFrame);
+    resizeFrame=requestAnimationFrame(render);
+  });
   $('#forecast-refresh').onclick=()=>{if(selectedSite)updateForecast(selectedSite,selectedVariable,true);};
   $('#forecast-download').onclick=download;
   const refresh=()=>{if(!document.hidden&&selectedSite)updateForecast(selectedSite,selectedVariable);};
@@ -235,7 +242,14 @@ function render(){
     return `<button type="button" class="${key===selectedVariable?'selected':''}" data-fvar="${key}" aria-pressed="${key===selectedVariable}">${p.short}</button>`;
   }).join('');
   const legendHtml=`<span class="fc-legend"><i></i>${variable.name}${isTemp?` <b class="band"></b>${tx('Min–Max range','Rango mín–máx')}`:''}${selectedVariable==='T2M'&&hasEns?` <b class="ens"></b>GFS P10–P90`:''}</span>`;
-  const daysGridHtml=forecast.days.map((d,i)=>`<article class="forecast-day-card"><div class="forecast-day-head"><div><span class="forecast-weekday">${i===0?tx('TOMORROW','MAÑANA'):dateText(d.date,{weekday:'short'}).toUpperCase()}</span><span class="forecast-date">${dateText(d.date)}</span></div><span class="forecast-symbol" aria-hidden="true">${Number.isFinite(d.PRECTOTCORR)&&d.PRECTOTCORR>=1?'≋':'☼'}</span></div><div class="forecast-day-focus"><strong>${fmt(d[selectedVariable],variable.digits)} <small>${variable.unit}</small></strong><span class="forecast-day-sub">${variable.name}</span></div><dl class="forecast-day-metrics"><div><dt>Temp</dt><dd>${fmt(d.T2M,1)} °C <small>(${fmt(d.T2M_MIN,1)}°/${fmt(d.T2M_MAX,1)}°)</small></dd></div><div><dt>${tx('Rain','Lluvia')}</dt><dd>${fmt(d.PRECTOTCORR,1)} mm${Number.isFinite(d.rainProbability)?` <small>· ${fmt(d.rainProbability,0)}%</small>`:''}</dd></div><div><dt>${tx('Humidity','Humedad')}</dt><dd>${fmt(d.RH2M,0)} %</dd></div><div><dt>${tx('Solar','Radiación')}</dt><dd>${fmt(d.ALLSKY_SFC_SW_DWN,1)} MJ/m²</dd></div><div><dt>${tx('Soil','Suelo')}</dt><dd>${fmt(d.GWETTOP,3)} m³/m³</dd></div><div><dt>GFS P10–P90</dt><dd>${d.ensemble?`${fmt(d.ensemble.p10,1)}–${fmt(d.ensemble.p90,1)} °C`:'—'}</dd></div></dl></article>`).join('');
+  const daysGridHtml=forecast.days.map((d,i)=>{
+    const known=Number.isFinite(d.PRECTOTCORR),rainy=known&&d.PRECTOTCORR>=1;
+    const icon=known?`<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H8a5 5 0 0 1-.5-10 7.5 7.5 0 0 1 14.4-1A5.5 5.5 0 0 1 24 21h-1"/>${rainy?'<path d="m12 22-2 5m8-5-2 5m8-5-2 5"/>':'<path d="M12 21h8"/>'}</svg>`:'—';
+    return `<article class="forecast-day-card"><div class="forecast-day-head"><div><span class="forecast-weekday">${i===0?tx('TOMORROW','MAÑANA'):dateText(d.date,{weekday:'short'}).toUpperCase()}</span><span class="forecast-date">${dateText(d.date)}</span></div><span class="forecast-symbol" aria-hidden="true">${icon}</span></div>
+      <div class="forecast-day-focus"><strong>${fmt(d[selectedVariable],variable.digits)} <small>${variable.unit}</small></strong><span class="forecast-day-sub">${variable.name}</span></div>
+      <div class="forecast-day-overview"><span>${tx('Min / Max','Mín / Máx')} <b>${fmt(d.T2M_MIN,1)}° / ${fmt(d.T2M_MAX,1)}°C</b></span><span>${tx('Rain','Lluvia')} <b>${fmt(d.PRECTOTCORR,1)} mm</b></span></div>
+      <details class="forecast-day-more"><summary>${tx('All readings','Todas las variables')}</summary><dl class="forecast-day-metrics"><div><dt>${tx('Mean temperature','Temperatura media')}</dt><dd>${fmt(d.T2M,1)} °C</dd></div><div><dt>${tx('Max. hourly rain probability','Prob. horaria máx. de lluvia')}</dt><dd>${fmt(d.rainProbability,0)} %</dd></div><div><dt>${tx('Relative humidity','Humedad relativa')}</dt><dd>${fmt(d.RH2M,0)} %</dd></div><div><dt>${tx('Solar radiation','Radiación solar')}</dt><dd>${fmt(d.ALLSKY_SFC_SW_DWN,1)} MJ/m²</dd></div><div><dt>${tx('Soil moisture','Humedad del suelo')}</dt><dd>${fmt(d.GWETTOP,3)} m³/m³</dd></div><div><dt>GFS P10–P90</dt><dd>${d.ensemble?`${fmt(d.ensemble.p10,1)}–${fmt(d.ensemble.p90,1)} °C`:'—'}</dd></div></dl></details></article>`;
+  }).join('');
 
   $('#forecast-days').innerHTML=`<div class="forecast-chart-box"><div class="forecast-chart-head"><div><span class="section-label">${tx('7-DAY VARIATION CHART','GRÁFICO DE VARIACIÓN A 7 DÍAS')}</span>${legendHtml}</div><div class="forecast-var-pills" role="group" aria-label="${tx('Select forecast variable','Seleccionar variable del pronóstico')}">${pillsHtml}</div></div>${renderForecastChartSvg(forecast.days,selectedVariable,variable)}</div><div class="forecast-days-grid">${daysGridHtml}</div>`;
   $('#forecast-days').querySelectorAll('[data-fvar]').forEach(btn=>{

@@ -81,6 +81,10 @@ export function applyStaticI18n(){
   setText('#tendencias .eyebrow',es?'01 / SERIES TEMPORALES Y SIGNIFICANCIA':'01 / TIME SERIES & SIGNIFICANCE');
   const trH2=document.querySelector('#tendencias h2');
   if(trH2)trH2.innerHTML=es?'La historia detrás de la señal<span>.</span>':'The story behind the signal<span>.</span>';
+  setText('#trend-intro',es?'Explorá la evidencia. Compará territorios. Entendé qué está cambiando.':'Explore the evidence. Compare places. Understand what is changing.');
+  setText('#forecast-intro',es?'Una perspectiva clara de tu territorio, día a día.':'A clearer outlook for your territory, day by day.');
+  setText('#advanced-title',es?'Explorá la ciencia':'Explore the science');
+  setText('#advanced-note',es?'Puntuaciones Z, intervalos de confianza y métodos estadísticos':'Z-scores, confidence intervals and statistical methods');
   setText('#download span',es?'Descargar CSV':'Download CSV');
   const flowLabels=document.querySelectorAll('#analysis-flow .flow-step small');
   const flowCopy=es?['VARIABLE','REGIÓN','PERÍODO','TENDENCIA VISUAL','SIGNIFICANCIA']:['VARIABLE','REGION','PERIOD','VISUAL TREND','SIGNIFICANCE'];
@@ -139,7 +143,7 @@ export function applyStaticI18n(){
 
   setText('#pronostico .eyebrow',es?'05 / PERSPECTIVA A 7 DÍAS · CONTEXTO CORTO PLAZO':'05 / 7-DAY METEOROLOGICAL OUTLOOK · SHORT-TERM CONTEXT');
   const fcH2=document.querySelector('#pronostico h2');
-  if(fcH2)fcH2.innerHTML=es?'El clima cambia. Anticipá el tiempo<span>.</span>':'Weather shifts. Stay ahead<span>.</span>';
+  if(fcH2)fcH2.innerHTML=es?'Los próximos siete días<span>.</span>':'The next seven days<span>.</span>';
   setText('#forecast-refresh',es?'↻ Actualizar pronóstico':'↻ Refresh forecast');
   setText('.forecast-badge',es?'PRONÓSTICO DE MODELOS':'MODEL FORECAST');
   setText('.forecast-heading a',es?'Fuentes y método ↗':'Sources & method ↗');
@@ -170,7 +174,7 @@ export function applyStaticI18n(){
   });
 
   const footerBrand=document.querySelector('.footer-brand');
-  if(footerBrand)footerBrand.innerHTML=`<img class="footer-logo" src="assets/gaia-eb-logo.png" alt="Gaia E&amp;B" width="779" height="320"> <span>/</span> ${es?'Environment &amp; Benefits · Costa Rica.':'Environment &amp; Benefits · Costa Rica.'}`;
+  if(footerBrand)footerBrand.innerHTML=`<img class="footer-logo" src="assets/gaia-eb-final.png" alt="Gaia E&amp;B" width="1983" height="793"> <span>/</span> ${es?'Environment &amp; Benefits · Costa Rica.':'Environment &amp; Benefits · Costa Rica.'}`;
   setText('#sources-open',es?'Fuentes y limitaciones ↗':'Sources & limitations ↗');
 
   setText('#method-dialog .eyebrow',es?'GAIA E&B / CIENCIA TRANSPARENTE':'GAIA E&B / TRANSPARENT SCIENCE');
