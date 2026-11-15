@@ -7,6 +7,7 @@
     "dev": "node --env-file-if-exists=.env.local scripts/serve.mjs",
     "start": "node --env-file-if-exists=.env.local scripts/serve.mjs",
     "data": "node scripts/fetch-data.mjs",
+    "data:eco": "node scripts/fetch-ecological.mjs",
     "test": "node --test tests/*.test.mjs",
     "build": "node scripts/validate-deploy.mjs",
     "deploy": "vercel",

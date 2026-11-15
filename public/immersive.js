@@ -7,9 +7,9 @@ import * as THREE from './vendor/three.module.js';
 import {siteOptionsHtml,annualValue} from './territories.js';
 import {registerTerritories} from './recommendations.js';
 import {getLang,locale,setLang,tx} from './i18n.js';
-import {thermalColor,thermalRange,fetchLiveTemperatures,THERMAL_GRADIENT_CSS} from './thermal-radar.js';
-const host=document.createElement('section');host.id='immersive';host.setAttribute('aria-label',tx('3D exploration of Costa Rica','Exploración tridimensional de Costa Rica'));host.innerHTML=`<div id="world-canvas"></div><div class="scene-vignette"></div><div class="flight-intro"><span class="eyebrow">GAIATRACK / ${tx('COSTA RICA MISSION','MISIÓN COSTA RICA')}</span><h1>Costa Rica,<br><em>${tx('a living world.','un mundo vivo.')}</em></h1><p>${tx('AN OBSERVATORY TO EXPLORE<br>Weather, territory &amp; signals of change.','UN OBSERVATORIO PARA EXPLORAR<br>Tiempo, territorio y señales de cambio.')}</p></div><aside class="flight-panel"><div class="flight-kicker"><span class="live-dot"></span> ${tx('SCIENTIFIC TELEMETRY','TELEMETRÍA CIENTÍFICA')}</div><label class="territory-field-label" for="hud-province-select">01 / Provincia</label><select id="hud-province-select" class="hud-select" aria-label="Seleccionar provincia"></select><label class="territory-field-label" for="hud-site-select">02 / Cantón</label><select id="hud-site-select" class="hud-select" aria-label="${tx('Select province or canton','Seleccionar provincia o cantón')}"></select><h2 id="flight-place">${tx('Choose a province','Elegí una provincia')}</h2><span id="flight-coord" class="mono"></span><div class="flight-reading"><strong id="flight-value">—</strong><span id="flight-unit">°C</span></div><p id="flight-variable">${tx('Mean temperature · historical 2025','Temperatura media · histórico 2025')}</p><div class="flight-rule"></div><p class="flight-source">${tx('REAL DATA / NASA POWER<br><span>One reference point per territory.<br>Select a province or canton to investigate.</span>','DATOS REALES / NASA POWER<br><span>Un punto de referencia por territorio.<br>Seleccioná una provincia o cantón para investigar.</span>')}</p><p class="source-integrity"></p><button id="flight-investigate">${tx('Investigate this territory','Investigar este territorio')} <span>↗</span></button></aside><div class="flight-bottom"><div class="flight-controls"><button id="region-mode" class="chosen">${tx('⌖ 3D Territory','⌖ Territorio 3D')}</button><button id="radar-mode-3d" type="button" aria-pressed="false">${tx('🌡 Thermal Radar','🌡 Radar térmico')}</button><button id="lab-mode">${tx('≋ Lab & Trends','≋ Tendencias y Lab')}</button><button id="forecast-mode">${tx('↗ 7-Day Context','↗ Contexto 7 días')}</button></div><div class="flight-guidance"><span>${tx('DRAG TO MOVE · RIGHT-DRAG TO ROTATE · SCROLL TO ZOOM','ARRASTRÁ PARA MOVER · BOTÓN DERECHO PARA GIRAR · RUEDA PARA ZOOM')}</span><button id="hud-lang-toggle" type="button" aria-label="${tx('Cambiar a Español','Switch to English')}">${tx('🌐 ES','🌐 EN')}</button><button id="camera-mode" type="button" aria-pressed="false">${tx('↔ Move','↔ Mover')}</button><button id="camera-reset" type="button">${tx('⌖ Center','⌖ Centrar')}</button><button id="motion-toggle" aria-pressed="true">${tx('Ⅱ Motion','Ⅱ Animación')}</button><button id="fullscreen-mode">${tx('⛶ Fullscreen','⛶ Pantalla completa')}</button></div></div><div id="flight-label">${tx('COSTA RICA / ORBITAL DESCENT','COSTA RICA / DESCENSO ORBITAL')}</div><div id="hud-radar-legend" hidden><div class="radar-legend-head"><strong id="radar-legend-title"></strong><span id="radar-legend-range"></span></div><div class="radar-legend-bar"></div><small id="radar-legend-note"></small></div><span class="scene-disclaimer">${tx('Data-driven atmosphere illustration of the selected point · not satellite imagery or measured spatial distribution','Atmósfera ilustrativa del punto seleccionado, guiada por datos · no es imagen satelital ni distribución espacial medida')}</span><button id="close-lab" hidden>${tx('← Back to 3D exploration','← Volver a la exploración 3D')}</button><p id="scene-loading" role="status">${tx('Initializing 3D territory…','Inicializando territorio 3D…')}</p>`;document.body.append(host);document.body.classList.add('immersive-mode','intro-playing','national-view');
-const $=s=>document.querySelector(s);let explorer,cameraControls,radarMode=false,liveTemps=null,liveUpdatedAt=null,liveStatus='idle';const provinceBorders=[];let renderer,scene,camera,root,planet,planetFades=[],meshes=[],beacons=[],starPoints,pinRing,selection=null,sites=[],annual,territoryManifest,geo,variable='T2M',year=2025,orbital=true,introStart=null,introDone=false,moving=true,dragging=false,travel=0,yaw=.1026,pitch=.1815,distance=13.5,targetYaw=.1026,targetPitch=.1815,targetDistance=13.5,previous=[0,0],lastFrame=0;
+import {computeAllRisks,driverLabel,riskColor,riskLevel,RISK_GRADIENT_CSS} from './ecological-risk.js';
+const host=document.createElement('section');host.id='immersive';host.setAttribute('aria-label',tx('3D exploration of Costa Rica','Exploración tridimensional de Costa Rica'));host.innerHTML=`<div id="world-canvas"></div><div class="scene-vignette"></div><div class="flight-intro"><span class="eyebrow">GAIATRACK / ${tx('COSTA RICA MISSION','MISIÓN COSTA RICA')}</span><h1>Costa Rica,<br><em>${tx('a living world.','un mundo vivo.')}</em></h1><p>${tx('AN OBSERVATORY TO EXPLORE<br>Weather, territory &amp; signals of change.','UN OBSERVATORIO PARA EXPLORAR<br>Tiempo, territorio y señales de cambio.')}</p></div><aside class="flight-panel"><div class="flight-kicker"><span class="live-dot"></span> ${tx('SCIENTIFIC TELEMETRY','TELEMETRÍA CIENTÍFICA')}</div><label class="territory-field-label" for="hud-province-select">01 / Provincia</label><select id="hud-province-select" class="hud-select" aria-label="Seleccionar provincia"></select><label class="territory-field-label" for="hud-site-select">02 / Cantón</label><select id="hud-site-select" class="hud-select" aria-label="${tx('Select province or canton','Seleccionar provincia o cantón')}"></select><h2 id="flight-place">${tx('Choose a province','Elegí una provincia')}</h2><span id="flight-coord" class="mono"></span><div class="flight-reading"><strong id="flight-value">—</strong><span id="flight-unit">°C</span></div><p id="flight-variable">${tx('Mean temperature · historical 2025','Temperatura media · histórico 2025')}</p><div class="flight-rule"></div><p class="flight-source">${tx('REAL DATA / NASA POWER<br><span>One reference point per territory.<br>Select a province or canton to investigate.</span>','DATOS REALES / NASA POWER<br><span>Un punto de referencia por territorio.<br>Seleccioná una provincia o cantón para investigar.</span>')}</p><p class="source-integrity"></p><button id="flight-investigate">${tx('Investigate this territory','Investigar este territorio')} <span>↗</span></button></aside><div class="flight-bottom"><div class="flight-controls"><button id="region-mode" class="chosen">${tx('⌖ 3D Territory','⌖ Territorio 3D')}</button><button id="radar-mode-3d" type="button" aria-pressed="false">${tx('🌿 Ecological Risk','🌿 Riesgo ecológico')}</button><button id="lab-mode">${tx('≋ Lab & Trends','≋ Tendencias y Lab')}</button><button id="forecast-mode">${tx('↗ 7-Day Context','↗ Contexto 7 días')}</button></div><div class="flight-guidance"><span>${tx('DRAG TO MOVE · RIGHT-DRAG TO ROTATE · SCROLL TO ZOOM','ARRASTRÁ PARA MOVER · BOTÓN DERECHO PARA GIRAR · RUEDA PARA ZOOM')}</span><button id="hud-lang-toggle" type="button" aria-label="${tx('Cambiar a Español','Switch to English')}">${tx('🌐 ES','🌐 EN')}</button><button id="camera-mode" type="button" aria-pressed="false">${tx('↔ Move','↔ Mover')}</button><button id="camera-reset" type="button">${tx('⌖ Center','⌖ Centrar')}</button><button id="motion-toggle" aria-pressed="true">${tx('Ⅱ Motion','Ⅱ Animación')}</button><button id="fullscreen-mode">${tx('⛶ Fullscreen','⛶ Pantalla completa')}</button></div></div><div id="flight-label">${tx('COSTA RICA / ORBITAL DESCENT','COSTA RICA / DESCENSO ORBITAL')}</div><div id="hud-radar-legend" hidden><div class="radar-legend-head"><strong id="radar-legend-title"></strong><span id="radar-legend-range"></span></div><div class="radar-legend-bar"></div><small id="radar-legend-note"></small></div><span class="scene-disclaimer">${tx('Data-driven atmosphere illustration of the selected point · not satellite imagery or measured spatial distribution','Atmósfera ilustrativa del punto seleccionado, guiada por datos · no es imagen satelital ni distribución espacial medida')}</span><button id="close-lab" hidden>${tx('← Back to 3D exploration','← Volver a la exploración 3D')}</button><p id="scene-loading" role="status">${tx('Initializing 3D territory…','Inicializando territorio 3D…')}</p>`;document.body.append(host);document.body.classList.add('immersive-mode','intro-playing','national-view');
+const $=s=>document.querySelector(s);let explorer,cameraControls,radarMode=false,ecological=null,riskSummary=null;const provinceBorders=[];let renderer,scene,camera,root,planet,planetFades=[],meshes=[],beacons=[],starPoints,pinRing,selection=null,sites=[],annual,territoryManifest,geo,variable='T2M',year=2025,orbital=true,introStart=null,introDone=false,moving=true,dragging=false,travel=0,yaw=.1026,pitch=.1815,distance=13.5,targetYaw=.1026,targetPitch=.1815,targetDistance=13.5,previous=[0,0],lastFrame=0;
 const focus=new THREE.Vector3(),targetFocus=new THREE.Vector3();document.addEventListener('gaiatrack:focuspoint',e=>{introDone=true;document.body.classList.remove('intro-playing');mode(false);const p=coords(e.detail.longitude,e.detail.latitude);targetFocus.set(p.x,.6,p.z);targetDistance=6.8;});
 function panel(anchor){document.body.classList.add('lab-open');$('#close-lab').hidden=false;requestAnimationFrame(()=>{document.querySelector(anchor)?.scrollIntoView({behavior:'instant'});window.dispatchEvent(new Event('resize'));});}
 function close(){document.body.classList.remove('lab-open');$('#close-lab').hidden=true;$('.flight-panel').scrollTop=0;explorer?.focus();}
@@ -20,44 +20,39 @@ $('#hud-lang-toggle').onclick=()=>setLang(getLang()==='en'?'es':'en');
 $('#motion-toggle').onclick=()=>{moving=!moving;$('#motion-toggle').textContent=moving?tx('Ⅱ Motion','Ⅱ Animación'):tx('▶ Motion','▶ Animación');$('#motion-toggle').setAttribute('aria-pressed',String(moving));};
 function mode(value){targetFocus.set(0,0,0);orbital=value;root.visible=!value;root.scale.setScalar(1);planet.visible=value;targetDistance=value?13.5:16;targetPitch=value?.1815:.8;targetYaw=value?.1026:.22;$('#region-mode').classList.toggle('chosen',!value&&!radarMode);$('#flight-label').textContent=value?tx('COSTA RICA / ORBITAL DESCENT','COSTA RICA / DESCENSO ORBITAL'):tx('COSTA RICA / 3D OBSERVATORY','COSTA RICA / OBSERVATORIO 3D');updateRadarLegend();}
 $('#region-mode').onclick=()=>{introDone=true;document.body.classList.remove('intro-playing');mode(false);explorer?.focus();};
-function updateRadarLegend(range){
+function updateRadarLegend(){
   const leg=$('#hud-radar-legend');
   if(!leg)return;
   leg.hidden=!radarMode||orbital;
   if(leg.hidden)return;
-  $('#radar-legend-title').textContent=tx('LIVE THERMAL RADAR','RADAR TÉRMICO ACTUAL');
-  const fmt=n=>new Intl.NumberFormat(locale(),{minimumFractionDigits:1,maximumFractionDigits:1}).format(n);
-  if(liveStatus==='loading'){
-    $('#radar-legend-range').textContent=tx('Loading…','Cargando…');
-    $('#radar-legend-note').textContent=tx('Querying Open-Meteo for all 83 cantons…','Consultando Open-Meteo para los 83 cantones…');
-  }else if(liveStatus==='error'){
-    $('#radar-legend-range').textContent=tx('Unavailable','No disponible');
-    $('#radar-legend-note').textContent=tx('Current temperature could not be loaded.','No se pudo cargar la temperatura actual.');
+  const lang=getLang();
+  $('#radar-legend-title').textContent=tx('ECOLOGICAL RISK RADAR','RADAR DE RIESGO ECOLÓGICO');
+  $('#radar-legend-range').textContent=riskSummary?`${riskSummary.min} — ${riskSummary.max} / 100`:'0 — 100';
+  const bar=leg.querySelector('.radar-legend-bar');if(bar)bar.style.background=RISK_GRADIENT_CSS;
+  const site=sites.find(s=>s.id===selection);
+  const res=site&&riskSummary?.byId?.get(site.id);
+  if(res&&Number.isFinite(res.score)){
+    const lvl=riskLevel(res.score,lang);
+    const iucn=Number.isFinite(res.threatenedOccurrences)?` · ${new Intl.NumberFormat(locale()).format(res.threatenedOccurrences)} ${tx('IUCN','UICN')}`:'';
+    $('#radar-legend-note').textContent=`${site.name}: ${res.score}/100 (${lvl.label}) · ${driverLabel(res.driver,lang)}${iucn}`;
   }else{
-    $('#radar-legend-range').textContent=range?`${fmt(range.min)} — ${fmt(range.max)} °C`:'—';
-    const timeTxt=liveUpdatedAt?new Date(liveUpdatedAt).toLocaleTimeString(locale(),{timeZone:'America/Costa_Rica',hour:'2-digit',minute:'2-digit'}):'';
-    $('#radar-legend-note').textContent=tx(
-      `Open-Meteo model${timeTxt?` · ${timeTxt} CR`:''} · not local stations`,
-      `Modelo Open-Meteo${timeTxt?` · ${timeTxt} CR`:''} · no es estación local`
-    );
+    $('#radar-legend-note').textContent=tx('NASA POWER (2001–2025) + GBIF IUCN + DEM','NASA POWER (2001–2025) + GBIF UICN + DEM');
   }
-  const bar=leg.querySelector('.radar-legend-bar');if(bar)bar.style.background=THERMAL_GRADIENT_CSS;
 }
 function paintMeshes(){
   const site=sites.find(s=>s.id===selection);
   const isProvince=site?.type==='province';
-  if(radarMode){
-    const vals=liveTemps?[...liveTemps.values()]:[];
-    const range=vals.length?thermalRange(vals):null;
-    updateRadarLegend(range);
+  if(radarMode&&riskSummary){
+    updateRadarLegend();
     for(const mesh of meshes){
       const selected=Boolean(site)&&(mesh.userData.id===selection||(isProvince&&mesh.userData.province===selection));
       const sameProvince=Boolean(site)&&mesh.userData.province===site.province;
-      const val=liveTemps?.get(mesh.userData.id);
-      const tc=range?thermalColor(val,range.min,range.max):thermalColor(null);
-      mesh.material.color.setHex(tc.hex);
-      mesh.material.emissive.setHex(tc.hex).multiplyScalar(selected?.38:.16);
-      mesh.userData.targetY=selected?(isProvince?.12:.2):.02;
+      const res=riskSummary.byId.get(mesh.userData.id);
+      const rc=riskColor(res?.score);
+      mesh.material.color.setHex(rc.hex);
+      mesh.material.emissive.setHex(rc.hex).multiplyScalar(selected?.38:.16);
+      const riskLift=Number.isFinite(res?.score)?(res.score/100)*.05:0;
+      mesh.userData.targetY=selected?(isProvince?.14:.22):(.02+riskLift);
       if(mesh.userData.outline)mesh.userData.outline.material.opacity=selected?.98:sameProvince?.75:.45;
     }
     return;
@@ -72,26 +67,13 @@ function paintMeshes(){
     if(mesh.userData.outline)mesh.userData.outline.material.opacity=selected?.95:sameProvince?.7:.4;
   }
 }
-async function ensureLiveTemps3d(){
-  if(liveStatus==='loading')return;
-  liveStatus='loading';
-  paintMeshes();
-  try{
-    const data=await fetchLiveTemperatures();
-    liveTemps=data.temps;liveUpdatedAt=data.retrievedAt;liveStatus='ready';
-  }catch{
-    liveStatus='error';
-  }
-  paintMeshes();
-}
 function setRadarMode3d(enabled,{broadcast=true}={}){
   radarMode=Boolean(enabled);
   const btn=$('#radar-mode-3d');
   if(btn){btn.classList.toggle('chosen',radarMode);btn.setAttribute('aria-pressed',String(radarMode));}
   $('#region-mode').classList.toggle('chosen',!orbital&&!radarMode);
   if(radarMode&&orbital){introDone=true;document.body.classList.remove('intro-playing');mode(false);}
-  if(radarMode)ensureLiveTemps3d();
-  else paintMeshes();
+  paintMeshes();
   if(broadcast)document.dispatchEvent(new CustomEvent('gaiatrack:radar-mode',{detail:{enabled:radarMode}}));
 }
 $('#radar-mode-3d').onclick=()=>setRadarMode3d(!radarMode);
@@ -108,7 +90,7 @@ function applyHudLang(){
   $('.flight-kicker').innerHTML=`<span class="live-dot"></span> ${tx('SCIENTIFIC TELEMETRY','TELEMETRÍA CIENTÍFICA')}`;
   $('#flight-investigate').innerHTML=`${tx('Investigate this territory','Investigar este territorio')} <span>↗</span>`;
   $('#region-mode').textContent=tx('⌖ 3D Territory','⌖ Territorio 3D');
-  $('#radar-mode-3d').textContent=tx('🌡 Thermal Radar','🌡 Radar térmico');
+  $('#radar-mode-3d').textContent=tx('🌿 Ecological Risk','🌿 Riesgo ecológico');
   $('#lab-mode').textContent=tx('≋ Lab & Trends','≋ Tendencias y Lab');
   $('#forecast-mode').textContent=tx('↗ 7-Day Context','↗ Contexto 7 días');
   const guide=$('.flight-guidance span');if(guide)guide.textContent=tx('DRAG TO MOVE · RIGHT-DRAG TO ROTATE · SCROLL TO ZOOM','ARRASTRÁ PARA MOVER · BOTÓN DERECHO PARA GIRAR · RUEDA PARA ZOOM');
@@ -127,7 +109,7 @@ function applyHudLang(){
   }
 }
 document.addEventListener('gaiatrack:lang',()=>{applyHudLang();sync({site:selection,variable,year});explorer?.render();});
-async function init(){try{const responses=await Promise.all(['data/cantons.geojson?v=18','data/manifest.json?v=18','data/world.geojson','data/costa-rica-provinces.geojson?v=16','data/annual.json?v=18'].map(loadStaticJSON));geo=responses[0];sites=responses[1].sites;annual=responses[4];territoryManifest=responses[1];registerTerritories(sites);const hudSel=$('#hud-site-select');if(hudSel){hudSel.innerHTML=siteOptionsHtml(responses[1],getLang());hudSel.value=selection;hudSel.onchange=e=>{const s=$('#site-select');if(s){s.value=e.target.value;s.dispatchEvent(new Event('change',{bubbles:true}));}};}scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x030b12,.0045);camera=new THREE.PerspectiveCamera(42,innerWidth/innerHeight,.1,200);renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);renderer.setClearColor(0x040c17,1);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.2;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;$('#world-canvas').append(renderer.domElement);renderer.domElement.setAttribute('aria-label','Escena 3D: Costa Rica y sus provincias. Usá el selector de territorio del explorador para acceso por teclado.');scene.add(new THREE.AmbientLight(0x7497bd,.65));const key=new THREE.DirectionalLight(0xc3f7c3,3);key.position.set(4,12,5);key.castShadow=true;key.shadow.mapSize.set(1024,1024);key.shadow.camera.left=-16;key.shadow.camera.right=16;key.shadow.camera.top=16;key.shadow.camera.bottom=-16;key.shadow.bias=-.0005;scene.add(key);const rim=new THREE.PointLight(0x2089e4,70);rim.position.set(-6,3,-4);scene.add(rim);root=new THREE.Group();scene.add(root);
+async function init(){try{const responses=await Promise.all(['data/cantons.geojson?v=18','data/manifest.json?v=18','data/world.geojson','data/costa-rica-provinces.geojson?v=16','data/annual.json?v=18'].map(loadStaticJSON));geo=responses[0];sites=responses[1].sites;annual=responses[4];territoryManifest=responses[1];ecological=await loadStaticJSON('data/ecological.json?v=1').catch(()=>null);riskSummary=computeAllRisks({sites,annual,ecological});registerTerritories(sites);const hudSel=$('#hud-site-select');if(hudSel){hudSel.innerHTML=siteOptionsHtml(responses[1],getLang());hudSel.value=selection;hudSel.onchange=e=>{const s=$('#site-select');if(s){s.value=e.target.value;s.dispatchEvent(new Event('change',{bubbles:true}));}};}scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x030b12,.0045);camera=new THREE.PerspectiveCamera(42,innerWidth/innerHeight,.1,200);renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.setSize(innerWidth,innerHeight);renderer.setClearColor(0x040c17,1);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.2;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;$('#world-canvas').append(renderer.domElement);renderer.domElement.setAttribute('aria-label','Escena 3D: Costa Rica y sus provincias. Usá el selector de territorio del explorador para acceso por teclado.');scene.add(new THREE.AmbientLight(0x7497bd,.65));const key=new THREE.DirectionalLight(0xc3f7c3,3);key.position.set(4,12,5);key.castShadow=true;key.shadow.mapSize.set(1024,1024);key.shadow.camera.left=-16;key.shadow.camera.right=16;key.shadow.camera.top=16;key.shadow.camera.bottom=-16;key.shadow.bias=-.0005;scene.add(key);const rim=new THREE.PointLight(0x2089e4,70);rim.position.set(-6,3,-4);scene.add(rim);root=new THREE.Group();scene.add(root);
 const provinceLine=new THREE.LineBasicMaterial({color:0xc3f7d8,transparent:true,opacity:.85});for(const f of responses[3].features){const polys=f.geometry.type==='Polygon'?[f.geometry.coordinates]:f.geometry.coordinates;for(const rings of polys){if(!rings[0]||rings[0].length<3)continue;const outline=rings[0].map(([lon,lat])=>{const p=coords(lon,lat);p.y=.3;return p;});const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(outline),provinceLine);line.userData.province=f.properties.id;provinceBorders.push(line);root.add(line);}}
 for(const f of geo.features){const polys=f.geometry.type==='Polygon'?[f.geometry.coordinates]:f.geometry.coordinates;for(const rings of polys){const shape=new THREE.Shape();rings[0].forEach(([lon,lat],i)=>{const p=coords(lon,lat);if(i===0)shape.moveTo(p.x,-p.z);else shape.lineTo(p.x,-p.z);});for(const hole of rings.slice(1)){const path=new THREE.Path();hole.forEach(([lon,lat],i)=>{const p=coords(lon,lat);if(i===0)path.moveTo(p.x,-p.z);else path.lineTo(p.x,-p.z);});shape.holes.push(path);}const geometry=new THREE.ExtrudeGeometry(shape,{depth:.26,bevelEnabled:true,bevelSize:.018,bevelThickness:.025,bevelSegments:3,steps:1});geometry.rotateX(-Math.PI/2);const material=surfaceMaterial();const mesh=new THREE.Mesh(geometry,material);mesh.castShadow=true;mesh.receiveShadow=true;mesh.userData={id:f.properties.id,name:f.properties.name,province:f.properties.province,targetY:0};meshes.push(mesh);root.add(mesh);for(const ring of rings){const outline=ring.map(([lon,lat])=>{const p=coords(lon,lat);p.y=.285;return p;});const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(outline),new THREE.LineBasicMaterial({color:0x8bc4c7,transparent:true,opacity:.65}));mesh.userData.outline=line;mesh.add(line);}}}
 for(const s of sites){const province=s.type==='province';const point=coords(s.longitude,s.latitude);point.y=.36;const beacon=new THREE.Mesh(new THREE.SphereGeometry(province?.034:.02,12,12),new THREE.MeshBasicMaterial({color:0xc3f77a}));beacon.position.copy(point);root.add(beacon);const ring=new THREE.Mesh(new THREE.RingGeometry(.09,.108,32),new THREE.MeshBasicMaterial({color:0xc3f77a,side:THREE.DoubleSide,transparent:true,opacity:.65}));ring.rotation.x=-Math.PI/2;ring.position.copy(point);ring.position.y=.32;root.add(ring);const pulse=new THREE.Mesh(new THREE.RingGeometry(.11,.135,32),new THREE.MeshBasicMaterial({color:0xc3f77a,side:THREE.DoubleSide,transparent:true,opacity:.6,depthWrite:false}));pulse.rotation.x=-Math.PI/2;pulse.position.copy(point);pulse.position.y=.325;pulse.visible=false;root.add(pulse);beacons.push({id:s.id,province:s.province,beacon,ring,pulse,baseY:.36});}

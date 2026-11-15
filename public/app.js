@@ -3,7 +3,7 @@ import {siteOptionsHtml,provinceOptionsHtml,territoryOptionsHtml,annualPoints,an
 import {trend,baseline,mean,historyCoverage,detrendedCorrelation,benjaminiHochberg} from './science.js';
 import {initForecast,updateForecast} from './forecast.js';
 import {getLang,locale,tx,applyStaticI18n} from './i18n.js';
-import {thermalColor,thermalRange,fetchLiveTemperatures,THERMAL_GRADIENT_CSS} from './thermal-radar.js';
+import {computeAllRisks,driverLabel,riskColor,riskLevel,RISK_GRADIENT_CSS} from './ecological-risk.js';
 
 const $=s=>document.querySelector(s);
 const rawVariables=[
@@ -31,7 +31,7 @@ const rawVariables=[
 ];
 
 const state={variable:'T2M',site:null,year:2025,start:2001,end:2025,anomaly:false,compare:false,compareSite:'sarapiqui',radarMode:false};
-let lastMapSite=null,mapOverview=true,liveTemps=null,liveStatus='idle';
+let lastMapSite=null,mapOverview=true,ecological=null,riskSummary=null;
 const annualCache=new Map(),historyFailures=new Set(),historyLoading=new Map();
 let annual,manifest,geo,data={},map,boundaryLayer,markers={},seaMarkers=[],timer=null;
 const v=()=>{const r=rawVariables.find(x=>x.id===state.variable);const l=r[getLang()];return {id:r.id,icon:r.icon,digits:r.digits,...l};};
@@ -89,27 +89,14 @@ function setVariable(id){state.variable=id;render();}
 function updateRadarButtons(){
   const normalBtn=$('#mode-normal'),radarBtn=$('#mode-radar');
   if(normalBtn){normalBtn.textContent=tx('Normal','Normal');normalBtn.classList.toggle('selected',!state.radarMode);normalBtn.setAttribute('aria-pressed',String(!state.radarMode));}
-  if(radarBtn){radarBtn.textContent=tx('🌡 Thermal Radar','🌡 Radar térmico');radarBtn.classList.toggle('selected',state.radarMode);radarBtn.setAttribute('aria-pressed',String(state.radarMode));}
-}
-async function ensureLiveTemps2d(){
-  if(liveStatus==='loading')return;
-  liveStatus='loading';
-  renderMap();
-  try{
-    const res=await fetchLiveTemperatures();
-    liveTemps=res.temps;liveStatus='ready';
-  }catch{
-    liveStatus='error';
-  }
-  renderMap();
+  if(radarBtn){radarBtn.textContent=tx('🌿 Ecological Risk','🌿 Riesgo ecológico');radarBtn.classList.toggle('selected',state.radarMode);radarBtn.setAttribute('aria-pressed',String(state.radarMode));}
 }
 function setRadarMode(enabled,{broadcast=true}={}){
   const next=Boolean(enabled);
   if(state.radarMode===next){updateRadarButtons();return;}
   state.radarMode=next;
   updateRadarButtons();
-  if(state.radarMode)ensureLiveTemps2d();
-  else renderMap();
+  renderMap();
   if(broadcast)document.dispatchEvent(new CustomEvent('gaiatrack:radar-mode',{detail:{enabled:state.radarMode}}));
 }
 document.addEventListener('gaiatrack:radar-mode',e=>setRadarMode(e.detail?.enabled,{broadcast:false}));
@@ -180,23 +167,19 @@ function color(value,min,max){if(!Number.isFinite(value))return '#7c8791';const 
 
 function renderMap(){
   const radarActive=state.radarMode;
-  const activeMeta=radarActive?{name:tx('Current temperature','Temperatura actual'),unit:'°C'}:v();
-  const activeDigits=radarActive?1:v().digits;
-  const readVal=id=>radarActive?(liveTemps?.get(id)??null):valueAt(id,state.year);
+  const readVal=id=>radarActive?(riskSummary?.byId?.get(id)?.score??null):valueAt(id,state.year);
   const values=manifest.sites.map(s=>readVal(s.id)).filter(Number.isFinite);
-  const hasLive=radarActive&&values.length>0;
-  const {min,max}=radarActive?thermalRange(values):{min:Math.min(...values),max:Math.max(...values)};
-  $('#map-variable').textContent=radarActive?`${activeMeta.name} · ${tx('Thermal Radar','Radar térmico')}`:v().name;
+  const min=radarActive?(riskSummary?.min??0):Math.min(...values);
+  const max=radarActive?(riskSummary?.max??100):Math.max(...values);
+  $('#map-variable').textContent=radarActive?tx('Ecological Risk Radar','Radar de Riesgo Ecológico'):v().name;
   const noteEl=$('#map-caption-note');
   if(noteEl)noteEl.textContent=radarActive
-    ?tx('Open-Meteo current model by canton · not local stations','Modelo actual Open-Meteo por cantón · no es estación local')
+    ?tx('NASA POWER (2001–2025) + GBIF IUCN + elevation · exploratory index','NASA POWER (2001–2025) + GBIF UICN + elevación · índice exploratorio')
     :tx('Reference points · not provincial or canton averages','Puntos de referencia · no son promedios provinciales ni cantonales');
-  $('#map-year').textContent=radarActive?tx('LIVE','ACTUAL'):state.year;
-  $('#map-range').textContent=radarActive&&!hasLive
-    ?(liveStatus==='loading'?tx('Loading…','Cargando…'):tx('Unavailable','No disponible'))
-    :`${format(min,activeDigits)} — ${format(max,activeDigits)} ${activeMeta.unit}`;
+  $('#map-year').textContent=radarActive?'0–100':state.year;
+  $('#map-range').textContent=radarActive?`${min} — ${max} / 100`:`${format(min)} — ${format(max)} ${v().unit}`;
   const gradEl=$('.gradient-key');
-  if(gradEl){gradEl.classList.toggle('is-thermal',radarActive);gradEl.style.background=radarActive?THERMAL_GRADIENT_CSS:'';}
+  if(gradEl){gradEl.classList.toggle('is-thermal',radarActive);gradEl.style.background=radarActive?RISK_GRADIENT_CSS:'';}
 
   if(!map)return;
   const selectedSite=state.site?manifest.sites.find(s=>s.id===state.site):null;
@@ -211,9 +194,9 @@ function renderMap(){
     if(visible&&!map.hasLayer(markers[s.id]))markers[s.id].addTo(map);
     if(!visible&&map.hasLayer(markers[s.id]))map.removeLayer(markers[s.id]);
     const value=readVal(s.id),selected=s.id===state.site;
-    const fill=radarActive?thermalColor(value,min,max).css:color(value,min,max);
+    const fill=radarActive?riskColor(value).css:color(value,min,max);
     markers[s.id].setStyle({fillColor:fill,color:selected?'#f1ffda':'#10232c',weight:selected?3:1.5,fillOpacity:.95}).setRadius(selected?9:6);
-    markers[s.id].setTooltipContent(`${s.name} · ${format(value,activeDigits)} ${activeMeta.unit}`);
+    if(radarActive){const res=riskSummary?.byId?.get(s.id);const lvl=riskLevel(value,getLang()).label;markers[s.id].setTooltipContent(`${s.name} · ${value??'—'}/100 (${lvl})${res?` · ${driverLabel(res.driver,getLang())}`:''}`);}else{markers[s.id].setTooltipContent(`${s.name} · ${format(value)} ${v().unit}`);}
     if(selected)markers[s.id].bringToFront();
   }
   boundaryLayer.setStyle(f=>{
@@ -221,7 +204,7 @@ function renderMap(){
     const shown=mapOverview||!province||f.properties.province===province;
     if(radarActive){
       const cVal=readVal(f.properties.id);
-      return {opacity:shown?1:0,color:selected?'#f1ffda':'#0d1c24',weight:selected?2.5:1,fillColor:thermalColor(cVal,min,max).css,fillOpacity:shown?(selected?.84:.64):0};
+      return {opacity:shown?1:0,color:selected?'#f1ffda':'#0d1c24',weight:selected?2.5:1,fillColor:riskColor(cVal).css,fillOpacity:shown?(selected?.84:.64):0};
     }
     return {opacity:shown?1:0,color:selected?'#c3f77a':'#617f85',weight:selected?2:1,fillColor:'#344b48',fillOpacity:shown?(selected?.18:.04):0};
   });
@@ -507,6 +490,8 @@ async function boot(){
   initForecast();
   try{
     [manifest,annual,geo]=await Promise.all(['data/manifest.json?v=18','data/annual.json?v=18','data/cantons.geojson?v=18'].map(loadStaticJSON));
+    ecological=await loadStaticJSON('data/ecological.json?v=1').catch(()=>null);
+    riskSummary=computeAllRisks({sites:manifest.sites,annual,ecological});
     data=Object.fromEntries(manifest.sites.map(site=>[site.id,{...site}]));
     buildLayerButtons();
     options($('#site-select'),state.site);options($('#compare-site'),state.compareSite);

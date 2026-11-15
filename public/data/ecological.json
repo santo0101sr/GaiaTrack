@@ -1,0 +1,1811 @@
+{
+  "retrievedAt": "2026-11-15T02:18:02.686Z",
+  "sources": {
+    "biodiversity": "GBIF Occurrence API (country=CR, hasCoordinate=true)",
+    "biodiversityUrl": "https://api.gbif.org/v1/occurrence/search",
+    "elevation": "Open-Meteo Elevation API (Copernicus DEM GLO-90)",
+    "elevationUrl": "https://open-meteo.com/en/docs/elevation-api"
+  },
+  "sites": {
+    "san-jose": {
+      "occurrences": 9570048,
+      "threatenedOccurrences": 27102,
+      "iucn": {
+        "CR": 1025,
+        "EN": 4718,
+        "VU": 21359,
+        "NT": 116392
+      },
+      "animalia": 9170446,
+      "plantae": 360770,
+      "fungi": 34470,
+      "elevationM": 1597,
+      "bbox": {
+        "minLat": 9.08,
+        "maxLat": 10.1917,
+        "minLon": -84.5928,
+        "maxLon": -83.4252
+      }
+    },
+    "alajuela": {
+      "occurrences": 12812504,
+      "threatenedOccurrences": 72461,
+      "iucn": {
+        "CR": 1174,
+        "EN": 4249,
+        "VU": 67038,
+        "NT": 217601
+      },
+      "animalia": 12484925,
+      "plantae": 289212,
+      "fungi": 35216,
+      "elevationM": 540,
+      "bbox": {
+        "minLat": 9.8305,
+        "maxLat": 11.0793,
+        "minLon": -85.432,
+        "maxLon": -84.1557
+      }
+    },
+    "cartago": {
+      "occurrences": 4722545,
+      "threatenedOccurrences": 10336,
+      "iucn": {
+        "CR": 465,
+        "EN": 1809,
+        "VU": 8062,
+        "NT": 66825
+      },
+      "animalia": 4498164,
+      "plantae": 194233,
+      "fungi": 26618,
+      "elevationM": 749,
+      "bbox": {
+        "minLat": 9.4998,
+        "maxLat": 10.1498,
+        "minLon": -84.0848,
+        "maxLon": -83.3117
+      }
+    },
+    "guanacaste": {
+      "occurrences": 10321552,
+      "threatenedOccurrences": 49311,
+      "iucn": {
+        "CR": 857,
+        "EN": 2976,
+        "VU": 45478,
+        "NT": 122644
+      },
+      "animalia": 10059407,
+      "plantae": 236101,
+      "fungi": 23686,
+      "elevationM": 150,
+      "bbox": {
+        "minLat": 9.7326,
+        "maxLat": 11.2169,
+        "minLon": -85.9496,
+        "maxLon": -84.7708
+      }
+    },
+    "puntarenas": {
+      "occurrences": 20097832,
+      "threatenedOccurrences": 105920,
+      "iucn": {
+        "CR": 3515,
+        "EN": 12595,
+        "VU": 89810,
+        "NT": 269689
+      },
+      "animalia": 19114362,
+      "plantae": 768179,
+      "fungi": 83552,
+      "elevationM": 32,
+      "bbox": {
+        "minLat": 5.5007,
+        "maxLat": 10.3361,
+        "minLon": -87.0946,
+        "maxLon": -82.7118
+      }
+    },
+    "limon": {
+      "occurrences": 7602344,
+      "threatenedOccurrences": 30173,
+      "iucn": {
+        "CR": 2127,
+        "EN": 4305,
+        "VU": 23741,
+        "NT": 104042
+      },
+      "animalia": 7274190,
+      "plantae": 285984,
+      "fungi": 35854,
+      "elevationM": 24,
+      "bbox": {
+        "minLat": 9.0621,
+        "maxLat": 10.9382,
+        "minLon": -83.9424,
+        "maxLon": -82.5539
+      }
+    },
+    "san-jose-centro": {
+      "occurrences": 261450,
+      "threatenedOccurrences": 453,
+      "iucn": {
+        "CR": 22,
+        "EN": 88,
+        "VU": 343,
+        "NT": 1704
+      },
+      "animalia": 251257,
+      "plantae": 9020,
+      "fungi": 904,
+      "elevationM": 1102,
+      "bbox": {
+        "minLat": 9.9001,
+        "maxLat": 9.9718,
+        "minLon": -84.1797,
+        "maxLon": -84.0474
+      }
+    },
+    "escazu": {
+      "occurrences": 118021,
+      "threatenedOccurrences": 387,
+      "iucn": {
+        "CR": 22,
+        "EN": 105,
+        "VU": 260,
+        "NT": 618
+      },
+      "animalia": 109072,
+      "plantae": 8379,
+      "fungi": 542,
+      "elevationM": 1210,
+      "bbox": {
+        "minLat": 9.8604,
+        "maxLat": 9.973,
+        "minLon": -84.1853,
+        "maxLon": -84.1213
+      }
+    },
+    "desamparados": {
+      "occurrences": 256065,
+      "threatenedOccurrences": 485,
+      "iucn": {
+        "CR": 49,
+        "EN": 98,
+        "VU": 338,
+        "NT": 2498
+      },
+      "animalia": 240053,
+      "plantae": 14190,
+      "fungi": 1731,
+      "elevationM": 1856,
+      "bbox": {
+        "minLat": 9.714,
+        "maxLat": 9.9085,
+        "minLon": -84.1104,
+        "maxLon": -83.9482
+      }
+    },
+    "puriscal": {
+      "occurrences": 198768,
+      "threatenedOccurrences": 776,
+      "iucn": {
+        "CR": 14,
+        "EN": 254,
+        "VU": 508,
+        "NT": 3572
+      },
+      "animalia": 173917,
+      "plantae": 24644,
+      "fungi": 169,
+      "elevationM": 1080,
+      "bbox": {
+        "minLat": 9.5571,
+        "maxLat": 9.9104,
+        "minLon": -84.4907,
+        "maxLon": -84.2526
+      }
+    },
+    "tarrazu": {
+      "occurrences": 164310,
+      "threatenedOccurrences": 1024,
+      "iucn": {
+        "CR": 23,
+        "EN": 353,
+        "VU": 648,
+        "NT": 1425
+      },
+      "animalia": 144732,
+      "plantae": 18604,
+      "fungi": 904,
+      "elevationM": 1472,
+      "bbox": {
+        "minLat": 9.4491,
+        "maxLat": 9.7182,
+        "minLon": -84.1567,
+        "maxLon": -83.9708
+      }
+    },
+    "aserri": {
+      "occurrences": 134707,
+      "threatenedOccurrences": 546,
+      "iucn": {
+        "CR": 68,
+        "EN": 136,
+        "VU": 342,
+        "NT": 950
+      },
+      "animalia": 110233,
+      "plantae": 23629,
+      "fungi": 818,
+      "elevationM": 1553,
+      "bbox": {
+        "minLat": 9.6165,
+        "maxLat": 9.8753,
+        "minLon": -84.2238,
+        "maxLon": -84.061
+      }
+    },
+    "mora": {
+      "occurrences": 320368,
+      "threatenedOccurrences": 291,
+      "iucn": {
+        "CR": 30,
+        "EN": 72,
+        "VU": 189,
+        "NT": 4283
+      },
+      "animalia": 302643,
+      "plantae": 17043,
+      "fungi": 629,
+      "elevationM": 802,
+      "bbox": {
+        "minLat": 9.8087,
+        "maxLat": 9.9358,
+        "minLon": -84.4139,
+        "maxLon": -84.1456
+      }
+    },
+    "goicoechea": {
+      "occurrences": 128414,
+      "threatenedOccurrences": 84,
+      "iucn": {
+        "CR": 2,
+        "EN": 18,
+        "VU": 64,
+        "NT": 1081
+      },
+      "animalia": 124961,
+      "plantae": 3052,
+      "fungi": 303,
+      "elevationM": 1560,
+      "bbox": {
+        "minLat": 9.9393,
+        "maxLat": 9.9753,
+        "minLon": -84.0783,
+        "maxLon": -83.8867
+      }
+    },
+    "santa-ana": {
+      "occurrences": 160504,
+      "threatenedOccurrences": 258,
+      "iucn": {
+        "CR": 15,
+        "EN": 44,
+        "VU": 199,
+        "NT": 1147
+      },
+      "animalia": 152008,
+      "plantae": 8322,
+      "fungi": 132,
+      "elevationM": 959,
+      "bbox": {
+        "minLat": 9.8633,
+        "maxLat": 9.973,
+        "minLon": -84.2436,
+        "maxLon": -84.1473
+      }
+    },
+    "alajuelita": {
+      "occurrences": 138821,
+      "threatenedOccurrences": 285,
+      "iucn": {
+        "CR": 10,
+        "EN": 58,
+        "VU": 217,
+        "NT": 472
+      },
+      "animalia": 134073,
+      "plantae": 4363,
+      "fungi": 351,
+      "elevationM": 1374,
+      "bbox": {
+        "minLat": 9.8465,
+        "maxLat": 9.9314,
+        "minLon": -84.1452,
+        "maxLon": -84.0841
+      }
+    },
+    "vazquez-de-coronado": {
+      "occurrences": 437249,
+      "threatenedOccurrences": 1361,
+      "iucn": {
+        "CR": 47,
+        "EN": 512,
+        "VU": 802,
+        "NT": 7330
+      },
+      "animalia": 399695,
+      "plantae": 36253,
+      "fungi": 941,
+      "elevationM": 1192,
+      "bbox": {
+        "minLat": 9.9647,
+        "maxLat": 10.1897,
+        "minLon": -84.0348,
+        "maxLon": -83.8581
+      }
+    },
+    "acosta": {
+      "occurrences": 98765,
+      "threatenedOccurrences": 463,
+      "iucn": {
+        "CR": 47,
+        "EN": 129,
+        "VU": 287,
+        "NT": 1377
+      },
+      "animalia": 80067,
+      "plantae": 18565,
+      "fungi": 119,
+      "elevationM": 1073,
+      "bbox": {
+        "minLat": 9.6231,
+        "maxLat": 9.8608,
+        "minLon": -84.3414,
+        "maxLon": -84.1321
+      }
+    },
+    "tibas": {
+      "occurrences": 14938,
+      "threatenedOccurrences": 19,
+      "iucn": {
+        "CR": 1,
+        "EN": 5,
+        "VU": 13,
+        "NT": 34
+      },
+      "animalia": 13645,
+      "plantae": 1209,
+      "fungi": 81,
+      "elevationM": 1148,
+      "bbox": {
+        "minLat": 9.9406,
+        "maxLat": 9.9719,
+        "minLon": -84.1069,
+        "maxLon": -84.0548
+      }
+    },
+    "moravia": {
+      "occurrences": 212142,
+      "threatenedOccurrences": 273,
+      "iucn": {
+        "CR": 10,
+        "EN": 55,
+        "VU": 208,
+        "NT": 1522
+      },
+      "animalia": 200585,
+      "plantae": 10510,
+      "fungi": 624,
+      "elevationM": 1382,
+      "bbox": {
+        "minLat": 9.9524,
+        "maxLat": 10.0666,
+        "minLon": -84.0656,
+        "maxLon": -83.9749
+      }
+    },
+    "montes-de-oca": {
+      "occurrences": 198100,
+      "threatenedOccurrences": 97,
+      "iucn": {
+        "CR": 4,
+        "EN": 17,
+        "VU": 76,
+        "NT": 1129
+      },
+      "animalia": 193813,
+      "plantae": 3692,
+      "fungi": 455,
+      "elevationM": 1351,
+      "bbox": {
+        "minLat": 9.9221,
+        "maxLat": 9.9574,
+        "minLon": -84.0656,
+        "maxLon": -83.9567
+      }
+    },
+    "turrubares": {
+      "occurrences": 274810,
+      "threatenedOccurrences": 918,
+      "iucn": {
+        "CR": 7,
+        "EN": 170,
+        "VU": 741,
+        "NT": 3535
+      },
+      "animalia": 257001,
+      "plantae": 17236,
+      "fungi": 514,
+      "elevationM": 530,
+      "bbox": {
+        "minLat": 9.57,
+        "maxLat": 9.9252,
+        "minLon": -84.5931,
+        "maxLon": -84.4026
+      }
+    },
+    "dota": {
+      "occurrences": 1149300,
+      "threatenedOccurrences": 1312,
+      "iucn": {
+        "CR": 8,
+        "EN": 649,
+        "VU": 655,
+        "NT": 16688
+      },
+      "animalia": 1094038,
+      "plantae": 46208,
+      "fungi": 8740,
+      "elevationM": 2575,
+      "bbox": {
+        "minLat": 9.4303,
+        "maxLat": 9.7388,
+        "minLon": -83.9897,
+        "maxLon": -83.7574
+      }
+    },
+    "curridabat": {
+      "occurrences": 100491,
+      "threatenedOccurrences": 78,
+      "iucn": {
+        "CR": 3,
+        "EN": 9,
+        "VU": 66,
+        "NT": 323
+      },
+      "animalia": 98380,
+      "plantae": 1635,
+      "fungi": 347,
+      "elevationM": 1217,
+      "bbox": {
+        "minLat": 9.8935,
+        "maxLat": 9.939,
+        "minLon": -84.0523,
+        "maxLon": -84.0057
+      }
+    },
+    "perez-zeledon": {
+      "occurrences": 2058519,
+      "threatenedOccurrences": 5583,
+      "iucn": {
+        "CR": 94,
+        "EN": 622,
+        "VU": 4867,
+        "NT": 22490
+      },
+      "animalia": 1973801,
+      "plantae": 68053,
+      "fungi": 15169,
+      "elevationM": 724,
+      "bbox": {
+        "minLat": 9.075,
+        "maxLat": 9.5986,
+        "minLon": -84.0012,
+        "maxLon": -83.4297
+      }
+    },
+    "leon-cortes-castro": {
+      "occurrences": 27967,
+      "threatenedOccurrences": 201,
+      "iucn": {
+        "CR": 8,
+        "EN": 67,
+        "VU": 126,
+        "NT": 232
+      },
+      "animalia": 20564,
+      "plantae": 6467,
+      "fungi": 906,
+      "elevationM": 1925,
+      "bbox": {
+        "minLat": 9.6375,
+        "maxLat": 9.7499,
+        "minLon": -84.154,
+        "maxLon": -83.9713
+      }
+    },
+    "alajuela-centro": {
+      "occurrences": 1151550,
+      "threatenedOccurrences": 1881,
+      "iucn": {
+        "CR": 473,
+        "EN": 379,
+        "VU": 1029,
+        "NT": 12997
+      },
+      "animalia": 1122681,
+      "plantae": 26144,
+      "fungi": 2534,
+      "elevationM": 2310,
+      "bbox": {
+        "minLat": 9.9146,
+        "maxLat": 10.4133,
+        "minLon": -84.3678,
+        "maxLon": -84.1609
+      }
+    },
+    "san-ramon": {
+      "occurrences": 2053368,
+      "threatenedOccurrences": 19589,
+      "iucn": {
+        "CR": 76,
+        "EN": 1175,
+        "VU": 18338,
+        "NT": 62543
+      },
+      "animalia": 1977414,
+      "plantae": 68237,
+      "fungi": 6442,
+      "elevationM": 980,
+      "bbox": {
+        "minLat": 9.9802,
+        "maxLat": 10.4548,
+        "minLon": -84.7938,
+        "maxLon": -84.4138
+      }
+    },
+    "grecia": {
+      "occurrences": 255729,
+      "threatenedOccurrences": 248,
+      "iucn": {
+        "CR": 17,
+        "EN": 96,
+        "VU": 135,
+        "NT": 2991
+      },
+      "animalia": 248802,
+      "plantae": 5566,
+      "fungi": 1332,
+      "elevationM": 1054,
+      "bbox": {
+        "minLat": 9.9929,
+        "maxLat": 10.1882,
+        "minLon": -84.3616,
+        "maxLon": -84.2297
+      }
+    },
+    "san-mateo": {
+      "occurrences": 77315,
+      "threatenedOccurrences": 290,
+      "iucn": {
+        "CR": 6,
+        "EN": 4,
+        "VU": 280,
+        "NT": 1062
+      },
+      "animalia": 76141,
+      "plantae": 1080,
+      "fungi": 87,
+      "elevationM": 292,
+      "bbox": {
+        "minLat": 9.9069,
+        "maxLat": 10.0139,
+        "minLon": -84.6675,
+        "maxLon": -84.4523
+      }
+    },
+    "atenas": {
+      "occurrences": 70994,
+      "threatenedOccurrences": 84,
+      "iucn": {
+        "CR": 10,
+        "EN": 8,
+        "VU": 66,
+        "NT": 1363
+      },
+      "animalia": 69655,
+      "plantae": 1279,
+      "fungi": 42,
+      "elevationM": 786,
+      "bbox": {
+        "minLat": 9.9204,
+        "maxLat": 10.039,
+        "minLon": -84.4684,
+        "maxLon": -84.3411
+      }
+    },
+    "naranjo": {
+      "occurrences": 212389,
+      "threatenedOccurrences": 129,
+      "iucn": {
+        "CR": 12,
+        "EN": 34,
+        "VU": 83,
+        "NT": 2739
+      },
+      "animalia": 209639,
+      "plantae": 2530,
+      "fungi": 205,
+      "elevationM": 1066,
+      "bbox": {
+        "minLat": 10.0181,
+        "maxLat": 10.1924,
+        "minLon": -84.443,
+        "maxLon": -84.3327
+      }
+    },
+    "palmares": {
+      "occurrences": 58989,
+      "threatenedOccurrences": 19,
+      "iucn": {
+        "CR": 8,
+        "EN": 4,
+        "VU": 7,
+        "NT": 915
+      },
+      "animalia": 57725,
+      "plantae": 1190,
+      "fungi": 69,
+      "elevationM": 1027,
+      "bbox": {
+        "minLat": 10.0074,
+        "maxLat": 10.0866,
+        "minLon": -84.4695,
+        "maxLon": -84.4066
+      }
+    },
+    "poas": {
+      "occurrences": 216278,
+      "threatenedOccurrences": 267,
+      "iucn": {
+        "CR": 10,
+        "EN": 128,
+        "VU": 129,
+        "NT": 2281
+      },
+      "animalia": 208958,
+      "plantae": 6076,
+      "fungi": 1174,
+      "elevationM": 1286,
+      "bbox": {
+        "minLat": 10.0143,
+        "maxLat": 10.1972,
+        "minLon": -84.2992,
+        "maxLon": -84.1958
+      }
+    },
+    "orotina": {
+      "occurrences": 111632,
+      "threatenedOccurrences": 476,
+      "iucn": {
+        "CR": 20,
+        "EN": 7,
+        "VU": 449,
+        "NT": 1182
+      },
+      "animalia": 108524,
+      "plantae": 3036,
+      "fungi": 63,
+      "elevationM": 159,
+      "bbox": {
+        "minLat": 9.8394,
+        "maxLat": 9.9451,
+        "minLon": -84.6895,
+        "maxLon": -84.4617
+      }
+    },
+    "san-carlos": {
+      "occurrences": 4646331,
+      "threatenedOccurrences": 42836,
+      "iucn": {
+        "CR": 283,
+        "EN": 2537,
+        "VU": 40016,
+        "NT": 140126
+      },
+      "animalia": 4517752,
+      "plantae": 117896,
+      "fungi": 9447,
+      "elevationM": 106,
+      "bbox": {
+        "minLat": 10.246,
+        "maxLat": 10.995,
+        "minLon": -84.8614,
+        "maxLon": -84.1609
+      }
+    },
+    "zarcero": {
+      "occurrences": 165347,
+      "threatenedOccurrences": 208,
+      "iucn": {
+        "CR": 6,
+        "EN": 42,
+        "VU": 160,
+        "NT": 2325
+      },
+      "animalia": 158243,
+      "plantae": 6497,
+      "fungi": 573,
+      "elevationM": 1702,
+      "bbox": {
+        "minLat": 10.1669,
+        "maxLat": 10.2698,
+        "minLon": -84.518,
+        "maxLon": -84.3151
+      }
+    },
+    "sarchi": {
+      "occurrences": 286684,
+      "threatenedOccurrences": 318,
+      "iucn": {
+        "CR": 19,
+        "EN": 123,
+        "VU": 176,
+        "NT": 3489
+      },
+      "animalia": 277312,
+      "plantae": 7662,
+      "fungi": 1686,
+      "elevationM": 1623,
+      "bbox": {
+        "minLat": 10.0478,
+        "maxLat": 10.2743,
+        "minLon": -84.3611,
+        "maxLon": -84.2264
+      }
+    },
+    "upala": {
+      "occurrences": 4664371,
+      "threatenedOccurrences": 6594,
+      "iucn": {
+        "CR": 84,
+        "EN": 631,
+        "VU": 5879,
+        "NT": 23879
+      },
+      "animalia": 4595625,
+      "plantae": 59924,
+      "fungi": 8410,
+      "elevationM": 127,
+      "bbox": {
+        "minLat": 10.671,
+        "maxLat": 11.0653,
+        "minLon": -85.4491,
+        "maxLon": -84.8798
+      }
+    },
+    "los-chiles": {
+      "occurrences": 618656,
+      "threatenedOccurrences": 2309,
+      "iucn": {
+        "CR": 15,
+        "EN": 227,
+        "VU": 2067,
+        "NT": 6427
+      },
+      "animalia": 611495,
+      "plantae": 6722,
+      "fungi": 429,
+      "elevationM": 50,
+      "bbox": {
+        "minLat": 10.6306,
+        "maxLat": 11.0837,
+        "minLon": -84.8962,
+        "maxLon": -84.4512
+      }
+    },
+    "guatuso": {
+      "occurrences": 664952,
+      "threatenedOccurrences": 2390,
+      "iucn": {
+        "CR": 24,
+        "EN": 233,
+        "VU": 2133,
+        "NT": 7642
+      },
+      "animalia": 648066,
+      "plantae": 14395,
+      "fungi": 2457,
+      "elevationM": 46,
+      "bbox": {
+        "minLat": 10.5554,
+        "maxLat": 10.8519,
+        "minLon": -85.0141,
+        "maxLon": -84.647
+      }
+    },
+    "rio-cuarto": {
+      "occurrences": 117237,
+      "threatenedOccurrences": 445,
+      "iucn": {
+        "CR": 56,
+        "EN": 117,
+        "VU": 272,
+        "NT": 2781
+      },
+      "animalia": 112686,
+      "plantae": 4440,
+      "fungi": 106,
+      "elevationM": 225,
+      "bbox": {
+        "minLat": 10.2418,
+        "maxLat": 10.5771,
+        "minLon": -84.2651,
+        "maxLon": -84.1609
+      }
+    },
+    "cartago-centro": {
+      "occurrences": 1716461,
+      "threatenedOccurrences": 2778,
+      "iucn": {
+        "CR": 124,
+        "EN": 773,
+        "VU": 1881,
+        "NT": 18498
+      },
+      "animalia": 1637854,
+      "plantae": 70135,
+      "fungi": 7808,
+      "elevationM": 1388,
+      "bbox": {
+        "minLat": 9.6039,
+        "maxLat": 9.9708,
+        "minLon": -84.0873,
+        "maxLon": -83.7652
+      }
+    },
+    "paraiso": {
+      "occurrences": 1771662,
+      "threatenedOccurrences": 2895,
+      "iucn": {
+        "CR": 53,
+        "EN": 775,
+        "VU": 2067,
+        "NT": 25180
+      },
+      "animalia": 1685506,
+      "plantae": 69745,
+      "fungi": 13985,
+      "elevationM": 1513,
+      "bbox": {
+        "minLat": 9.5514,
+        "maxLat": 9.9078,
+        "minLon": -83.8944,
+        "maxLon": -83.6272
+      }
+    },
+    "la-union": {
+      "occurrences": 141919,
+      "threatenedOccurrences": 112,
+      "iucn": {
+        "CR": 6,
+        "EN": 28,
+        "VU": 78,
+        "NT": 906
+      },
+      "animalia": 137806,
+      "plantae": 3623,
+      "fungi": 470,
+      "elevationM": 1362,
+      "bbox": {
+        "minLat": 9.8754,
+        "maxLat": 9.9495,
+        "minLon": -84.0419,
+        "maxLon": -83.9484
+      }
+    },
+    "jimenez": {
+      "occurrences": 736981,
+      "threatenedOccurrences": 1764,
+      "iucn": {
+        "CR": 44,
+        "EN": 216,
+        "VU": 1504,
+        "NT": 12519
+      },
+      "animalia": 710293,
+      "plantae": 23170,
+      "fungi": 2357,
+      "elevationM": 635,
+      "bbox": {
+        "minLat": 9.6893,
+        "maxLat": 9.9488,
+        "minLon": -83.785,
+        "maxLon": -83.5988
+      }
+    },
+    "turrialba": {
+      "occurrences": 3067281,
+      "threatenedOccurrences": 6806,
+      "iucn": {
+        "CR": 163,
+        "EN": 873,
+        "VU": 5770,
+        "NT": 47905
+      },
+      "animalia": 2955151,
+      "plantae": 92661,
+      "fungi": 16963,
+      "elevationM": 1283,
+      "bbox": {
+        "minLat": 9.484,
+        "maxLat": 10.0838,
+        "minLon": -83.8194,
+        "maxLon": -83.3124
+      }
+    },
+    "alvarado": {
+      "occurrences": 31583,
+      "threatenedOccurrences": 82,
+      "iucn": {
+        "CR": 1,
+        "EN": 18,
+        "VU": 63,
+        "NT": 844
+      },
+      "animalia": 28399,
+      "plantae": 3015,
+      "fungi": 130,
+      "elevationM": 2242,
+      "bbox": {
+        "minLat": 9.8723,
+        "maxLat": 10.0167,
+        "minLon": -83.8426,
+        "maxLon": -83.7606
+      }
+    },
+    "oreamuno": {
+      "occurrences": 195435,
+      "threatenedOccurrences": 492,
+      "iucn": {
+        "CR": 20,
+        "EN": 81,
+        "VU": 391,
+        "NT": 3218
+      },
+      "animalia": 182783,
+      "plantae": 10993,
+      "fungi": 1542,
+      "elevationM": 2247,
+      "bbox": {
+        "minLat": 9.8477,
+        "maxLat": 10.147,
+        "minLon": -83.9472,
+        "maxLon": -83.801
+      }
+    },
+    "el-guarco": {
+      "occurrences": 888783,
+      "threatenedOccurrences": 1541,
+      "iucn": {
+        "CR": 41,
+        "EN": 499,
+        "VU": 1001,
+        "NT": 9714
+      },
+      "animalia": 846982,
+      "plantae": 36560,
+      "fungi": 5013,
+      "elevationM": 2140,
+      "bbox": {
+        "minLat": 9.6111,
+        "maxLat": 9.8541,
+        "minLon": -84.0296,
+        "maxLon": -83.7901
+      }
+    },
+    "heredia": {
+      "occurrences": 4812966,
+      "threatenedOccurrences": 20507,
+      "iucn": {
+        "CR": 1298,
+        "EN": 2600,
+        "VU": 16609,
+        "NT": 64312
+      },
+      "animalia": 4631867,
+      "plantae": 171539,
+      "fungi": 7006,
+      "elevationM": 1953,
+      "bbox": {
+        "minLat": 9.9626,
+        "maxLat": 10.7893,
+        "minLon": -84.1955,
+        "maxLon": -83.7066
+      }
+    },
+    "barva": {
+      "occurrences": 129583,
+      "threatenedOccurrences": 333,
+      "iucn": {
+        "CR": 7,
+        "EN": 96,
+        "VU": 230,
+        "NT": 1314
+      },
+      "animalia": 118782,
+      "plantae": 10425,
+      "fungi": 347,
+      "elevationM": 1656,
+      "bbox": {
+        "minLat": 10.0101,
+        "maxLat": 10.1369,
+        "minLon": -84.146,
+        "maxLon": -84.085
+      }
+    },
+    "santo-domingo": {
+      "occurrences": 462377,
+      "threatenedOccurrences": 126,
+      "iucn": {
+        "CR": 10,
+        "EN": 23,
+        "VU": 93,
+        "NT": 1349
+      },
+      "animalia": 455272,
+      "plantae": 6474,
+      "fungi": 547,
+      "elevationM": 1211,
+      "bbox": {
+        "minLat": 9.9607,
+        "maxLat": 10.0154,
+        "minLon": -84.1135,
+        "maxLon": -84.0228
+      }
+    },
+    "santa-barbara": {
+      "occurrences": 103360,
+      "threatenedOccurrences": 96,
+      "iucn": {
+        "CR": 2,
+        "EN": 28,
+        "VU": 66,
+        "NT": 886
+      },
+      "animalia": 99694,
+      "plantae": 3419,
+      "fungi": 206,
+      "elevationM": 1523,
+      "bbox": {
+        "minLat": 10.0063,
+        "maxLat": 10.1581,
+        "minLon": -84.1732,
+        "maxLon": -84.1214
+      }
+    },
+    "san-rafael": {
+      "occurrences": 134302,
+      "threatenedOccurrences": 358,
+      "iucn": {
+        "CR": 114,
+        "EN": 84,
+        "VU": 160,
+        "NT": 1597
+      },
+      "animalia": 125178,
+      "plantae": 8617,
+      "fungi": 479,
+      "elevationM": 1744,
+      "bbox": {
+        "minLat": 9.999,
+        "maxLat": 10.1205,
+        "minLon": -84.1191,
+        "maxLon": -84.044
+      }
+    },
+    "san-isidro": {
+      "occurrences": 140591,
+      "threatenedOccurrences": 104,
+      "iucn": {
+        "CR": 2,
+        "EN": 24,
+        "VU": 78,
+        "NT": 822
+      },
+      "animalia": 134563,
+      "plantae": 5589,
+      "fungi": 430,
+      "elevationM": 1443,
+      "bbox": {
+        "minLat": 9.9964,
+        "maxLat": 10.0617,
+        "minLon": -84.076,
+        "maxLon": -84.0104
+      }
+    },
+    "belen": {
+      "occurrences": 161352,
+      "threatenedOccurrences": 177,
+      "iucn": {
+        "CR": 5,
+        "EN": 9,
+        "VU": 163,
+        "NT": 487
+      },
+      "animalia": 158523,
+      "plantae": 2775,
+      "fungi": 50,
+      "elevationM": 963,
+      "bbox": {
+        "minLat": 9.9658,
+        "maxLat": 10.0052,
+        "minLon": -84.1999,
+        "maxLon": -84.1537
+      }
+    },
+    "flores": {
+      "occurrences": 21723,
+      "threatenedOccurrences": 13,
+      "iucn": {
+        "CR": 1,
+        "EN": 2,
+        "VU": 10,
+        "NT": 162
+      },
+      "animalia": 21413,
+      "plantae": 276,
+      "fungi": 19,
+      "elevationM": 1043,
+      "bbox": {
+        "minLat": 9.9901,
+        "maxLat": 10.0211,
+        "minLon": -84.1737,
+        "maxLon": -84.1341
+      }
+    },
+    "san-pablo": {
+      "occurrences": 405649,
+      "threatenedOccurrences": 54,
+      "iucn": {
+        "CR": 6,
+        "EN": 8,
+        "VU": 40,
+        "NT": 510
+      },
+      "animalia": 401726,
+      "plantae": 3440,
+      "fungi": 480,
+      "elevationM": 1179,
+      "bbox": {
+        "minLat": 9.9713,
+        "maxLat": 10.0124,
+        "minLon": -84.1134,
+        "maxLon": -84.0738
+      }
+    },
+    "sarapiqui": {
+      "occurrences": 3074845,
+      "threatenedOccurrences": 14764,
+      "iucn": {
+        "CR": 600,
+        "EN": 1260,
+        "VU": 12904,
+        "NT": 43550
+      },
+      "animalia": 2979738,
+      "plantae": 90384,
+      "fungi": 2828,
+      "elevationM": 49,
+      "bbox": {
+        "minLat": 10.1829,
+        "maxLat": 10.7927,
+        "minLon": -84.1612,
+        "maxLon": -83.7107
+      }
+    },
+    "liberia": {
+      "occurrences": 4686591,
+      "threatenedOccurrences": 8476,
+      "iucn": {
+        "CR": 189,
+        "EN": 795,
+        "VU": 7492,
+        "NT": 16328
+      },
+      "animalia": 4613996,
+      "plantae": 67591,
+      "fungi": 4023,
+      "elevationM": 98,
+      "bbox": {
+        "minLat": 10.42,
+        "maxLat": 10.9643,
+        "minLon": -85.6991,
+        "maxLon": -85.2911
+      }
+    },
+    "nicoya": {
+      "occurrences": 390743,
+      "threatenedOccurrences": 3049,
+      "iucn": {
+        "CR": 85,
+        "EN": 79,
+        "VU": 2885,
+        "NT": 2343
+      },
+      "animalia": 370459,
+      "plantae": 17160,
+      "fungi": 2942,
+      "elevationM": 179,
+      "bbox": {
+        "minLat": 9.8596,
+        "maxLat": 10.3467,
+        "minLon": -85.697,
+        "maxLon": -85.1894
+      }
+    },
+    "santa-cruz": {
+      "occurrences": 316065,
+      "threatenedOccurrences": 2172,
+      "iucn": {
+        "CR": 99,
+        "EN": 57,
+        "VU": 2016,
+        "NT": 3561
+      },
+      "animalia": 306905,
+      "plantae": 8378,
+      "fungi": 676,
+      "elevationM": 209,
+      "bbox": {
+        "minLat": 9.9841,
+        "maxLat": 10.488,
+        "minLon": -85.8753,
+        "maxLon": -85.4057
+      }
+    },
+    "bagaces": {
+      "occurrences": 2385105,
+      "threatenedOccurrences": 5640,
+      "iucn": {
+        "CR": 132,
+        "EN": 326,
+        "VU": 5182,
+        "NT": 9633
+      },
+      "animalia": 2344933,
+      "plantae": 33495,
+      "fungi": 6486,
+      "elevationM": 71,
+      "bbox": {
+        "minLat": 10.2483,
+        "maxLat": 10.7758,
+        "minLon": -85.4331,
+        "maxLon": -85.0599
+      }
+    },
+    "carrillo": {
+      "occurrences": 400885,
+      "threatenedOccurrences": 2207,
+      "iucn": {
+        "CR": 78,
+        "EN": 81,
+        "VU": 2048,
+        "NT": 3322
+      },
+      "animalia": 395447,
+      "plantae": 4913,
+      "fungi": 435,
+      "elevationM": 26,
+      "bbox": {
+        "minLat": 10.3262,
+        "maxLat": 10.6368,
+        "minLon": -85.8131,
+        "maxLon": -85.3686
+      }
+    },
+    "canas": {
+      "occurrences": 386464,
+      "threatenedOccurrences": 2002,
+      "iucn": {
+        "CR": 65,
+        "EN": 174,
+        "VU": 1763,
+        "NT": 5580
+      },
+      "animalia": 365410,
+      "plantae": 17081,
+      "fungi": 3935,
+      "elevationM": 90,
+      "bbox": {
+        "minLat": 10.1923,
+        "maxLat": 10.7082,
+        "minLon": -85.2482,
+        "maxLon": -84.9497
+      }
+    },
+    "abangares": {
+      "occurrences": 404367,
+      "threatenedOccurrences": 6504,
+      "iucn": {
+        "CR": 62,
+        "EN": 245,
+        "VU": 6197,
+        "NT": 12253
+      },
+      "animalia": 388524,
+      "plantae": 15174,
+      "fungi": 639,
+      "elevationM": 62,
+      "bbox": {
+        "minLat": 10.1123,
+        "maxLat": 10.3892,
+        "minLon": -85.2258,
+        "maxLon": -84.8268
+      }
+    },
+    "tilaran": {
+      "occurrences": 556866,
+      "threatenedOccurrences": 4207,
+      "iucn": {
+        "CR": 43,
+        "EN": 507,
+        "VU": 3657,
+        "NT": 17001
+      },
+      "animalia": 529323,
+      "plantae": 25233,
+      "fungi": 2205,
+      "elevationM": 722,
+      "bbox": {
+        "minLat": 10.3207,
+        "maxLat": 10.6525,
+        "minLon": -85.0464,
+        "maxLon": -84.7661
+      }
+    },
+    "nandayure": {
+      "occurrences": 88381,
+      "threatenedOccurrences": 533,
+      "iucn": {
+        "CR": 51,
+        "EN": 26,
+        "VU": 456,
+        "NT": 305
+      },
+      "animalia": 81932,
+      "plantae": 4584,
+      "fungi": 1855,
+      "elevationM": 311,
+      "bbox": {
+        "minLat": 9.7283,
+        "maxLat": 10.0747,
+        "minLon": -85.4562,
+        "maxLon": -85.1494
+      }
+    },
+    "la-cruz": {
+      "occurrences": 3449149,
+      "threatenedOccurrences": 5027,
+      "iucn": {
+        "CR": 240,
+        "EN": 928,
+        "VU": 3859,
+        "NT": 12040
+      },
+      "animalia": 3360359,
+      "plantae": 84649,
+      "fungi": 2863,
+      "elevationM": 217,
+      "bbox": {
+        "minLat": 10.7993,
+        "maxLat": 11.219,
+        "minLon": -85.9583,
+        "maxLon": -85.2288
+      }
+    },
+    "hojancha": {
+      "occurrences": 52591,
+      "threatenedOccurrences": 199,
+      "iucn": {
+        "CR": 15,
+        "EN": 12,
+        "VU": 172,
+        "NT": 135
+      },
+      "animalia": 47138,
+      "plantae": 3622,
+      "fungi": 1820,
+      "elevationM": 489,
+      "bbox": {
+        "minLat": 9.8494,
+        "maxLat": 10.0994,
+        "minLon": -85.4956,
+        "maxLon": -85.3225
+      }
+    },
+    "puntarenas-centro": {
+      "occurrences": 3020131,
+      "threatenedOccurrences": 31798,
+      "iucn": {
+        "CR": 639,
+        "EN": 1311,
+        "VU": 29848,
+        "NT": 68727
+      },
+      "animalia": 2790144,
+      "plantae": 103179,
+      "fungi": 7384,
+      "elevationM": 120,
+      "bbox": {
+        "minLat": 5.4978,
+        "maxLat": 10.3374,
+        "minLon": -87.0955,
+        "maxLon": -84.6621
+      }
+    },
+    "esparza": {
+      "occurrences": 116736,
+      "threatenedOccurrences": 984,
+      "iucn": {
+        "CR": 32,
+        "EN": 14,
+        "VU": 938,
+        "NT": 1501
+      },
+      "animalia": 112359,
+      "plantae": 4282,
+      "fungi": 84,
+      "elevationM": 235,
+      "bbox": {
+        "minLat": 9.8629,
+        "maxLat": 10.1275,
+        "minLon": -84.7419,
+        "maxLon": -84.5529
+      }
+    },
+    "buenos-aires": {
+      "occurrences": 895237,
+      "threatenedOccurrences": 2532,
+      "iucn": {
+        "CR": 146,
+        "EN": 647,
+        "VU": 1739,
+        "NT": 3953
+      },
+      "animalia": 837303,
+      "plantae": 54060,
+      "fungi": 3668,
+      "elevationM": 303,
+      "bbox": {
+        "minLat": 8.7746,
+        "maxLat": 9.3826,
+        "minLon": -83.5632,
+        "maxLon": -82.9699
+      }
+    },
+    "montes-de-oro": {
+      "occurrences": 197459,
+      "threatenedOccurrences": 1050,
+      "iucn": {
+        "CR": 23,
+        "EN": 122,
+        "VU": 905,
+        "NT": 3673
+      },
+      "animalia": 186913,
+      "plantae": 10339,
+      "fungi": 76,
+      "elevationM": 682,
+      "bbox": {
+        "minLat": 10.0084,
+        "maxLat": 10.2842,
+        "minLon": -84.812,
+        "maxLon": -84.6554
+      }
+    },
+    "osa": {
+      "occurrences": 2064424,
+      "threatenedOccurrences": 20072,
+      "iucn": {
+        "CR": 339,
+        "EN": 3151,
+        "VU": 16582,
+        "NT": 21735
+      },
+      "animalia": 1955589,
+      "plantae": 101382,
+      "fungi": 6451,
+      "elevationM": 9,
+      "bbox": {
+        "minLat": 8.5049,
+        "maxLat": 9.2799,
+        "minLon": -83.9044,
+        "maxLon": -83.163
+      }
+    },
+    "quepos": {
+      "occurrences": 838798,
+      "threatenedOccurrences": 5932,
+      "iucn": {
+        "CR": 25,
+        "EN": 965,
+        "VU": 4942,
+        "NT": 3823
+      },
+      "animalia": 814340,
+      "plantae": 23289,
+      "fungi": 1018,
+      "elevationM": 24,
+      "bbox": {
+        "minLat": 9.2546,
+        "maxLat": 9.5721,
+        "minLon": -84.2517,
+        "maxLon": -83.8408
+      }
+    },
+    "golfito": {
+      "occurrences": 1124754,
+      "threatenedOccurrences": 9243,
+      "iucn": {
+        "CR": 92,
+        "EN": 1115,
+        "VU": 8036,
+        "NT": 15787
+      },
+      "animalia": 1077628,
+      "plantae": 42689,
+      "fungi": 3765,
+      "elevationM": 100,
+      "bbox": {
+        "minLat": 8.0389,
+        "maxLat": 8.8074,
+        "minLon": -83.3364,
+        "maxLon": -82.886
+      }
+    },
+    "coto-brus": {
+      "occurrences": 1504739,
+      "threatenedOccurrences": 1941,
+      "iucn": {
+        "CR": 73,
+        "EN": 401,
+        "VU": 1467,
+        "NT": 9156
+      },
+      "animalia": 1438483,
+      "plantae": 50947,
+      "fungi": 14836,
+      "elevationM": 1022,
+      "bbox": {
+        "minLat": 8.6913,
+        "maxLat": 9.0963,
+        "minLon": -83.1058,
+        "maxLon": -82.7133
+      }
+    },
+    "parrita": {
+      "occurrences": 111120,
+      "threatenedOccurrences": 1279,
+      "iucn": {
+        "CR": 84,
+        "EN": 134,
+        "VU": 1061,
+        "NT": 1306
+      },
+      "animalia": 107080,
+      "plantae": 3915,
+      "fungi": 89,
+      "elevationM": 23,
+      "bbox": {
+        "minLat": 9.4497,
+        "maxLat": 9.6494,
+        "minLon": -84.555,
+        "maxLon": -84.1341
+      }
+    },
+    "corredores": {
+      "occurrences": 144063,
+      "threatenedOccurrences": 1023,
+      "iucn": {
+        "CR": 1,
+        "EN": 57,
+        "VU": 965,
+        "NT": 2244
+      },
+      "animalia": 142050,
+      "plantae": 1442,
+      "fungi": 528,
+      "elevationM": 8,
+      "bbox": {
+        "minLat": 8.3418,
+        "maxLat": 8.733,
+        "minLon": -83.0566,
+        "maxLon": -82.8226
+      }
+    },
+    "garabito": {
+      "occurrences": 1415915,
+      "threatenedOccurrences": 6825,
+      "iucn": {
+        "CR": 102,
+        "EN": 106,
+        "VU": 6617,
+        "NT": 18185
+      },
+      "animalia": 1397363,
+      "plantae": 17225,
+      "fungi": 1225,
+      "elevationM": 234,
+      "bbox": {
+        "minLat": 9.5386,
+        "maxLat": 9.8781,
+        "minLon": -84.7017,
+        "maxLon": -84.5296
+      }
+    },
+    "puerto-jimenez": {
+      "occurrences": 1263315,
+      "threatenedOccurrences": 14250,
+      "iucn": {
+        "CR": 105,
+        "EN": 2178,
+        "VU": 11967,
+        "NT": 15078
+      },
+      "animalia": 1211544,
+      "plantae": 45756,
+      "fungi": 5931,
+      "elevationM": 636,
+      "bbox": {
+        "minLat": 8.3735,
+        "maxLat": 8.6923,
+        "minLon": -83.6525,
+        "maxLon": -83.2712
+      }
+    },
+    "limon-centro": {
+      "occurrences": 922745,
+      "threatenedOccurrences": 3927,
+      "iucn": {
+        "CR": 764,
+        "EN": 594,
+        "VU": 2569,
+        "NT": 7589
+      },
+      "animalia": 868217,
+      "plantae": 44851,
+      "fungi": 8373,
+      "elevationM": 983,
+      "bbox": {
+        "minLat": 9.484,
+        "maxLat": 10.0681,
+        "minLon": -83.5159,
+        "maxLon": -82.8692
+      }
+    },
+    "pococi": {
+      "occurrences": 1503402,
+      "threatenedOccurrences": 8805,
+      "iucn": {
+        "CR": 731,
+        "EN": 1633,
+        "VU": 6441,
+        "NT": 21983
+      },
+      "animalia": 1459418,
+      "plantae": 40643,
+      "fungi": 1868,
+      "elevationM": 31,
+      "bbox": {
+        "minLat": 10.0633,
+        "maxLat": 10.941,
+        "minLon": -83.9472,
+        "maxLon": -83.343
+      }
+    },
+    "siquirres": {
+      "occurrences": 252336,
+      "threatenedOccurrences": 1342,
+      "iucn": {
+        "CR": 189,
+        "EN": 172,
+        "VU": 981,
+        "NT": 5418
+      },
+      "animalia": 239784,
+      "plantae": 11505,
+      "fungi": 993,
+      "elevationM": 30,
+      "bbox": {
+        "minLat": 9.9817,
+        "maxLat": 10.3145,
+        "minLon": -83.7171,
+        "maxLon": -83.2711
+      }
+    },
+    "talamanca": {
+      "occurrences": 874543,
+      "threatenedOccurrences": 5094,
+      "iucn": {
+        "CR": 399,
+        "EN": 750,
+        "VU": 3945,
+        "NT": 9659
+      },
+      "animalia": 791270,
+      "plantae": 76616,
+      "fungi": 5963,
+      "elevationM": 1255,
+      "bbox": {
+        "minLat": 9.0761,
+        "maxLat": 9.7677,
+        "minLon": -83.4895,
+        "maxLon": -82.5523
+      }
+    },
+    "matina": {
+      "occurrences": 506670,
+      "threatenedOccurrences": 1307,
+      "iucn": {
+        "CR": 114,
+        "EN": 314,
+        "VU": 879,
+        "NT": 3870
+      },
+      "animalia": 486890,
+      "plantae": 19069,
+      "fungi": 687,
+      "elevationM": 31,
+      "bbox": {
+        "minLat": 9.7985,
+        "maxLat": 10.2236,
+        "minLon": -83.4679,
+        "maxLon": -83.1509
+      }
+    },
+    "guacimo": {
+      "occurrences": 172409,
+      "threatenedOccurrences": 589,
+      "iucn": {
+        "CR": 79,
+        "EN": 86,
+        "VU": 424,
+        "NT": 3882
+      },
+      "animalia": 167793,
+      "plantae": 3970,
+      "fungi": 572,
+      "elevationM": 46,
+      "bbox": {
+        "minLat": 10.0381,
+        "maxLat": 10.3703,
+        "minLon": -83.7755,
+        "maxLon": -83.4703
+      }
+    },
+    "heredia-centro": {
+      "occurrences": 1331380,
+      "threatenedOccurrences": 2331,
+      "iucn": {
+        "CR": 197,
+        "EN": 595,
+        "VU": 1539,
+        "NT": 12155
+      },
+      "animalia": 1252019,
+      "plantae": 75813,
+      "fungi": 2981,
+      "elevationM": 1953,
+      "bbox": {
+        "minLat": 9.9595,
+        "maxLat": 10.2976,
+        "minLon": -84.1641,
+        "maxLon": -83.9143
+      }
+    }
+  }
+}
