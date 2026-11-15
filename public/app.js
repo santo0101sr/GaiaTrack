@@ -63,7 +63,7 @@ function showError(message){$('#status').textContent=message;}
 const PROVINCE_IDS=['san-jose','alajuela','cartago','heredia','guanacaste','puntarenas','limon'];
 function options(select,value){
   if(!select)return;
-  if(select.id==='site-select'||select.id==='quick-site-select'){
+  if(select.id==='site-select'){
     const province=value?manifest.sites.find(s=>s.id===value)?.province:null;
     select.innerHTML=province?territoryOptionsHtml(manifest,province,getLang()):`<option value="">${tx('Choose a province first','Elegí primero una provincia')}</option>`;
     select.value=value||'';
@@ -115,20 +115,13 @@ function render(){
   document.querySelectorAll('.layer-button').forEach(b=>{const active=b.dataset.variable===state.variable;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});
   const selectedSite=state.site?manifest.sites.find(s=>s.id===state.site):null;
   options($('#site-select'),state.site);
-  options($('#quick-site-select'),state.site);
   $('#site-select').hidden=!selectedSite;
-  if($('#quick-site-select'))$('#quick-site-select').hidden=!selectedSite;
-  const siteLabel=$('.territory-field-label[for="site-select"]');
-  if(siteLabel)siteLabel.hidden=!selectedSite;
+  $('#site-select').classList.toggle('has-selection',Boolean(selectedSite));
   const provHtml=`<option value="">${tx('Choose a province','Elegí una provincia')}</option>`+provinceOptionsHtml(manifest);
   const provVal=selectedSite?selectedSite.province:'';
   $('#province-select').innerHTML=provHtml;
   $('#province-select').value=provVal;
-  if($('#quick-province-select')){
-    $('#quick-province-select').innerHTML=provHtml;
-    $('#quick-province-select').value=provVal;
-    $('#quick-province-select').classList.toggle('has-selection',Boolean(provVal));
-  }
+  $('#province-select').classList.toggle('has-selection',Boolean(provVal));
   if($('#quick-variable-select')){
     $('#quick-variable-select').innerHTML=rawVariables.map(p=>`<option value="${p.id}">${p[getLang()].short}</option>`).join('');
     $('#quick-variable-select').value=state.variable;
@@ -147,6 +140,7 @@ function render(){
 function renderInspector(){
   if(!state.site){
     $('#history-retry').hidden=true;
+    if($('#inspector-place'))$('#inspector-place').textContent=tx('Costa Rica · Choose a province','Costa Rica · Elegí una provincia');
     $('#point-coordinates').textContent=tx('COSTA RICA · 7 PROVINCES · 83 CANTONS','COSTA RICA · 7 PROVINCIAS · 83 CANTONES');
     $('#metric-year').textContent=state.year;$('#metric-value').textContent='—';
     $('#history-quality').textContent=tx(
@@ -162,6 +156,7 @@ function renderInspector(){
     return;
   }
   const s=data[state.site],points=series(),current=valueAt(state.site,state.year),base=baseline(points),diff=Number.isFinite(current)&&Number.isFinite(base)?current-base:null;
+  if($('#inspector-place'))$('#inspector-place').textContent=s.name;
   $('#point-coordinates').textContent=`${s.latitude.toFixed(4)}° N / ${Math.abs(s.longitude).toFixed(4)}° ${tx('W','O')} · ${tx('REFERENCE POINT','PUNTO DE REFERENCIA')}`;
   $('#metric-year').textContent=state.year;$('#metric-value').textContent=format(current);
   const coverage=historyCoverage(s.monthly??[],state.variable,state.year);
@@ -576,8 +571,6 @@ async function boot(){
     $('#start-year').value=state.start;$('#end-year').value=state.end;
     const onProvincePick=e=>{if(!e.target.value){selectSite(null);return;}const p=manifest.provinces.find(x=>x.id===e.target.value);if(p)selectSite(p.siteId);};
     $('#site-select').onchange=e=>selectSite(e.target.value);$('#province-select').onchange=onProvincePick;
-    if($('#quick-site-select'))$('#quick-site-select').onchange=e=>selectSite(e.target.value);
-    if($('#quick-province-select'))$('#quick-province-select').onchange=onProvincePick;
     if($('#quick-variable-select'))$('#quick-variable-select').onchange=e=>setVariable(e.target.value);
     $('#year-slider').oninput=e=>{stop();setYear(e.target.value);};
     $('#compare').onchange=e=>{state.compare=e.target.checked;renderChart();};

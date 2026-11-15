@@ -63,12 +63,10 @@ export function applyStaticI18n(){
   const inspLabels=document.querySelectorAll('.inspector>.section-label');
   if(inspLabels[0])inspLabels[0].innerHTML=es?'PUNTO DE INVESTIGACIÓN <span>↗</span>':'RESEARCH POINT <span>↗</span>';
   if(inspLabels[1])inspLabels[1].textContent=es?'LECTURA DEL TERRITORIO':'TERRITORY READING';
-  setText('label[for="province-select"]',es?'Provincia':'Province');setText('.territory-field-label[for="site-select"]',es?'Cantón / vista provincial':'Canton / province overview');setAttr('#province-select','aria-label',es?'Seleccionar provincia':'Select province');setAttr('#site-select','aria-label',es?'Seleccionar cantón o vista provincial':'Select canton or province overview');
+  setAttr('#province-select','aria-label',es?'Seleccionar provincia':'Select province');setAttr('#site-select','aria-label',es?'Seleccionar cantón o vista provincial':'Select canton or province overview');
   setText('#sticky-kicker',es?'⌖ TERRITORIO':'⌖ TERRITORY');
   setText('#sticky-var-kicker','◉ VARIABLE');
   setAttr('#sticky-territory-bar','aria-label',es?'Selector rápido de territorio':'Quick territory selector');
-  setAttr('#quick-province-select','aria-label',es?'Seleccionar provincia':'Select province');
-  setAttr('#quick-site-select','aria-label',es?'Seleccionar cantón o provincia':'Select canton or province');
   setAttr('#quick-variable-select','aria-label',es?'Seleccionar variable':'Select variable');
   setText('.comparison-line span',es?'Frente a 2001–2010':'Vs. 2001–2010 baseline');
 
