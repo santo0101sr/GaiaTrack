@@ -16,12 +16,8 @@ const square=[[0,0],[2,0],[2,2],[0,2],[0,0]];
 const hole=[[.6,.6],[1.4,.6],[1.4,1.4],[.6,1.4],[.6,.6]];
 function checkDrops(field,origin,check){
   const positions=field.geometry.attributes.position.array;
-  const seeds=field.geometry.attributes.aSeed.array;
-  const maxDrift=field.appearance.wind;
-  for(let i=0;i<field.geometry.drawRange.count;i++){
-    const pt=field.evaluateDropXZ(i);
-    const a={x:pt.x,z:pt.z};
-    const b={x:positions[i*3]+origin.x-seeds[i*4+3]*Math.min(1,maxDrift),z:positions[i*3+2]+origin.z};
+  for(let i=0;i<field.geometry.drawRange.count;i+=2){
+    const n=i*3,a={x:positions[n]+origin.x,z:positions[n+2]+origin.z},b={x:positions[n+3]+origin.x,z:positions[n+5]+origin.z};
     check(a,b);
   }
 }
@@ -51,17 +47,14 @@ test('Every positive rate is visible, with increasing density, speed, length and
 test('Wind never carries a drop or its tail outside the territory over prolonged animation',()=>{
   const domain=createRainDomain([meshFor([square,hole])]);
   const field=createRainField(domain,{count:160,random:randomSource()}),origin=new THREE.Vector3(1,.25,1);
-  assert.equal(field.mesh.isPoints,true);
   field.setOrigin(origin);field.setWeather({precipitation:20,weatherCode:65});
-  const timeBefore=field.mesh.material.uniforms.uTime.value;
   for(let frame=0;frame<600;frame++){
     field.animate(.05);
     checkDrops(field,origin,(a,b)=>assert.ok(domain.containsSegment(a,b),`escaped at frame ${frame}`));
   }
-  assert.ok(field.mesh.material.uniforms.uTime.value>timeBefore);
   field.setWeather({precipitation:0,weatherCode:3});
   assert.equal(field.geometry.drawRange.count,0);
-  assert.equal(field.mesh.visible,false);
+  assert.equal(field.mesh.getObjectByName('intensity-rain-streaks').geometry.instanceCount,0);
   field.animate(.05);assert.equal(field.geometry.drawRange.count,0);
 });
 

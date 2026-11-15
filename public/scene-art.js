@@ -1,28 +1,17 @@
 import * as THREE from './vendor/three.module.js';
-const textureCache=new Map();
 export function softTexture(kind='cloud'){
-if(textureCache.has(kind))return textureCache.get(kind);
-if(typeof document==='undefined'){const t=new THREE.DataTexture(new Uint8Array([255,255,255,255]),1,1);textureCache.set(kind,t);return t;}
 const canvas=document.createElement('canvas');canvas.width=256;canvas.height=256;const ctx=canvas.getContext('2d');
 if(kind==='cloud'){for(const [x,y,r,a] of [[128,140,88,.65],[77,137,53,.45],[174,139,55,.45],[119,102,60,.65],[155,115,43,.4]]){const g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,`rgba(235,248,255,${a})`);g.addColorStop(.5,`rgba(205,228,244,${a*.6})`);g.addColorStop(1,'rgba(140,174,209,0)');ctx.fillStyle=g;ctx.fillRect(0,0,256,256);}}
 else{const g=ctx.createRadialGradient(128,128,0,128,128,128);g.addColorStop(0,'rgba(255,250,221,1)');g.addColorStop(.15,'rgba(255,213,136,.75)');g.addColorStop(.4,'rgba(255,158,77,.18)');g.addColorStop(1,'rgba(255,130,50,0)');ctx.fillStyle=g;ctx.fillRect(0,0,256,256);}
-const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
-textureCache.set(kind,texture);
-return texture;
+const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;return texture;
 }
-export function surfaceMaterial({vertexColors=false,styled=true}={}){
-const material=new THREE.MeshLambertMaterial({color:vertexColors?0xffffff:0x153e4a,emissive:vertexColors?0x000000:0x04151c,vertexColors});
-if(styled){
-material.onBeforeCompile=shader=>{shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vSurface;').replace('#include <begin_vertex>','#include <begin_vertex>\nvSurface=position;');shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vSurface;').replace('#include <color_fragment>',`#include <color_fragment>
+export function surfaceMaterial(){const material=new THREE.MeshStandardMaterial({color:0x153e4a,emissive:0x04151c,metalness:.28,roughness:.75});material.onBeforeCompile=shader=>{shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vSurface;').replace('#include <begin_vertex>','#include <begin_vertex>\nvSurface=position;');shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vSurface;').replace('#include <color_fragment>',`#include <color_fragment>
 float contour=sin(vSurface.x*12.0+sin(vSurface.z*6.0)*1.6+sin(vSurface.x*3.0+vSurface.z*2.0));
 float grain=fract(sin(dot(floor(vSurface.xz*180.0),vec2(12.9898,78.233)))*43758.5453);
 float top=smoothstep(.10,.16,vSurface.y);
 diffuseColor.rgb*=mix(.30,1.0,top);
 diffuseColor.rgb*=.91+.07*contour+.035*grain;
-diffuseColor.rgb+=vec3(.003,.008,.009)*top*pow(abs(contour),24.0);`);};
-}
-return material;
-}
+diffuseColor.rgb+=vec3(.003,.008,.009)*top*pow(abs(contour),24.0);`);};return material;}
 export function addSceneAtmosphere(scene,root){
 const hemisphere=new THREE.HemisphereLight(0x9cd8ee,0x07101f,1.6);scene.add(hemisphere);
 const base=new THREE.Mesh(new THREE.CircleGeometry(28,96),new THREE.ShaderMaterial({

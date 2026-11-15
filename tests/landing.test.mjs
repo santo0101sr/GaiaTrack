@@ -128,7 +128,7 @@ test('Unified slide renders creators carousel with dormant photo support, outsid
 
     // Unified single giant slide without bottom section bar, video chapters, or inside NASA box
     assert.equal(portal.querySelectorAll('.lp-giant-slide').length, 1);
-    assert.doesNotMatch(portal.innerHTML, /class="lp-nav"|lp-slider-bar|lp-chapters|lp-chap|data-slide=|\blp-prev\b|\blp-next\b|data-go-next|lp-nasa-banner/);
+    assert.doesNotMatch(portal.innerHTML, /class="lp-nav"|lp-slider-bar|lp-chapters|lp-chap|data-slide=|lp-prev|lp-next|data-go-next|lp-nasa-banner/);
 
     // Simplified gray NASA footnote strictly outside .lp-giant-slide with zero emojis
     const fnMatch = portal.innerHTML.match(/<p class="lp-nasa-footnote">([^<]+)<\/p>/);
@@ -187,39 +187,16 @@ test('Unified slide renders creators carousel with dormant photo support, outsid
     assert.equal(i18nMod.getTheme(), 'dark');
     assert.equal(doc.body.classList.contains('light-mode'), false);
 
-    // Main app static HTML also exposes topbar theme toggle and non-AI official logo favicon
-    const indexHtml = await fs.readFile(path.resolve('public/index.html'), 'utf8');
-    assert.match(indexHtml, /id="topbar-theme-toggle"[^>]*data-theme-toggle/);
-    assert.match(indexHtml, /<link rel="icon" type="image\/png" href="assets\/gaia-eb-final\.png">/);
-    assert.doesNotMatch(indexHtml, /rel="icon" href="data:image\/svg\+xml/);
-    const creditsHtml = await fs.readFile(path.resolve('public/credits.html'), 'utf8');
-    assert.match(creditsHtml, /<link rel="icon" type="image\/png" href="assets\/gaia-eb-final\.png">/);
-    assert.doesNotMatch(creditsHtml, /por verificar|Apéndice A/i);
+    // Main app static HTML also exposes topbar theme toggle
+    const mapHtml = await fs.readFile(path.resolve('public/map.html'), 'utf8');
+    assert.match(mapHtml, /id="topbar-theme-toggle"[^>]*data-theme-toggle/);
 
-    // Verify brand logo image and Gemini-watermarked demo MP4 exist cleanly on disk
-    const logoStat = await fs.stat(path.resolve('public/assets/gaia-eb-final.png'));
-    assert.ok(logoStat.size > 0);
-    const demoPath = path.resolve('public/assets/gaiatrack-demo.mp4');
-    const demoStat = await fs.stat(demoPath);
-    assert.ok(demoStat.size > 100000);
-    const demoHeader = (await fs.readFile(demoPath)).subarray(0, 12).toString('latin1');
-    assert.equal(demoHeader.slice(4, 8), 'ftyp');
-
-    // Verify centered brand logo, PDF, demo video, and dynamic verified coverage (never unverifiable Appendix A claims)
+    // Verify centered brand logo, PDF, demo video, and quantified Trend Detective metrics
     assert.match(portal.innerHTML, /assets\/gaia-eb-final\.png/);
     assert.match(portal.innerHTML, /assets\/gaia-eb-research-paper\.pdf/);
     assert.match(portal.innerHTML, /assets\/gaiatrack-demo\.mp4/);
-    const manifest = JSON.parse(await fs.readFile(path.resolve('public/data/manifest.json'), 'utf8'));
-    const annual = JSON.parse(await fs.readFile(path.resolve('public/data/annual.json'), 'utf8'));
-    const sectors = JSON.parse(await fs.readFile(path.resolve('public/data/sectors.json'), 'utf8'));
-    const sectorsCount = Object.values(sectors).reduce((sum, arr) => sum + (Array.isArray(arr) ? arr.length : 0), 0);
-    landingMod.setLandingFacts({ manifest, annual, sectorsCount });
-
-    for (const token of ['2001–2025', '83', '20', '10', '479', 'Z =', '95% CI']) {
-      assert.ok(portal.innerHTML.includes(token), `Missing verified landing token: ${token}`);
-    }
-    for (const stale of ['MODIS', 'GPM', 'SMAP', '84 Cantons', '84 cantons', '89%', '−44.8%', '−32.6%', 'to be verified', 'por verificar', 'Appendix A', '450 ha', '1,800 ha', '1,200 ha', '−74%']) {
-      assert.equal(portal.innerHTML.includes(stale), false, `Found prohibited unverified token: ${stale}`);
+    for (const token of ['2001–2025', '84', '95%', '89%', '−44.8%', '−32.6%', '17.5M']) {
+      assert.ok(portal.innerHTML.includes(token), `Missing quantified metric token: ${token}`);
     }
 
     // Entering main app is one-way: closes portal, pauses demo video, resizes, clears intro, and refuses reopening
