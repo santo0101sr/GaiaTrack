@@ -116,7 +116,7 @@ export function createSkyField(initialDomain,{maxClusters=20,marchSteps=16,showS
   function buildClouds(){
     clusters=[];clusterLayout=[];let seed=5719;
     const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
-    const MIN_CLOUD_R=.09;
+    const MIN_CLOUD_R=showSun?.10:.20;
     const baseR=Math.min(domain.shortSpan*.45,Math.sqrt(domain.area/maxClusters)*1.2);
     if(baseR<MIN_CLOUD_R)return;
     const minR=Math.max(MIN_CLOUD_R,baseR*.28);
@@ -187,7 +187,7 @@ export function createSkyField(initialDomain,{maxClusters=20,marchSteps=16,showS
   }
   function applyCloudCount(sectors=null){
     activeClusters=[];
-    const MIN_COVER=.25;
+    const MIN_COVER=.35;
     if(sectors&&sectors.length&&clusters.length){
       const bySector=new Map(sectors.map((s,idx)=>[idx,[]]));
       for(let i=0;i<clusters.length;i++){
