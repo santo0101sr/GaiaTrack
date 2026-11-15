@@ -522,6 +522,13 @@ html[data-theme="light"] .sim-rec-box strong{color:#0b6e3b}
 html[data-theme="light"] .sim-close{background:#e7f2fe;border-color:#93c5fd;color:#0e77f0}
 html[data-theme="light"] .sim-horizon-tab.is-on{background:#e2f0fd;border-color:#0e77f0;color:#0e77f0}
 html[data-theme="light"] .sim-preset.is-on{background:#e4f5ec;border-color:#0b6e3b;color:#0b6e3b}
+html[data-theme="light"] .sim-svg text[fill="#9bc0dc"],
+html[data-theme="light"] .sim-svg text[fill="#8bb0cc"]{fill:#425e52}
+html[data-theme="light"] .sim-svg text[fill="#bae6fd"],
+html[data-theme="light"] .sim-svg text[fill="#7dd3fc"]{fill:#0e77f0}
+html[data-theme="light"] .sim-svg text[fill="#fde68a"]{fill:#a36200}
+html[data-theme="light"] .sim-svg text[fill="#86efac"]{fill:#0b6e3b}
+html[data-theme="light"] .sim-svg line[stroke*="148,163,184"]{stroke:rgba(15,60,42,.22)}
 
 /* Assistant Chat in Light Mode */
 html[data-theme="light"] #gaia-launch{background:#0b6e3b;color:#ffffff;border-color:#0e77f0;box-shadow:0 8px 24px rgba(12,50,36,.22)}
