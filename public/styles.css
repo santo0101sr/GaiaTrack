@@ -55,4 +55,14 @@ dialog[open]{animation:dialogIn .28s cubic-bezier(.22,1,.36,1) both}
 .calc-grid strong{font:500 18px var(--display);color:var(--text)}
 .calc-grid small{font-size:11px;color:var(--muted);line-height:1.45}
 .calc-formula{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;color:var(--blue);background:#0a1016;border:1px solid #25313c88;border-radius:4px;padding:4px 7px;margin-top:4px;overflow-x:auto;white-space:nowrap}
+.calc-guide{margin-top:12px;background:#0c151d;border:1px solid var(--line);border-radius:6px;padding:10px 14px}
+.calc-guide summary{cursor:pointer;font-size:12px;font-weight:500;color:var(--accent);list-style:none;display:flex;align-items:center;gap:8px}
+.calc-guide summary::-webkit-details-marker{display:none}
+.calc-guide[open] summary{margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.calc-guide-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.calc-guide-card{background:#0a1016;border:1px solid #25313c;border-radius:5px;padding:11px 12px;display:flex;flex-direction:column;gap:6px}
+.calc-guide-card h4{margin:0;font:600 12.5px var(--display);color:var(--text)}
+.calc-guide-card code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;color:var(--blue);background:#101922;padding:3px 6px;border-radius:3px;overflow-x:auto;white-space:nowrap}
+.calc-guide-card p{margin:0;font-size:11px;color:var(--muted);line-height:1.45}
+.calc-guide-card small{font-size:10.5px;color:#c3f77ad9;line-height:1.4;margin-top:auto}
 @media(max-width:850px){.calc-grid{grid-template-columns:1fr}}

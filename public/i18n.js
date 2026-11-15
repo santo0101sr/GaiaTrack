@@ -102,6 +102,30 @@ export function applyStaticI18n(){
   if(statLabels[2])statLabels[2].textContent=es?'PERÍODO ANALIZADO':'ANALYZED PERIOD';
   const slopeSmall=document.querySelector('.stat-grid>div:first-child small');
   if(slopeSmall)slopeSmall.textContent=es?'Estimador robusto de Theil–Sen':'Theil–Sen robust slope estimator';
+  const calcLabels=document.querySelectorAll('.calc-grid .section-label');
+  if(calcLabels[0])calcLabels[0].textContent=es?'Z DESESTACIONALIZADO E IEA':'DESEASONALIZED Z & IEA';
+  if(calcLabels[1])calcLabels[1].textContent=es?'PRUEBA T DE WELCH VS. 2001–2010':'WELCH T-TEST VS. 2001–2010';
+  if(calcLabels[2])calcLabels[2].textContent=es?'INTERVALOS DE CONFIANZA 95%':'95% CONFIDENCE INTERVALS';
+  setText('#calc-guide-summary',es
+    ?'📖 Guía rápida: ¿qué mide cada fórmula y cómo interpretarla?'
+    :'📖 Quick guide: What does each formula measure and how do I read it?');
+  const guideBody=document.querySelector('#calc-guide-body');
+  if(guideBody){
+    const cards=es?[
+      ['Z-Score Desestacionalizado','Z = (X − μ) / s','Mide cuántas desviaciones estándar se aleja un mes respecto a su propio promedio histórico (2001–2010), eliminando el ciclo estación seca/lluviosa.','Cómo leerlo: Z ≈ 0 es normal para ese mes; |Z| > 1,5 señala anomalía fuerte.'],
+      ['IEA Calibrado (Estrés Ambiental)','IEA = Σ w·Z\' + γ·max(0,Z\'ₛₘ)·max(0,Z\'ₜ)','Combina calor (+Z_T), falta de lluvia (−Z_P) y sequedad del suelo (−Z_SM), más el término no lineal γ cuando calor y suelo seco coinciden.','Cómo leerlo: IEA ≥ 0,89 indica estrés compuesto; IEA < 0 suele ser superávit benigno (fresco/húmedo).'],
+      ['Prueba t de Welch','t = (x̄₁ − x̄₂) / √(s₁²/n₁ + s₂²/n₂)','Compara el promedio del período elegido frente a la década base 2001–2010, sin asumir varianzas iguales entre ambos períodos.','Cómo leerlo: si p < 0,05, la diferencia de promedio respecto a 2001–2010 es estadísticamente significativa.'],
+      ['Intervalos de Confianza (IC 95%)','IC₉₅ = x̄ ± t₀.₀₂₅ · (s / √n)','Estima el rango donde cae la media real con 95% de confianza (t de Student) e incluye el IC no paramétrico de la pendiente por década.','Cómo leerlo: si el IC de la pendiente no cruza el 0, confirma una tendencia sostenida.'],
+      ['Theil–Sen, Mann–Kendall y FDR (q)','Pendiente mediana · prueba monótona · q','Theil–Sen calcula la mediana de pendientes entre pares de años (resiste valores atípicos); Mann–Kendall mide monotonicidad; q controla falsos positivos al probar las 7 provincias.','Cómo leerlo: p < 0,05 y q ≤ 0,05 (sin autocorrelación lag-1) respaldan señal real.']
+    ]:[
+      ['Deseasonalized Z-Score','Z = (X − μ) / s','Measures how many standard deviations a month deviates from its own 2001–2010 calendar-month average, removing normal dry/rainy seasonality.','How to read it: Z ≈ 0 is normal for that month; |Z| > 1.5 flags a strong anomaly.'],
+      ['Calibrated IEA (Environmental Stress)','IEA = Σ w·Z\' + γ·max(0,Z\'ₛₘ)·max(0,Z\'ₜ)','Combines heat (+Z_T), rain deficit (−Z_P), and dry soil (−Z_SM), plus a non-linear coupling term γ when heat and dry soil occur together.','How to read it: IEA ≥ 0.89 signals compound stress; IEA < 0 indicates a benign cool/wet surplus.'],
+      ['Welch Two-Sample t-Test','t = (x̄₁ − x̄₂) / √(s₁²/n₁ + s₂²/n₂)','Compares the selected period mean against the 2001–2010 baseline without assuming equal variances between windows.','How to read it: p < 0.05 means the shift in average relative to 2001–2010 is statistically significant.'],
+      ['95% Confidence Intervals','CI₉₅ = x̄ ± t₀.₀₂₅ · (s / √n)','Shows the 95% certainty range for the period mean (Student\'s t) alongside the non-parametric 95% CI for the decadal slope.','How to read it: if the slope CI does not include 0, it reinforces a sustained trend.'],
+      ['Theil–Sen, Mann–Kendall & FDR (q)','Median slope · monotonic test · q','Theil–Sen takes the median pairwise slope (outlier-resistant); Mann–Kendall tests sustained monotonic direction; Benjamini–Hochberg q limits false positives across all 7 provinces.','How to read it: p < 0.05 and q ≤ 0.05 (without lag-1 autocorrelation) mark robust regional signals.']
+    ];
+    guideBody.innerHTML=cards.map(([title,formula,what,how])=>`<article class="calc-guide-card"><h4>${title}</h4><code>${formula}</code><p>${what}</p><small>${how}</small></article>`).join('');
+  }
   setText('#scan-title',es?'¿DÓNDE ESTÁ CAMBIANDO? · 7 PROVINCIAS DE COSTA RICA':'WHERE IS IT CHANGING? · 7 PROVINCES OF COSTA RICA');
   setText('#scan-hint',es?'Hacé clic en cualquier provincia para inspeccionar su serie':'Click any province to inspect its series');
 
