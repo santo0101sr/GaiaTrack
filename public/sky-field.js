@@ -188,6 +188,7 @@ export function createSkyField(initialDomain,{maxClusters=20,marchSteps=16,showS
   }
   function applyCloudCount(sectors=null){
     activeClusters=[];
+    const MIN_COVER=.25;
     if(sectors&&sectors.length&&clusters.length){
       const bySector=new Map(sectors.map((s,idx)=>[idx,[]]));
       for(let i=0;i<clusters.length;i++){
@@ -198,17 +199,18 @@ export function createSkyField(initialDomain,{maxClusters=20,marchSteps=16,showS
       for(const [sIdx,indices] of bySector){
         const sec=sectors[sIdx],secApp=skyAppearance(sec);
         const sCov=secApp.cover??appearance.cover??0,sRain=secApp.storm??appearance.storm??0;
-        if(sCov<=0&&sRain<=0)continue;
-        const effCov=sCov>0?sCov:Math.min(.75,.35+sRain*.4);
+        if((sCov<MIN_COVER&&sRain<=0)||(!sCov&&sRain<=0))continue;
+        const effCov=sCov>=MIN_COVER?sCov:Math.min(.75,.35+sRain*.4);
         const keep=Math.min(indices.length,Math.max(1,Math.round(effCov*indices.length)));
         for(let k=0;k<keep;k++){
           const idx=indices[k];
           activeClusters.push({cluster:clusters[idx],layout:clusterLayout[idx],cover:effCov,rain:sRain});
         }
       }
-    }else if(appearance.cover>0&&clusters.length){
-      const count=Math.min(clusters.length,Math.max(1,Math.round(appearance.cover*clusters.length)));
-      for(let i=0;i<count;i++)activeClusters.push({cluster:clusters[i],layout:clusterLayout[i],cover:appearance.cover,rain:appearance.storm??0});
+    }else if(((appearance.cover??0)>=MIN_COVER||(appearance.storm??0)>0)&&clusters.length){
+      const effCov=(appearance.cover??0)>=MIN_COVER?appearance.cover:Math.min(.75,.35+(appearance.storm??0)*.4);
+      const count=Math.min(clusters.length,Math.max(1,Math.round(effCov*clusters.length)));
+      for(let i=0;i<count;i++)activeClusters.push({cluster:clusters[i],layout:clusterLayout[i],cover:effCov,rain:appearance.storm??0});
     }
     cloud.count=activeClusters.length*puffs.length;
     cloud.visible=cloud.count>0;
