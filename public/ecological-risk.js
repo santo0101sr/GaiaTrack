@@ -59,59 +59,65 @@ export function computeSiteRisk({ site, annual, ecologicalSite = null, liveTemp 
     return { score: null, climateRisk: null, bioRisk: null, driver: 'thermal', hasLive: false };
   }
 
-  // 1. Thermal pressure (NASA POWER T2M: recent 2021-2025 vs 2001-2010 + Theil-Sen slope + optional live temp)
+  // 1. Thermal pressure (NASA POWER T2M, T2M_MAX, T2M_MIN: 2021-2025 vs 2001-2010 + Theil-Sen slope + scale-aligned live temp)
   const t2m = annualPoints(annual, site.id, 'T2M');
+  const tMax = annualPoints(annual, site.id, 'T2M_MAX');
+  const tMin = annualPoints(annual, site.id, 'T2M_MIN');
   const baseT = baseline(t2m, 2001, 2010);
+  const baseTMax = baseline(tMax, 2001, 2010);
+  const baseTMin = baseline(tMin, 2001, 2010);
   const recentT = mean(t2m.filter(p => p.year >= 2021 && Number.isFinite(p.value)).map(p => p.value));
+  const recentTMax = mean(tMax.filter(p => p.year >= 2021 && Number.isFinite(p.value)).map(p => p.value));
+  const recentTMin = mean(tMin.filter(p => p.year >= 2021 && Number.isFinite(p.value)).map(p => p.value));
   const deltaT = Number.isFinite(baseT) && Number.isFinite(recentT) ? recentT - baseT : 0;
+  const deltaTMax = Number.isFinite(baseTMax) && Number.isFinite(recentTMax) ? recentTMax - baseTMax : deltaT;
+  const deltaTMin = Number.isFinite(baseTMin) && Number.isFinite(recentTMin) ? recentTMin - baseTMin : deltaT;
   const slopeDecade = (trend(t2m).slope ?? 0) * 10;
   const baseThermal = clamp(
-    clamp((deltaT / 1.0) * 65, 0, 70) + clamp((slopeDecade / 0.5) * 30, 0, 30),
+    clamp((deltaT / 1.0) * 35, 0, 38)
+      + clamp((deltaTMax / 1.2) * 25, 0, 27)
+      + clamp((deltaTMin / 1.0) * 15, 0, 15)
+      + clamp((slopeDecade / 0.45) * 25, 0, 25),
     0,
     100
   );
-  const hasLive = Number.isFinite(liveTemp) && Number.isFinite(baseT);
-  const liveAnomalyRisk = hasLive ? clamp(((liveTemp - baseT) / 4.0) * 100, 0, 100) : null;
-  const thermalRisk = hasLive ? clamp(0.65 * baseThermal + 0.35 * liveAnomalyRisk, 0, 100) : baseThermal;
+  const liveRef = Number.isFinite(baseTMax) ? baseTMax : baseT;
+  const hasLive = Number.isFinite(liveTemp) && Number.isFinite(liveRef);
+  const liveAnomalyRisk = hasLive ? clamp(((liveTemp - liveRef) / 4.5) * 100, 0, 100) : null;
+  const thermalRisk = hasLive ? clamp(0.80 * baseThermal + 0.20 * liveAnomalyRisk, 0, 100) : baseThermal;
 
-  // 2. Hydrological stress (NASA POWER PRECTOTCORR + GWETTOP + elevation)
+  // 2. Bidirectional hydrological stress (NASA POWER PRECTOTCORR + GWETTOP relative to territory baseline + smooth elevation)
   const prec = annualPoints(annual, site.id, 'PRECTOTCORR');
   const soil = annualPoints(annual, site.id, 'GWETTOP');
   const baseP = baseline(prec, 2001, 2010);
+  const baseSM = baseline(soil, 2001, 2010) ?? 0.7;
   const recentP = mean(prec.filter(p => p.year >= 2021 && Number.isFinite(p.value)).map(p => p.value));
   const pctP = Number.isFinite(baseP) && baseP > 0 && Number.isFinite(recentP)
     ? ((recentP - baseP) / baseP) * 100
     : 0;
-  const recentSM = mean(soil.filter(p => p.year >= 2021 && Number.isFinite(p.value)).map(p => p.value)) ?? 0.7;
+  const recentSM = mean(soil.filter(p => p.year >= 2021 && Number.isFinite(p.value)).map(p => p.value)) ?? baseSM;
+  const deltaSM = recentSM - baseSM;
 
-  const kind = site?.climate?.kind ?? 'urban-valley';
-  let hydroRisk = 0;
-  let hydroDriver = 'saturation';
-  if (kind === 'dry-coast' || kind === 'urban-valley') {
-    hydroDriver = 'drought';
-    const dryAnomaly = clamp((-pctP / 25) * 55, 0, 55);
-    const drySoil = clamp(((0.68 - recentSM) / 0.25) * 45, 0, 45);
-    hydroRisk = clamp(dryAnomaly + drySoil, 0, 100);
-  } else {
-    hydroDriver = 'saturation';
-    const wetAnomaly = clamp((pctP / 45) * 48, 0, 48);
-    const wetSoil = clamp(((recentSM - 0.74) / 0.22) * 40, 0, 40);
-    const elevBonus = Number.isFinite(ecologicalSite?.elevationM) && ecologicalSite.elevationM >= 900 ? 12 : 0;
-    hydroRisk = clamp(wetAnomaly + wetSoil + elevBonus, 0, 100);
-  }
+  const droughtStress = clamp((-pctP / 22) * 55, 0, 55) + clamp((-deltaSM / 0.12) * 45, 0, 45);
+  const wetStress = clamp((pctP / 35) * 52, 0, 52) + clamp((deltaSM / 0.12) * 40, 0, 40);
+  const elevSmooth = Number.isFinite(ecologicalSite?.elevationM) ? clamp((ecologicalSite.elevationM - 300) / 1800, 0, 1) * 10 : 0;
+  const hydroDriver = droughtStress >= wetStress ? 'drought' : 'saturation';
+  const hydroRisk = clamp(Math.max(droughtStress, wetStress) + elevSmooth, 0, 100);
 
-  // 3. Biological sensitivity (GBIF georeferenced records & IUCN Red List threatened occurrences)
+  // 3. Unbiased biological sensitivity (IUCN threatened proportion + presence, reducing raw sampling/area bias)
   const occ = ecologicalSite?.occurrences;
   const threat = ecologicalSite?.threatenedOccurrences;
   let bioRisk = null;
   if (Number.isFinite(occ) && Number.isFinite(threat)) {
-    const threatPart = clamp((Math.log10(threat + 1) / 3.8) * 65, 0, 65);
-    const occPart = clamp((Math.log10(occ + 1) / 6.3) * 35, 0, 35);
-    bioRisk = clamp(threatPart + occPart, 0, 100);
+    const threatRatio = occ > 0 ? threat / occ : 0;
+    const ratioPart = clamp((threatRatio / 0.06) * 70, 0, 70);
+    const presencePart = clamp((Math.log10(threat + 1) / 3.8) * 30, 0, 30);
+    bioRisk = clamp(ratioPart + presencePart, 0, 100);
   }
 
   const climateRisk = 0.55 * thermalRisk + 0.45 * hydroRisk;
-  const score = Math.round(bioRisk !== null ? 0.60 * climateRisk + 0.40 * bioRisk : climateRisk);
+  const couplingBonus = bioRisk !== null ? clamp((climateRisk / 100) * (bioRisk / 100) * 8, 0, 8) : 0;
+  const score = Math.round(clamp(bioRisk !== null ? 0.65 * climateRisk + 0.35 * bioRisk + couplingBonus : climateRisk, 0, 100));
 
   const candidates = [
     ['thermal', thermalRisk],
