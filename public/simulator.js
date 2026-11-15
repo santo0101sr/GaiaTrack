@@ -6,13 +6,13 @@ import {buildAnnualPrediction,buildDailyPrediction,buildHourlyPrediction,buildMo
 import {getLang,locale,tx} from './i18n.js';
 
 const VARS=[
-  {key:'T2M',name:()=>tx('Mean temp','Temp. media'),unit:'°C',d:1},
-  {key:'T2M_MAX',name:()=>tx('Max temp','Temp. máxima'),unit:'°C',d:1},
-  {key:'T2M_MIN',name:()=>tx('Min temp','Temp. mínima'),unit:'°C',d:1},
-  {key:'PRECTOTCORR',name:()=>tx('Rainfall','Lluvia'),unit:'mm/d',d:2},
-  {key:'ALLSKY_SFC_SW_DWN',name:()=>tx('Solar rad.','Radiación'),unit:'MJ/m²/d',d:1},
-  {key:'GWETTOP',name:()=>tx('Soil moisture','Humedad suelo'),unit:'0–1',d:2},
-  {key:'RH2M',name:()=>tx('Rel. humidity','Humedad rel.'),unit:'%',d:0}
+  {key:'T2M',icon:'🌡️',name:()=>tx('Mean temp','Temp. media'),hourlyName:()=>tx('Temperature','Temperatura'),unit:'°C',d:1},
+  {key:'T2M_MAX',icon:'🔥',name:()=>tx('Max temp','Temp. máxima'),unit:'°C',d:1},
+  {key:'T2M_MIN',icon:'❄️',name:()=>tx('Min temp','Temp. mínima'),unit:'°C',d:1},
+  {key:'PRECTOTCORR',icon:'🌧️',name:()=>tx('Rainfall','Lluvia'),unit:'mm/d',d:2},
+  {key:'ALLSKY_SFC_SW_DWN',icon:'☀️',name:()=>tx('Solar rad.','Radiación'),unit:'MJ/m²/d',d:1},
+  {key:'GWETTOP',icon:'🌱',name:()=>tx('Soil moisture','Humedad suelo'),unit:'0–1',d:2},
+  {key:'RH2M',icon:'💧',name:()=>tx('Rel. humidity','Humedad rel.'),unit:'%',d:0}
 ];
 
 export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory}){
@@ -351,16 +351,22 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
         </header>
 
         <section class="sim-panel">
-          <div class="sim-panel-head">
+          <div class="sim-panel-head" style="flex-wrap:wrap">
             <div class="sim-horizon-tabs">
               <button type="button" class="sim-horizon-tab ${state.horizon==='hours'?'is-on':''}" data-hz="hours">${tx('Next 48h','Próximas 48 h')}</button>
               <button type="button" class="sim-horizon-tab ${state.horizon==='days'?'is-on':''}" data-hz="days">${tx('Next 7 days','Próximos 7 días')}</button>
               <button type="button" class="sim-horizon-tab ${state.horizon==='months'?'is-on':''}" data-hz="months">${tx('Next 12 months','Próximos 12 meses')}</button>
               <button type="button" class="sim-horizon-tab ${state.horizon==='years'?'is-on':''}" data-hz="years">${tx('Next years (2026–2050)','Próximos años')}</button>
             </div>
-            <div class="sim-pickers">
-              <select id="sim-var" style="background:#081322;color:#e8f3fb;border:1px solid rgba(56,189,248,.3);border-radius:7px;padding:6px 10px;font-size:12.5px">${VARS.map(v=>`<option value="${v.key}" ${v.key===state.varKey?'selected':''}>${v.name()} (${v.unit})</option>`).join('')}</select>
-            </div>
+          </div>
+          <div class="sim-var-bar" role="tablist" aria-label="${tx('Variable selector','Selector de variable')}">
+            ${VARS.filter(v=>state.horizon!=='hours'||(v.key!=='T2M_MAX'&&v.key!=='T2M_MIN')).map(v=>{
+              const isTempHour=state.horizon==='hours'&&v.key==='T2M'&&(state.varKey==='T2M'||state.varKey==='T2M_MAX'||state.varKey==='T2M_MIN');
+              const active=isTempHour||v.key===state.varKey;
+              const label=(state.horizon==='hours'&&v.hourlyName)?v.hourlyName():v.name();
+              const u=state.horizon==='hours'?(v.key==='PRECTOTCORR'?'mm/h':v.key==='ALLSKY_SFC_SW_DWN'?'W/m²':v.unit):v.unit;
+              return `<button type="button" class="sim-var-pill ${active?'is-on':''}" data-var-pill="${v.key}"><span>${v.icon}</span>${label}<small>${u}</small></button>`;
+            }).join('')}
           </div>
           <div class="sim-predict-grid">
             <div>${chartHtml}</div>
@@ -421,7 +427,7 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
     };
     el.querySelector('#sim-canton').onchange=e=>{state.site=e.target.value;state.district=null;onSelectTerritory?.(state.site,null);render();};
     el.querySelector('#sim-dist')?.addEventListener('change',e=>{state.district=e.target.value||null;onSelectTerritory?.(state.site,state.district);render();});
-    el.querySelector('#sim-var').onchange=e=>{state.varKey=e.target.value;render();};
+    el.querySelectorAll('[data-var-pill]').forEach(b=>b.onclick=()=>{state.varKey=b.dataset.varPill;render();});
     el.querySelector('#sim-year')?.addEventListener('input',e=>{state.targetYear=+e.target.value;render();});
     el.querySelector('#sim-dt').oninput=e=>{state.deltaT=+e.target.value;render();};
     el.querySelector('#sim-dp').oninput=e=>{state.deltaP=+e.target.value;render();};

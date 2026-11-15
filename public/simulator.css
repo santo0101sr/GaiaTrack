@@ -101,3 +101,11 @@
   color:#86efac;font-size:11px;font-weight:600;
 }
 .sim-live-dot{width:6px;height:6px;border-radius:50%;background:#4ade80}
+.sim-var-bar{display:flex;flex-wrap:wrap;gap:6px;padding:6px;background:#081322;border:1px solid rgba(56,189,248,.16);border-radius:10px}
+.sim-var-pill{
+  display:inline-flex;align-items:center;gap:5px;background:transparent;border:1px solid transparent;
+  color:#9fc0db;border-radius:7px;padding:5px 10px;font-size:12px;font-weight:500;cursor:pointer;
+}
+.sim-var-pill:hover{background:rgba(56,189,248,.09);color:#e8f3fb}
+.sim-var-pill.is-on{background:rgba(24,216,107,.14);border-color:rgba(74,222,128,.45);color:#dcfce7;font-weight:600}
+.sim-var-pill small{opacity:.7;font-size:10.5px}
