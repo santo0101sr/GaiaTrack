@@ -3,6 +3,7 @@ import {getLang,getTheme,setLang,toggleTheme,themeToggleHtml,tx} from './i18n.js
 // Paste the final Pitch Video URL here when ready; UI stays hidden while empty.
 export const PITCH_VIDEO_URL='';
 
+const PITCH_VIDEO_SRC='assets/gaiatrack-pitch.mp4?v=20261115p1';
 const DEMO_VIDEO_SRC='assets/gaiatrack-demo.mp4?v=20261115enw';
 const PAPER_PDF_SRC='assets/gaia-eb-research-paper.pdf';
 const BRAND_LOGO_SRC='assets/gaia-eb-final.png';
@@ -64,9 +65,27 @@ function shouldAutoOpenLanding(){
   return true;
 }
 
-function pauseDemoVideo(){
-  const video=portal?.querySelector('#landing-demo-video');
-  try{video?.pause?.();}catch{}
+const LANDING_VIDEO_IDS=['landing-pitch-video','landing-demo-video'];
+
+function renderVideoBlock({id,src,kickerEn,kickerEs,headingEn,headingEs,extraAttrs=''}){
+  return `
+      <section class="lp-block">
+        <span class="lp-slide-kicker">${tx(kickerEn,kickerEs)}</span>
+        <h2 class="lp-slide-heading">${tx(headingEn,headingEs)}</h2>
+        <div class="lp-video-stage">
+          <div class="lp-video-frame">
+            <video id="${id}" src="${src}" controls preload="metadata" playsinline${extraAttrs?` ${extraAttrs}`:''}></video>
+          </div>
+        </div>
+      </section>
+  `;
+}
+
+function pauseLandingVideos(){
+  for(const id of LANDING_VIDEO_IDS){
+    const video=portal?.querySelector?.(`#${id}`);
+    try{video?.pause?.();}catch{}
+  }
 }
 
 export function openLanding(){
@@ -85,7 +104,7 @@ export function closeLanding(target='app'){
     return;
   }
   hasEnteredApp=true;
-  pauseDemoVideo();
+  pauseLandingVideos();
   document.body.classList.remove('landing-open');
   document.body.setAttribute?.('data-landing-entered',target);
   portal.hidden=true;
@@ -258,15 +277,24 @@ function buildContent(){
 
       ${buildBenefitsBlock()}
 
-      <section class="lp-block">
-        <span class="lp-slide-kicker">${tx('LIVE WALKTHROUGH DEMO','DEMOSTRACIÓN DE USO EN VIVO')}</span>
-        <h2 class="lp-slide-heading">${tx('Explore 3D cantons, Ecological Risk & 25-year NASA trends.','Explorá cantones 3D, Riesgo Ecológico y tendencias NASA.')}</h2>
-        <div class="lp-video-stage">
-          <div class="lp-video-frame">
-            <video id="landing-demo-video" src="${DEMO_VIDEO_SRC}" controls preload="metadata" playsinline muted loop></video>
-          </div>
-        </div>
-      </section>
+      ${renderVideoBlock({
+        id:'landing-pitch-video',
+        src:PITCH_VIDEO_SRC,
+        kickerEn:'OFFICIAL PROJECT PITCH',
+        kickerEs:'PITCH OFICIAL DEL PROYECTO',
+        headingEn:'Why GaiaTrack matters for environmental intelligence in Costa Rica.',
+        headingEs:'Por qué GaiaTrack impulsa la inteligencia ambiental en Costa Rica.'
+      })}
+
+      ${renderVideoBlock({
+        id:'landing-demo-video',
+        src:DEMO_VIDEO_SRC,
+        kickerEn:'LIVE WALKTHROUGH DEMO',
+        kickerEs:'DEMOSTRACIÓN DE USO EN VIVO',
+        headingEn:'Explore 3D cantons, Ecological Risk & 25-year NASA trends.',
+        headingEs:'Explorá cantones 3D, Riesgo Ecológico y tendencias NASA.',
+        extraAttrs:'muted loop'
+      })}
 
       <section class="lp-block">
         <span class="lp-slide-kicker">${tx('CREATORS & RESEARCH TEAM','CREADORES Y EQUIPO INVESTIGADOR')}</span>
@@ -304,15 +332,24 @@ function buildContent(){
 
 function render(){
   if(!portal)return;
-  const prevVideo=portal.querySelector?.('#landing-demo-video');
-  const videoTime=prevVideo&&Number.isFinite(prevVideo.currentTime)?prevVideo.currentTime:0;
-  const wasPaused=prevVideo?prevVideo.paused:true;
+  const videoStates=LANDING_VIDEO_IDS.map(id=>{
+    const prev=portal.querySelector?.(`#${id}`);
+    return {
+      id,
+      time:prev&&Number.isFinite(prev.currentTime)?prev.currentTime:0,
+      paused:prev?prev.paused:true
+    };
+  });
   portal.innerHTML=buildContent();
   wireEvents();
   syncAuthorsCarousel();
-  const nextVideo=portal.querySelector?.('#landing-demo-video');
-  if(nextVideo&&videoTime>0){
-    try{nextVideo.currentTime=videoTime;if(!wasPaused)nextVideo.play?.();}catch{}
+  for(const state of videoStates){
+    if(state.time>0){
+      const next=portal.querySelector?.(`#${state.id}`);
+      if(next){
+        try{next.currentTime=state.time;if(!state.paused)next.play?.();}catch{}
+      }
+    }
   }
 }
 

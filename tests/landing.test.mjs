@@ -205,19 +205,22 @@ test('Unified slide renders creators carousel with dormant photo support, outsid
     const faviconBytes = await fs.readFile(path.resolve('public/assets/gaia-favicon.png'));
     assert.equal(faviconBytes.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
 
-    // Verify centered brand logo, PDF, demo video, and quantified Trend Detective metrics
+    // Verify centered brand logo, PDF, pitch & demo videos, and quantified Trend Detective metrics
     assert.match(portal.innerHTML, /assets\/gaia-eb-final\.png/);
     assert.match(portal.innerHTML, /assets\/gaia-eb-research-paper\.pdf/);
-    assert.match(portal.innerHTML, /assets\/gaiatrack-demo\.mp4/);
+    assert.match(portal.innerHTML, /id="landing-pitch-video"\s+src="assets\/gaiatrack-pitch\.mp4[^"]*"/);
+    assert.doesNotMatch(portal.innerHTML, /id="landing-pitch-video"[^>]*muted/);
+    assert.match(portal.innerHTML, /id="landing-demo-video"\s+src="assets\/gaiatrack-demo\.mp4[^"]*"[^>]*muted/);
     for (const token of ['2001–2025', '84', '95%', '89%', '−44.8%', '−32.6%', '17.5M']) {
       assert.ok(portal.innerHTML.includes(token), `Missing quantified metric token: ${token}`);
     }
 
-    // Entering main app is one-way: closes portal, pauses demo video, resizes, clears intro, and refuses reopening
+    // Entering main app is one-way: closes portal, pauses pitch & demo videos, resizes, clears intro, and refuses reopening
     get('#landing-enter-app').click();
     assert.equal(doc.body.classList.contains('landing-open'), false);
     assert.equal(portal.hidden, true);
     assert.equal(portal.getAttribute('aria-hidden'), 'true');
+    assert.equal(get('#landing-pitch-video').paused, true);
     assert.equal(get('#landing-demo-video').paused, true);
     assert.equal(regionClicks, 1);
     assert.ok(resizeEvents >= 1);
