@@ -39,37 +39,70 @@ export function hourlyMeta(varKey){
   return HOURLY_MAP[varKey]||HOURLY_MAP.T2M;
 }
 
+const DAY_ES=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const DAY_EN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+function parseCrTimeMs(iso){
+  if(typeof iso!=='string')return NaN;
+  return Date.parse(/[Z+-]\d{2}:?\d{2}$/.test(iso)||iso.endsWith('Z')?iso:`${iso}-06:00`);
+}
+
+function crDateParts(ms){
+  const cr=new Date(ms-6*3600*1000);
+  return {day:cr.getUTCDay(),hour:cr.getUTCHours(),dateStr:cr.toISOString().slice(0,10)};
+}
+
 /**
  * Extracts up to 48 hours of live + forecast hourly points from Open-Meteo timeline.
  */
-export function buildHourlyPrediction(timeline,currentObs,varKey,nowMs=Date.now()){
+export function buildHourlyPrediction(timeline,currentObs,varKey,nowMs=Date.now(),{todayTimeline=null,lang='es'}={}){
   const meta=hourlyMeta(varKey);
-  const cutoff=nowMs+48*3600*1000;
-  const pts=[];
+  const combined=[...(todayTimeline||[]),...(timeline||[])];
+  const rawPts=[];
+  const seen=new Set();
 
-  const curVal=currentObs?.[meta.curField];
-  const curMs=currentObs?.observedAt?Date.parse(currentObs.observedAt):nowMs;
-  if(Number.isFinite(curVal)&&Number.isFinite(curMs)&&nowMs-curMs<=7200*1000){
-    pts.push({timeMs:curMs,label:'Ahora',value:curVal,isNow:true,isDay:currentObs.isDay??true});
-  }
-
-  for(const row of (timeline||[])){
-    const tMs=Date.parse(row.time);
+  for(const row of combined){
+    const tMs=parseCrTimeMs(row.time);
     const val=row[meta.field];
     if(!Number.isFinite(tMs)||!Number.isFinite(val))continue;
-    if(tMs<nowMs-1800*1000||tMs>cutoff)continue;
-    if(pts.length&&tMs<=pts[pts.length-1].timeMs+1200*1000)continue;
-    const hr=new Date(tMs).getHours();
-    pts.push({timeMs:tMs,time:row.time,label:`${String(hr).padStart(2,'0')}h`,value:val,isNow:false,isDay:row.isDay});
+    if(tMs<nowMs-1800*1000||seen.has(tMs))continue;
+    seen.add(tMs);
+    rawPts.push({timeMs:tMs,time:row.time,value:val,isDay:row.isDay});
+  }
+  rawPts.sort((a,b)=>a.timeMs-b.timeMs);
+
+  // Only anchor live observation at t=0 if it connects continuously (<= 2h) to the hourly curve
+  const curVal=currentObs?.[meta.curField];
+  const curMs=currentObs?.observedAt?Date.parse(currentObs.observedAt):nowMs;
+  const pts=[];
+  if(Number.isFinite(curVal)&&Number.isFinite(curMs)&&nowMs-curMs<=7200*1000){
+    const firstFc=rawPts[0];
+    if(!firstFc||(firstFc.timeMs-curMs<=2*3600*1000&&firstFc.timeMs>=curMs-1800*1000)){
+      pts.push({timeMs:curMs,value:curVal,isNow:true,isDay:currentObs.isDay??true});
+    }
   }
 
-  const sliced=pts.slice(0,49);
-  if(sliced.length<2)return {points:sliced,unit:meta.unit,digits:meta.d,min:null,max:null,mean:null,sum:null};
-  const vals=sliced.map(p=>p.value);
-  const min=sliced.reduce((a,b)=>b.value<a.value?b:a,sliced[0]);
-  const max=sliced.reduce((a,b)=>b.value>a.value?b:a,sliced[0]);
+  const startMs=pts.length?pts[0].timeMs:(rawPts[0]?.timeMs??nowMs);
+  const cutoff=startMs+48*3600*1000;
+  for(const p of rawPts){
+    if(p.timeMs>cutoff)continue;
+    if(pts.length&&p.timeMs<=pts[pts.length-1].timeMs+1200*1000)continue;
+    pts.push({timeMs:p.timeMs,time:p.time,value:p.value,isNow:false,isDay:p.isDay});
+  }
+
+  const dayNames=lang==='en'?DAY_EN:DAY_ES;
+  const formatted=pts.slice(0,49).map(p=>{
+    const {day,hour,dateStr}=crDateParts(p.timeMs);
+    const hh=`${String(hour).padStart(2,'0')}h`;
+    return {...p,hour,day,dateStr,dayName:dayNames[day],label:p.isNow?(lang==='en'?'Now':'Ahora'):`${dayNames[day]} ${hh}`,hh};
+  });
+
+  if(formatted.length<2)return {points:formatted,unit:meta.unit,digits:meta.d,min:null,max:null,mean:null,sum:null};
+  const vals=formatted.map(p=>p.value);
+  const min=formatted.reduce((a,b)=>b.value<a.value?b:a,formatted[0]);
+  const max=formatted.reduce((a,b)=>b.value>a.value?b:a,formatted[0]);
   const sum=vals.reduce((a,b)=>a+b,0);
-  return {points:sliced,unit:meta.unit,digits:meta.d,min,max,mean:sum/vals.length,sum};
+  return {points:formatted,unit:meta.unit,digits:meta.d,min,max,mean:sum/vals.length,sum};
 }
 
 /**

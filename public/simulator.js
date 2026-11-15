@@ -56,28 +56,44 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
   function buildHourlySvg(hPred){
     const pts=hPred.points;
     if(pts.length<2)return `<p class="sim-footnote">${tx('Loading live 48-hour forecast from Open-Meteo…','Cargando pronóstico horario en vivo de Open-Meteo…')}</p>`;
-    const W=680,H=210,padL=48,padR=18,padT=18,padB=28;
+    const W=680,H=220,padL=48,padR=20,padT=28,padB=30;
     const vals=pts.map(p=>p.value);
     let vMin=Math.min(...vals),vMax=Math.max(...vals);
     if(vMax-vMin<1e-6){vMin-=1;vMax+=1;}
-    const m=(vMax-vMin)*.16;vMin-=m;vMax+=m;
-    const xOf=i=>padL+(i/Math.max(1,pts.length-1))*(W-padL-padR);
+    const m=(vMax-vMin)*.14;vMin-=m;vMax+=m;
+    const t0=pts[0].timeMs,tSpan=Math.max(1,pts[pts.length-1].timeMs-t0);
+    const xOf=t=>padL+((t-t0)/tSpan)*(W-padL-padR);
     const yOf=v=>padT+(1-(v-vMin)/(vMax-vMin))*(H-padT-padB);
-    const path=pts.map((p,i)=>`${i===0?'M':'L'}${xOf(i).toFixed(1)},${yOf(p.value).toFixed(1)}`).join(' ');
-    const area=`${path} L${xOf(pts.length-1).toFixed(1)},${(H-padB).toFixed(1)} L${xOf(0).toFixed(1)},${(H-padB).toFixed(1)} Z`;
-    const peakIdx=pts.indexOf(hPred.max);
-    const tickIdxs=[0,Math.floor(pts.length*0.25),Math.floor(pts.length*0.5),Math.floor(pts.length*0.75),pts.length-1];
+    const path=pts.map((p,i)=>`${i===0?'M':'L'}${xOf(p.timeMs).toFixed(1)},${yOf(p.value).toFixed(1)}`).join(' ');
+    const area=`${path} L${xOf(pts[pts.length-1].timeMs).toFixed(1)},${(H-padB).toFixed(1)} L${xOf(t0).toFixed(1)},${(H-padB).toFixed(1)} Z`;
+
+    // Ordered 6-hour grid ticks (00h, 06h, 12h, 18h) with day label at midnight or first tick
+    const ticks=[];
+    for(let i=0;i<pts.length;i++){
+      const p=pts[i];
+      if(!p.isNow&&p.hour%6===0){
+        const text=p.hour===0||ticks.length===0?`${p.dayName} ${p.hh}`:p.hh;
+        ticks.push({x:xOf(p.timeMs),text,midnight:p.hour===0});
+      }
+    }
+    if(!ticks.length||ticks[0].x-padL>55)ticks.unshift({x:xOf(t0),text:pts[0].label,midnight:false});
+
+    const peakX=xOf(hPred.max.timeMs),peakY=yOf(hPred.max.value);
+    const peakAnchor=peakX<padL+95?'start':peakX>W-padR-95?'end':'middle';
+    const midV=(vMin+vMax)/2;
     return `<svg viewBox="0 0 ${W} ${H}" class="sim-svg" role="img" aria-label="${tx('Live 48-hour hourly forecast','Pronóstico horario en vivo 48 h')}">
       <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(148,163,184,.25)"/>
+      <line x1="${padL}" y1="${yOf(midV).toFixed(1)}" x2="${W-padR}" y2="${yOf(midV).toFixed(1)}" stroke="rgba(148,163,184,.12)" stroke-dasharray="3 3"/>
       <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="rgba(148,163,184,.25)"/>
+      ${ticks.map(t=>`<line x1="${t.x.toFixed(1)}" y1="${padT}" x2="${t.x.toFixed(1)}" y2="${H-padB}" stroke="${t.midnight?'rgba(56,189,248,.22)':'rgba(148,163,184,.08)'}" stroke-dasharray="3 3"/><text x="${t.x.toFixed(1)}" y="${H-9}" text-anchor="middle" fill="${t.midnight?'#bae6fd':'#8bb0cc'}" font-size="10">${t.text}</text>`).join('')}
       <path d="${area}" fill="rgba(56,189,248,.12)"/>
-      <path d="${path}" fill="none" stroke="#38bdf8" stroke-width="2.4"/>
-      <circle cx="${xOf(0).toFixed(1)}" cy="${yOf(pts[0].value).toFixed(1)}" r="4.5" fill="#4ade80"/>
-      <circle cx="${xOf(peakIdx).toFixed(1)}" cy="${yOf(hPred.max.value).toFixed(1)}" r="4" fill="#f5b316"/>
-      <text x="${xOf(peakIdx).toFixed(1)}" y="${Math.max(13,yOf(hPred.max.value)-8)}" text-anchor="middle" fill="#fde68a" font-size="10.5" font-weight="600">${hPred.max.label}: ${fmt(hPred.max.value,hPred.digits)} ${hPred.unit}</text>
-      <text x="${padL-6}" y="${padT+8}" text-anchor="end" fill="#8bb0cc" font-size="10">${fmt(vMax,hPred.digits)}</text>
+      <path d="${path}" fill="none" stroke="#38bdf8" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+      <circle cx="${xOf(t0).toFixed(1)}" cy="${yOf(pts[0].value).toFixed(1)}" r="4.5" fill="#4ade80"/>
+      <circle cx="${peakX.toFixed(1)}" cy="${peakY.toFixed(1)}" r="4" fill="#f5b316"/>
+      <text x="${peakX.toFixed(1)}" y="${Math.max(15,peakY-9)}" text-anchor="${peakAnchor}" fill="#fde68a" font-size="10.5" font-weight="600">${hPred.max.label}: ${fmt(hPred.max.value,hPred.digits)} ${hPred.unit}</text>
+      <text x="${padL-6}" y="${padT+4}" text-anchor="end" fill="#8bb0cc" font-size="10">${fmt(vMax,hPred.digits)}</text>
+      <text x="${padL-6}" y="${yOf(midV).toFixed(1)}" text-anchor="end" fill="#8bb0cc" font-size="10">${fmt(midV,hPred.digits)}</text>
       <text x="${padL-6}" y="${H-padB}" text-anchor="end" fill="#8bb0cc" font-size="10">${fmt(vMin,hPred.digits)}</text>
-      ${[...new Set(tickIdxs)].map(i=>`<text x="${xOf(i).toFixed(1)}" y="${H-8}" text-anchor="middle" fill="#8bb0cc" font-size="10">${pts[i].label}</text>`).join('')}
     </svg>`;
   }
 
@@ -192,7 +208,7 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
     const pts=seriesFor(siteObj.id,vMeta.key);
     const mk=pts.length>=3?trend(pts):{slope:null,p:null,n:pts.length,slopeCI:null};
     const annPred=buildAnnualPrediction(pts,mk,state.targetYear);
-    const hPred=buildHourlyPrediction(forecast?.timeline,activeCur,vMeta.key);
+    const hPred=buildHourlyPrediction(forecast?.timeline,activeCur,vMeta.key,Date.now(),{todayTimeline:forecast?.todayTimeline,lang:getLang()});
     const dPred=buildDailyPrediction(forecast?.days,vMeta.key);
     const mPred=buildMonthlyPrediction(monthly,vMeta.key,{currentObs:activeCur,forecastDays:forecast?.days,annualSlope:mk.slope??0,lang:getLang()});
 
