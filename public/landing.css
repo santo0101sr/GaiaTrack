@@ -19,6 +19,7 @@ body.landing-open #gaia-chat,
 body.landing-open #weather-rain-status,
 body.landing-open #weather-clean-view,
 body.landing-open #hud-radar-legend,
+body.landing-open #radar-legend-show,
 body.landing-open #scene-loading{display:none!important}
 body.landing-open .flight-intro,
 body.landing-open .flight-panel,

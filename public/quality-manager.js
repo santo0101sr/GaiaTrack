@@ -66,9 +66,15 @@ export function createQualityManager({
   cooldownFrames = 45,
   onChange = () => {}
 } = {}) {
-  let mode = ['auto', ...QUALITY_LEVELS].includes(initialMode) ? initialMode : 'auto';
+  const resolveMode = raw => {
+    if (raw === 'performance') return 'low';
+    if (raw === 'quality') return 'high';
+    if (raw === 'auto') return detected;
+    return QUALITY_LEVELS.includes(raw) ? raw : detected;
+  };
+  let mode = ['auto', 'quality', 'performance', ...QUALITY_LEVELS].includes(initialMode) ? initialMode : 'auto';
   const detected = detectHardwareTier(hardware);
-  let active = mode === 'auto' ? detected : mode;
+  let active = resolveMode(mode);
   let governorForced = false;
   let recent = [];
   let cooldown = 0;
@@ -95,12 +101,12 @@ export function createQualityManager({
     get preset() { return QUALITY_PRESETS[active]; },
     get governorForced() { return governorForced; },
     setMode(nextMode) {
-      if (!['auto', ...QUALITY_LEVELS].includes(nextMode)) return active;
+      if (!['auto', 'quality', 'performance', ...QUALITY_LEVELS].includes(nextMode)) return active;
       mode = nextMode;
       governorForced = false;
       recent = [];
       cooldown = 0;
-      const target = mode === 'auto' ? detected : mode;
+      const target = resolveMode(mode);
       apply(target, { reason: 'user' });
       return active;
     },

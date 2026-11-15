@@ -46,7 +46,9 @@ test('Cloud layers and solar halo remain inside concave boundaries and holes thr
   }
   checkClouds();
   const before=cloud.instanceMatrix.array.slice();
-  for(let frame=0;frame<600;frame++)sky.animate(frame*50);
+  const t0=cloud.material.uniforms.time.value;
+  for(let frame=0;frame<600;frame++)sky.animate(frame*50,0.05);
+  assert.ok(cloud.material.uniforms.time.value>t0);
   checkClouds();
   // Buoyancy changes height; neither the cloud center nor its width can drift into a neighbour.
   for(let i=0;i<cloud.count;i++)for(const offset of [0,2,8,10,12,14])assert.equal(cloud.instanceMatrix.array[i*16+offset],before[i*16+offset]);

@@ -130,7 +130,7 @@ export function createSkyField(initialDomain,{maxClusters=10,showSun=true}={}){
   group.add(mist);
 
   const dummy=new THREE.Object3D();
-  let clusters=[],lastTime=0,mistAllowed=true;
+  let clusters=[],lastTime=0,simSec=0,lastRawTime=null,mistAllowed=true;
 
   const sun=new THREE.Mesh(new THREE.PlaneGeometry(2.6,2.6),new THREE.ShaderMaterial({
     transparent:true,depthWrite:false,side:THREE.DoubleSide,toneMapped:false,
@@ -218,11 +218,17 @@ export function createSkyField(initialDomain,{maxClusters=10,showSun=true}={}){
     if(mistActive>0)mist.instanceMatrix.needsUpdate=true;
   }
 
-  function animate(time){
+  function animate(time,dtSec=null){
     lastTime=time;
-    material.uniforms.time.value=time*.00012;
-    mistMat.uniforms.time.value=time*.00015;
-    halo.material.uniforms.time.value=time*.0004;
+    let dt=dtSec;
+    if(!Number.isFinite(dt)){
+      dt=lastRawTime===null?0.05:Math.max(0,Math.min(0.1,(time-lastRawTime)/1000));
+      lastRawTime=time;
+    }
+    simSec+=dt;
+    material.uniforms.time.value=simSec*0.12;
+    mistMat.uniforms.time.value=simSec*0.15;
+    halo.material.uniforms.time.value=simSec*0.4;
   }
 
   function applyCloudCount(sectors=null){

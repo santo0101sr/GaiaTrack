@@ -241,12 +241,6 @@ export function applyStaticI18n(){
     b.classList.toggle('selected',active);
     b.setAttribute('aria-pressed',String(active));
   });
-  const hudLang=document.querySelector('#hud-lang-toggle');
-  if(hudLang){
-    hudLang.innerHTML=`${icon('globe')} ${es?'EN':'ES'}`;
-    hudLang.setAttribute('aria-label',es?'Switch to English':'Cambiar a Español');
-    hudLang.title=es?'Switch to English':'Cambiar a Español';
-  }
   applyThemeDom(getTheme());
 }
 

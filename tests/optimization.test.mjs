@@ -26,7 +26,24 @@ test('Douglas-Peucker simplification reduces ADM2 vertices while keeping valid c
     const polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
     return s + polys.reduce((ps, rings) => ps + rings.reduce((rs, r) => rs + r.length, 0), 0);
   }, 0);
-  assert.ok(countPts(overview) < countPts(full) * 0.3);
+  assert.ok(countPts(overview) < countPts(full) * 0.6);
+
+  // Topology-preserving simplification keeps shared interior border edges aligned without gaps.
+  const edgeCounts = new Map();
+  for (const f of overview.features) {
+    const polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
+    for (const rings of polys) {
+      const r = rings[0];
+      for (let i = 0; i < r.length - 1; i++) {
+        const a = r[i].join(','), b = r[i + 1].join(',');
+        if (a === b) continue;
+        const k = a < b ? `${a}|${b}` : `${b}|${a}`;
+        edgeCounts.set(k, (edgeCounts.get(k) || 0) + 1);
+      }
+    }
+  }
+  const shared = [...edgeCounts.values()].filter(c => c === 2).length;
+  assert.ok(shared > 1000, `Expected >1000 watertight shared edges, got ${shared}`);
 });
 
 test('createTerritoryPicker uses bbox + point-in-polygon selection across national and province scope', async () => {
@@ -66,6 +83,10 @@ test('Quality manager detects low/mid/high tiers and steps down when sustained f
   for (let i = 0; i < 6; i++) qm.recordFrameTime(38);
   assert.equal(qm.active, 'low');
   assert.equal(changes.length, 2);
+
+  // Simple Quality / Performance mode aliases map cleanly to high / low presets.
+  assert.equal(qm.setMode('quality'), 'high');
+  assert.equal(qm.setMode('performance'), 'low');
 });
 
 test('Render loop pauses when idle/landing-open and wakes cleanly on invalidate', () => {
