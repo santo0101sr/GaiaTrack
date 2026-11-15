@@ -81,3 +81,33 @@ test('Hourly forecast preserves the provider daylight flags and unknown daylight
   assert.equal(skyAppearance(timeline[1]).sun,0);
   assert.equal(skyAppearance(timeline[2]).sun,0);
 });
+
+test('Overview canopies suppress floating sun dots, scale density/shade with cloudiness, and keep mist inside boundaries',()=>{
+  const domain=territory(),overview=createSkyField(domain,{maxClusters:6,showSun:false});
+  overview.setWeather({isDay:true,clouds:20,solarRadiation:900,precipitation:0});
+  assert.equal(overview.sun.visible,false);
+  assert.equal(overview.halo.visible,false);
+  const lowOpacity=overview.layers[0].material.opacity;
+  const lowCount=overview.layers[0].count;
+  const lowTopR=overview.layers[0].material.uniforms.cloudTop.value.r;
+  overview.setWeather({isDay:true,clouds:95,solarRadiation:120,precipitation:12,weatherCode:95});
+  assert.equal(overview.sun.visible,false);
+  assert.ok(overview.layers[0].count>lowCount);
+  assert.ok(overview.layers[0].material.opacity>lowOpacity);
+  assert.ok(overview.layers[0].material.uniforms.cloudTop.value.r<lowTopR);
+  const mist=overview.group.getObjectByName('bounded-mist-layer');
+  assert.equal(mist.visible,true);
+  assert.ok(mist.count>0);
+  const matrix=new THREE.Matrix4(),point=new THREE.Vector3(),verts=mist.geometry.attributes.position;
+  for(let i=0;i<mist.count;i++){
+    mist.getMatrixAt(i,matrix);
+    for(let j=0;j<verts.count;j++){
+      point.fromBufferAttribute(verts,j).applyMatrix4(matrix);
+      assert.ok(domain.contains(point),'mist vertex crossed a boundary');
+    }
+  }
+  overview.setFlash(.85);
+  assert.equal(overview.layers[0].material.uniforms.flash.value,.85);
+  overview.setWeather({isDay:true,clouds:0,solarRadiation:900,precipitation:0});
+  assert.equal(mist.visible,false);
+});

@@ -123,3 +123,27 @@ test('National and provincial views show a wet canton even with a dry provincial
     await Promise.resolve();
   }finally{globalThis.document=originalDocument;globalThis.fetch=originalFetch;}
 });
+
+test('Overview territories hide floating sun markers and reflect per-location cloudiness changes',async()=>{
+  const originalDocument=globalThis.document,originalFetch=globalThis.fetch;
+  globalThis.document=sceneDocument();globalThis.fetch=async()=>({ok:true,json:async()=>({monthly:[]})});
+  try{
+    const root=new THREE.Group(),light=new THREE.DirectionalLight(),coords=(lon,lat)=>new THREE.Vector3(lon,0,lat);
+    const sites=[{id:'heredia-centro',name:'Heredia centro',type:'canton',province:'heredia'},{id:'limon-centro',name:'Limón centro',type:'canton',province:'limon'}];
+    const meshes=sites.map((item,index)=>{const mesh=new THREE.Mesh(new THREE.BoxGeometry(1,.26,1),new THREE.MeshStandardMaterial());mesh.position.x=index*4;mesh.userData={...item};root.add(mesh);return mesh;});
+    const raw=(site,clouds,x)=>({site,name:site,precipitation:0,intervalSeconds:900,weatherCode:clouds>80?3:1,clouds,isDay:true,solarRadiation:800,observedAt:new Date().toISOString(),requested:{longitude:x,latitude:0}});
+    publishWeather('current',raw('heredia-centro',20,0));publishWeather('current',raw('limon-centro',95,4));
+    const scene=createWeatherExperience({root,meshes,light,coords,sites});
+    document.dispatchEvent(new CustomEvent('gaiatrack:territory-view',{detail:{province:null}}));scene.animate(50);
+    const herediaSky=root.getObjectByName('canton-weather-heredia-centro').getObjectByName('territory-sky');
+    const limonSky=root.getObjectByName('canton-weather-limon-centro').getObjectByName('territory-sky');
+    assert.equal(herediaSky.getObjectByName('territory-sun').visible,false);
+    assert.equal(limonSky.getObjectByName('territory-sun').visible,false);
+    const herediaClouds=herediaSky.getObjectByName('bounded-cloud-layer'),limonClouds=limonSky.getObjectByName('bounded-cloud-layer');
+    assert.ok(limonClouds.count>herediaClouds.count);
+    assert.ok(limonClouds.material.opacity>herediaClouds.material.opacity);
+    publishWeather('current',raw('heredia-centro',90,0));
+    assert.ok(herediaClouds.count>limonClouds.count*.5);
+    await Promise.resolve();
+  }finally{globalThis.document=originalDocument;globalThis.fetch=originalFetch;}
+});

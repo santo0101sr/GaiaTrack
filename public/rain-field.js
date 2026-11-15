@@ -91,8 +91,9 @@ export function createRainDomain(meshes){
 
 export function rainAppearance(data,count=1200){
   const intensity=weatherScales(data).rain??0;
+  const wind=Number.isFinite(data.windSpeed)?Math.max(.3,Math.min(1.8,data.windSpeed/8)):.8;
   return {intensity,count:intensity>0?Math.min(count,Math.max(Math.min(8,count),Math.round(intensity**.65*count))):0,
-    speed:.85+Math.sqrt(intensity)*3.1,length:.07+intensity*.25,width:1.1+intensity*1.9,opacity:intensity>0?.4+intensity*.48:0};
+    speed:1.05+Math.sqrt(intensity)*3.4,length:.14+intensity*.34,width:.75+intensity*1.5,opacity:intensity>0?.34+intensity*.52:0,wind};
 }
 
 export function createRainField(initialDomain,{count=1200,random=Math.random}={}){
@@ -115,13 +116,19 @@ export function createRainField(initialDomain,{count=1200,random=Math.random}={}
   ribbons.setAttribute('dropEnd',new THREE.InterleavedBufferAttribute(dropBuffer,3,3));
   ribbons.instanceCount=0;
   const ribbonMaterial=new THREE.ShaderMaterial({transparent:true,depthWrite:false,toneMapped:false,side:THREE.DoubleSide,
-    uniforms:{opacity:{value:0},width:{value:1},resolution:{value:new THREE.Vector2(1280,720)},pixelRatio:{value:1}},
+    uniforms:{opacity:{value:0},width:{value:1},flash:{value:0},resolution:{value:new THREE.Vector2(1280,720)},pixelRatio:{value:1}},
     vertexShader:`attribute vec3 dropStart;attribute vec3 dropEnd;uniform vec2 resolution;uniform float width;uniform float pixelRatio;varying vec2 dropUV;
       void main(){vec4 a=projectionMatrix*modelViewMatrix*vec4(dropStart,1.),b=projectionMatrix*modelViewMatrix*vec4(dropEnd,1.);
-        vec2 axis=(b.xy/b.w-a.xy/a.w)*resolution;vec2 side=vec2(-axis.y,axis.x)/max(.001,length(axis));
-        vec4 p=mix(a,b,position.y);p.xy+=side*position.x*width*pixelRatio*(1.-position.y*.65)/resolution*p.w;
+        vec2 ndcA=a.xy/a.w,ndcB=b.xy/b.w;vec2 screenAxis=(ndcB-ndcA)*resolution;float rawLen=length(screenAxis);
+        vec2 dir=rawLen>.001?screenAxis/rawLen:vec2(.12,.99);
+        float minLen=8.0*pixelRatio;if(rawLen<minLen){ndcB=ndcA+dir*(minLen/resolution);b.xy=ndcB*b.w;}
+        vec2 side=vec2(-dir.y,dir.x);
+        vec4 p=mix(a,b,position.y);p.xy+=side*position.x*width*pixelRatio*(1.-position.y*.68)/resolution*p.w;
         dropUV=position.xy;gl_Position=p;}`,
-    fragmentShader:`uniform float opacity;varying vec2 dropUV;void main(){float edge=1.-smoothstep(.05,1.,abs(dropUV.x));float tail=pow(1.-dropUV.y,.7);gl_FragColor=vec4(.73,.88,.97,opacity*edge*tail);}`});
+    fragmentShader:`uniform float opacity;uniform float flash;varying vec2 dropUV;
+      void main(){float edge=pow(max(0.,1.-abs(dropUV.x)),1.75);float tip=smoothstep(0.,.07,dropUV.y);float tail=pow(max(0.,1.-dropUV.y),.72);
+        vec3 col=mix(vec3(.58,.82,.97),vec3(.92,.97,1.),(1.-dropUV.y)*.7+flash*.35);
+        gl_FragColor=vec4(col,opacity*edge*tip*tail);}`});
   const streaks=new THREE.Mesh(ribbons,ribbonMaterial);streaks.name='intensity-rain-streaks';streaks.frustumCulled=false;streaks.renderOrder=2;
   streaks.onBeforeRender=renderer=>{renderer.getDrawingBufferSize(ribbonMaterial.uniforms.resolution.value);ribbonMaterial.uniforms.pixelRatio.value=renderer.getPixelRatio();};
   mesh.add(streaks);material.visible=false;
@@ -159,13 +166,14 @@ export function createRainField(initialDomain,{count=1200,random=Math.random}={}
     // A paused scene also reflects new intensity and drop length immediately.
     drops.forEach((d,i)=>write(i,d));geometry.attributes.position.needsUpdate=true;dropBuffer.needsUpdate=true;
   }
+  function setFlash(value){ribbonMaterial.uniforms.flash.value=Math.max(0,Math.min(1,value));}
   function animate(dt){
     const active=Math.min(drops.length,appearance.count);
     if(!active)return;
     for(let i=0;i<active;i++){
       let d=drops[i];
       const fall=appearance.speed*(.82+(i%7)*.055)*dt;
-      const previousX=d.x;d.x-=fall*.08;d.y-=fall;
+      const previousX=d.x;d.x-=fall*.08*appearance.wind;d.y-=fall;
       // Wind stops at the edge; it never pushes a drop through another province or an inland hole.
       if(!domain.containsSegment(d,{x:d.x+d.tail,z:d.z}))d.x=previousX;
       if(d.y<d.ground){
@@ -178,5 +186,5 @@ export function createRainField(initialDomain,{count=1200,random=Math.random}={}
     geometry.attributes.position.needsUpdate=true;dropBuffer.needsUpdate=true;
   }
   setDomain(initialDomain);
-  return {mesh,geometry,setDomain,setOrigin,setWeather,animate,get domain(){return domain;},get appearance(){return appearance;}};
+  return {mesh,geometry,setDomain,setOrigin,setWeather,setFlash,animate,get domain(){return domain;},get appearance(){return appearance;}};
 }
