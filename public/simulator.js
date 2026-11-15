@@ -53,14 +53,21 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
     return vals.map((v,i)=>({year:start+i,value:v})).filter(p=>Number.isFinite(p.value));
   }
 
-  function buildYAxisGrid(vMin,vMax,yOf,padL,W,padR,digits,unit,steps=5){
+  function buildYAxisGrid(vMin,vMax,yOf,padL,W,padR,digits,unit,targetTicks=6){
+    const span=Math.max(1e-6,vMax-vMin);
+    const rough=span/Math.max(2,targetTicks-1);
+    const mag=Math.pow(10,Math.floor(Math.log10(rough)));
+    const norm=rough/mag;
+    const niceMult=norm<=1.2?1:norm<=2.2?2:norm<=3?2.5:norm<=6?5:10;
+    const step=niceMult*mag;
+    const tickDigits=step>=1?0:Math.min(3,Math.max(digits,Math.ceil(-Math.log10(step))));
     const suffix=unit==='°C'?'°':'';
+    const start=Math.ceil(vMin/step)*step;
     let out='';
-    for(let i=0;i<=steps;i++){
-      const val=vMin+(vMax-vMin)*(i/steps);
+    for(let val=start;val<=vMax+step*1e-6;val+=step){
       const y=yOf(val).toFixed(1);
-      if(i>0)out+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="rgba(148,163,184,.13)" stroke-dasharray="3 3"/>`;
-      out+=`<text x="${padL-6}" y="${(+y+3).toFixed(1)}" text-anchor="end" fill="#8bb0cc" font-size="10">${fmt(val,digits)}${suffix}</text>`;
+      out+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="rgba(148,163,184,.18)" stroke-dasharray="3 3"/>`;
+      out+=`<text x="${padL-7}" y="${(+y+3.5).toFixed(1)}" text-anchor="end" fill="#9bc0dc" font-size="10.5">${fmt(val,tickDigits)}${suffix}</text>`;
     }
     return out;
   }
