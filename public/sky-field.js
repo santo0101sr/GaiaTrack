@@ -116,16 +116,15 @@ export function createSkyField(initialDomain,{maxClusters=20,marchSteps=16,showS
   function buildClouds(){
     clusters=[];clusterLayout=[];let seed=5719;
     const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+    const MIN_CLOUD_R=.09;
     const baseR=Math.min(domain.shortSpan*.45,Math.sqrt(domain.area/maxClusters)*1.2);
-    const minR=baseR*.25;
+    if(baseR<MIN_CLOUD_R)return;
+    const minR=Math.max(MIN_CLOUD_R,baseR*.28);
     for(let i=0;i<maxClusters;i++){
       let r=baseR,point=null;
       for(let attempt=0;attempt<7&&r>=minR;attempt++,r*=.8){
         for(let tries=0;tries<3;tries++){point=domain.sample(random,r);if(point)break;}
         if(point)break;
-      }
-      if(!point&&!clusters.length){
-        for(let attempt=0,rf=minR*.8;attempt<8&&rf>1e-5;attempt++,rf*=.65){point=domain.sample(random,rf);if(point){r=rf;break;}}
       }
       if(point){
         clusters.push({...point,radius:r});
