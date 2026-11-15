@@ -1,1318 +1,1860 @@
 {
+  "san-jose-centro": [
+    {
+      "id": "san-jose-centro__s1",
+      "name": "San José · Sur-Este",
+      "latitude": 9.92827,
+      "longitude": -84.09465
+    },
+    {
+      "id": "san-jose-centro__s2",
+      "name": "San José · Norte-Oeste",
+      "latitude": 9.96924,
+      "longitude": -84.17498
+    }
+  ],
+  "escazu": [
+    {
+      "id": "escazu__s1",
+      "name": "Escazú · Sur-Este",
+      "latitude": 9.90866,
+      "longitude": -84.14187
+    },
+    {
+      "id": "escazu__s2",
+      "name": "Escazú · Norte-Oeste",
+      "latitude": 9.96898,
+      "longitude": -84.18301
+    }
+  ],
+  "desamparados": [
+    {
+      "id": "desamparados__s1",
+      "name": "Desamparados · Norte-Oeste",
+      "latitude": 9.85293,
+      "longitude": -84.04089
+    },
+    {
+      "id": "desamparados__s2",
+      "name": "Desamparados · Sur-Este",
+      "latitude": 9.72789,
+      "longitude": -83.95399
+    }
+  ],
   "puriscal": [
     {
       "id": "puriscal__s1",
-      "name": "Puriscal · Sur",
-      "latitude": 9.70431,
-      "longitude": -84.40141
+      "name": "Puriscal · Centro",
+      "latitude": 9.70851,
+      "longitude": -84.39716
     },
     {
       "id": "puriscal__s2",
       "name": "Puriscal · Norte-Este",
-      "latitude": 9.85152,
-      "longitude": -84.33197
+      "latitude": 9.85993,
+      "longitude": -84.32913
     },
     {
       "id": "puriscal__s3",
       "name": "Puriscal · Sur-Oeste",
-      "latitude": 9.60126,
-      "longitude": -84.4411
+      "latitude": 9.58234,
+      "longitude": -84.47369
     },
     {
       "id": "puriscal__s4",
       "name": "Puriscal · Norte",
-      "latitude": 9.79263,
-      "longitude": -84.40141
+      "latitude": 9.79684,
+      "longitude": -84.39716
     }
   ],
   "tarrazu": [
     {
       "id": "tarrazu__s1",
-      "name": "Tarrazú · Norte-Oeste",
-      "latitude": 9.60607,
-      "longitude": -84.04051
+      "name": "Tarrazú · Centro",
+      "latitude": 9.60287,
+      "longitude": -84.03719
     },
     {
       "id": "tarrazu__s2",
-      "name": "Tarrazú · Sur-Este",
-      "latitude": 9.47152,
-      "longitude": -84.00953
+      "name": "Tarrazú · Sur",
+      "latitude": 9.47793,
+      "longitude": -84.01064
+    },
+    {
+      "id": "tarrazu__s3",
+      "name": "Tarrazú · Norte",
+      "latitude": 9.70859,
+      "longitude": -83.98408
     }
   ],
   "aserri": [
     {
       "id": "aserri__s1",
       "name": "Aserrí · Sur-Oeste",
-      "latitude": 9.65963,
+      "latitude": 9.65347,
       "longitude": -84.1831
     },
     {
       "id": "aserri__s2",
-      "name": "Aserrí · Norte-Este",
-      "latitude": 9.85373,
-      "longitude": -84.1017
+      "name": "Aserrí · Norte",
+      "latitude": 9.84757,
+      "longitude": -84.09589
+    },
+    {
+      "id": "aserri__s3",
+      "name": "Aserrí · Centro",
+      "latitude": 9.73666,
+      "longitude": -84.11333
     }
   ],
   "mora": [
     {
       "id": "mora__s1",
-      "name": "Mora · Sur-Este",
-      "latitude": 9.88814,
-      "longitude": -84.25739
+      "name": "Mora · Centro",
+      "latitude": 9.88587,
+      "longitude": -84.251
     },
     {
       "id": "mora__s2",
-      "name": "Mora · Norte-Oeste",
-      "latitude": 9.91991,
-      "longitude": -84.39154
+      "name": "Mora · Oeste",
+      "latitude": 9.91764,
+      "longitude": -84.39474
+    },
+    {
+      "id": "mora__s3",
+      "name": "Mora · Este",
+      "latitude": 9.86317,
+      "longitude": -84.15518
+    }
+  ],
+  "goicoechea": [
+    {
+      "id": "goicoechea__s1",
+      "name": "Goicoechea · Oeste",
+      "latitude": 9.9573,
+      "longitude": -84.01671
+    },
+    {
+      "id": "goicoechea__s2",
+      "name": "Goicoechea · Este",
+      "latitude": 9.97016,
+      "longitude": -83.89354
+    }
+  ],
+  "santa-ana": [
+    {
+      "id": "santa-ana__s1",
+      "name": "Santa Ana · Norte-Oeste",
+      "latitude": 9.9299,
+      "longitude": -84.19201
+    },
+    {
+      "id": "santa-ana__s2",
+      "name": "Santa Ana · Sur-Este",
+      "latitude": 9.86722,
+      "longitude": -84.15074
+    }
+  ],
+  "alajuelita": [
+    {
+      "id": "alajuelita__s1",
+      "name": "Alajuelita · Norte-Este",
+      "latitude": 9.89198,
+      "longitude": -84.10592
+    },
+    {
+      "id": "alajuelita__s2",
+      "name": "Alajuelita · Sur-Oeste",
+      "latitude": 9.84953,
+      "longitude": -84.13647
     }
   ],
   "vazquez-de-coronado": [
     {
       "id": "vazquez-de-coronado__s1",
-      "name": "Vázquez de Coronado · Sur",
+      "name": "Vázquez de Coronado · Sur-Este",
       "latitude": 10.02095,
-      "longitude": -83.93173
+      "longitude": -83.93383
     },
     {
       "id": "vazquez-de-coronado__s2",
       "name": "Vázquez de Coronado · Norte",
-      "latitude": 10.18032,
-      "longitude": -83.93909
+      "latitude": 10.17363,
+      "longitude": -83.94645
+    },
+    {
+      "id": "vazquez-de-coronado__s3",
+      "name": "Vázquez de Coronado · Oeste",
+      "latitude": 10.0772,
+      "longitude": -84.02218
     }
   ],
   "acosta": [
     {
       "id": "acosta__s1",
-      "name": "Acosta · Sur-Oeste",
+      "name": "Acosta · Centro",
       "latitude": 9.74195,
-      "longitude": -84.22803
+      "longitude": -84.2218
     },
     {
       "id": "acosta__s2",
       "name": "Acosta · Norte-Este",
-      "latitude": 9.84099,
-      "longitude": -84.15826
+      "latitude": 9.83533,
+      "longitude": -84.162
+    },
+    {
+      "id": "acosta__s3",
+      "name": "Acosta · Sur-Oeste",
+      "latitude": 9.64857,
+      "longitude": -84.27412
+    }
+  ],
+  "tibas": [
+    {
+      "id": "tibas__s1",
+      "name": "Tibás · Oeste",
+      "latitude": 9.95737,
+      "longitude": -84.08457
+    },
+    {
+      "id": "tibas__s2",
+      "name": "Tibás · Este",
+      "latitude": 9.97078,
+      "longitude": -84.05666
+    }
+  ],
+  "moravia": [
+    {
+      "id": "moravia__s1",
+      "name": "Moravia · Norte-Este",
+      "latitude": 10.04213,
+      "longitude": -84.00082
+    },
+    {
+      "id": "moravia__s2",
+      "name": "Moravia · Sur-Oeste",
+      "latitude": 9.96056,
+      "longitude": -84.0559
+    }
+  ],
+  "montes-de-oca": [
+    {
+      "id": "montes-de-oca__s1",
+      "name": "Montes de Oca · Oeste",
+      "latitude": 9.93975,
+      "longitude": -84.03838
+    },
+    {
+      "id": "montes-de-oca__s2",
+      "name": "Montes de Oca · Este",
+      "latitude": 9.95236,
+      "longitude": -83.96059
     }
   ],
   "turrubares": [
     {
       "id": "turrubares__s1",
-      "name": "Turrubares · Norte-Este",
-      "latitude": 9.8512,
-      "longitude": -84.47404
+      "name": "Turrubares · Norte",
+      "latitude": 9.84909,
+      "longitude": -84.47744
     },
     {
       "id": "turrubares__s2",
-      "name": "Turrubares · Sur-Oeste",
-      "latitude": 9.6144,
-      "longitude": -84.51373
+      "name": "Turrubares · Sur",
+      "latitude": 9.60806,
+      "longitude": -84.51826
+    },
+    {
+      "id": "turrubares__s3",
+      "name": "Turrubares · Centro",
+      "latitude": 9.73491,
+      "longitude": -84.52506
     }
   ],
   "dota": [
     {
       "id": "dota__s1",
-      "name": "Dota · Sur-Este",
+      "name": "Dota · Centro",
       "latitude": 9.58455,
-      "longitude": -83.91227
+      "longitude": -83.91503
     },
     {
       "id": "dota__s2",
-      "name": "Dota · Norte-Oeste",
-      "latitude": 9.72595,
-      "longitude": -83.97034
+      "name": "Dota · Norte",
+      "latitude": 9.72778,
+      "longitude": -83.96481
+    },
+    {
+      "id": "dota__s3",
+      "name": "Dota · Sur",
+      "latitude": 9.44132,
+      "longitude": -83.95651
+    }
+  ],
+  "curridabat": [
+    {
+      "id": "curridabat__s1",
+      "name": "Curridabat · Sur-Oeste",
+      "latitude": 9.91462,
+      "longitude": -84.029
+    },
+    {
+      "id": "curridabat__s2",
+      "name": "Curridabat · Norte-Este",
+      "latitude": 9.93737,
+      "longitude": -84.00903
     }
   ],
   "perez-zeledon": [
     {
       "id": "perez-zeledon__s1",
-      "name": "Pérez Zeledón · Norte-Este",
-      "latitude": 9.38043,
-      "longitude": -83.64401
+      "name": "Pérez Zeledón · Centro",
+      "latitude": 9.3929,
+      "longitude": -83.65422
     },
     {
       "id": "perez-zeledon__s2",
       "name": "Pérez Zeledón · Sur-Este",
-      "latitude": 9.11863,
-      "longitude": -83.54876
+      "latitude": 9.1124,
+      "longitude": -83.53175
     },
     {
       "id": "perez-zeledon__s3",
       "name": "Pérez Zeledón · Norte-Oeste",
-      "latitude": 9.44588,
-      "longitude": -83.90595
+      "latitude": 9.449,
+      "longitude": -83.89915
     },
     {
       "id": "perez-zeledon__s4",
-      "name": "Pérez Zeledón · Sur-Oeste",
-      "latitude": 9.27135,
-      "longitude": -83.8107
+      "name": "Pérez Zeledón · Oeste",
+      "latitude": 9.262,
+      "longitude": -83.79709
     },
     {
       "id": "perez-zeledon__s5",
+      "name": "Pérez Zeledón · Este",
+      "latitude": 9.2994,
+      "longitude": -83.51134
+    },
+    {
+      "id": "perez-zeledon__s6",
       "name": "Pérez Zeledón · Norte",
-      "latitude": 9.53315,
-      "longitude": -83.73926
+      "latitude": 9.5238,
+      "longitude": -83.75627
     }
   ],
   "leon-cortes-castro": [
     {
       "id": "leon-cortes-castro__s1",
-      "name": "León Cortés Castro · Este",
+      "name": "León Cortés Castro · Centro",
       "latitude": 9.6937,
       "longitude": -84.06265
     },
     {
       "id": "leon-cortes-castro__s2",
-      "name": "León Cortés Castro · Oeste",
-      "latitude": 9.67028,
-      "longitude": -84.14639
+      "name": "León Cortés Castro · Sur-Oeste",
+      "latitude": 9.6656,
+      "longitude": -84.14748
+    },
+    {
+      "id": "leon-cortes-castro__s3",
+      "name": "León Cortés Castro · Norte-Este",
+      "latitude": 9.7218,
+      "longitude": -83.97782
     }
   ],
   "alajuela-centro": [
     {
       "id": "alajuela-centro__s1",
-      "name": "Alajuela · Sur-Oeste",
-      "latitude": 9.97694,
-      "longitude": -84.26435
+      "name": "Alajuela · Sur",
+      "latitude": 9.98584,
+      "longitude": -84.24957
     },
     {
       "id": "alajuela-centro__s2",
-      "name": "Alajuela · Norte-Este",
-      "latitude": 10.39252,
-      "longitude": -84.16952
+      "name": "Alajuela · Norte",
+      "latitude": 10.39549,
+      "longitude": -84.16829
+    },
+    {
+      "id": "alajuela-centro__s3",
+      "name": "Alajuela · Centro",
+      "latitude": 10.19957,
+      "longitude": -84.19785
     }
   ],
   "san-ramon": [
     {
       "id": "san-ramon__s1",
-      "name": "San Ramón · Sur-Este",
-      "latitude": 10.1384,
-      "longitude": -84.5563
+      "name": "San Ramón · Sur",
+      "latitude": 10.1497,
+      "longitude": -84.56309
     },
     {
       "id": "san-ramon__s2",
       "name": "San Ramón · Norte",
-      "latitude": 10.41525,
-      "longitude": -84.61963
+      "latitude": 10.40395,
+      "longitude": -84.63094
     },
     {
       "id": "san-ramon__s3",
-      "name": "San Ramón · Norte-Oeste",
-      "latitude": 10.31638,
-      "longitude": -84.7463
+      "name": "San Ramón · Oeste",
+      "latitude": 10.30225,
+      "longitude": -84.73951
     },
     {
       "id": "san-ramon__s4",
-      "name": "San Ramón · Este",
-      "latitude": 10.27683,
-      "longitude": -84.58797
+      "name": "San Ramón · Centro",
+      "latitude": 10.2853,
+      "longitude": -84.56309
     }
   ],
   "grecia": [
     {
       "id": "grecia__s1",
-      "name": "Grecia · Sur-Oeste",
-      "latitude": 10.04172,
-      "longitude": -84.32313
+      "name": "Grecia · Sur",
+      "latitude": 10.0487,
+      "longitude": -84.31449
     },
     {
       "id": "grecia__s2",
       "name": "Grecia · Norte-Este",
-      "latitude": 10.15565,
-      "longitude": -84.26268
+      "latitude": 10.1603,
+      "longitude": -84.25796
+    },
+    {
+      "id": "grecia__s3",
+      "name": "Grecia · Centro",
+      "latitude": 10.11148,
+      "longitude": -84.30036
     }
   ],
   "san-mateo": [
     {
       "id": "san-mateo__s1",
-      "name": "San Mateo · Norte-Este",
-      "latitude": 9.96486,
-      "longitude": -84.52403
+      "name": "San Mateo · Este",
+      "latitude": 9.96422,
+      "longitude": -84.52916
     },
     {
       "id": "san-mateo__s2",
-      "name": "San Mateo · Sur-Oeste",
-      "latitude": 9.92028,
-      "longitude": -84.64957
+      "name": "San Mateo · Oeste",
+      "latitude": 9.91836,
+      "longitude": -84.65981
+    },
+    {
+      "id": "san-mateo__s3",
+      "name": "San Mateo · Centro",
+      "latitude": 9.94894,
+      "longitude": -84.59833
     }
   ],
   "atenas": [
     {
       "id": "atenas__s1",
-      "name": "Atenas · Norte-Este",
+      "name": "Atenas · Este",
       "latitude": 9.9797,
-      "longitude": -84.39414
+      "longitude": -84.39566
     },
     {
       "id": "atenas__s2",
       "name": "Atenas · Sur-Oeste",
-      "latitude": 9.92534,
-      "longitude": -84.45779
+      "latitude": 9.92464,
+      "longitude": -84.45931
+    },
+    {
+      "id": "atenas__s3",
+      "name": "Atenas · Norte",
+      "latitude": 10.00511,
+      "longitude": -84.45021
     }
   ],
   "naranjo": [
     {
       "id": "naranjo__s1",
-      "name": "Naranjo · Sur-Oeste",
+      "name": "Naranjo · Oeste",
       "latitude": 10.10525,
-      "longitude": -84.39245
+      "longitude": -84.39179
     },
     {
       "id": "naranjo__s2",
-      "name": "Naranjo · Norte-Este",
-      "latitude": 10.18514,
-      "longitude": -84.34649
+      "name": "Naranjo · Norte",
+      "latitude": 10.18617,
+      "longitude": -84.34452
+    },
+    {
+      "id": "naranjo__s3",
+      "name": "Naranjo · Sur",
+      "latitude": 10.02433,
+      "longitude": -84.36028
+    }
+  ],
+  "palmares": [
+    {
+      "id": "palmares__s1",
+      "name": "Palmares · Norte-Este",
+      "latitude": 10.04417,
+      "longitude": -84.4358
+    },
+    {
+      "id": "palmares__s2",
+      "name": "Palmares · Sur-Oeste",
+      "latitude": 10.01589,
+      "longitude": -84.46725
+    }
+  ],
+  "poas": [
+    {
+      "id": "poas__s1",
+      "name": "Poás · Norte-Este",
+      "latitude": 10.13188,
+      "longitude": -84.22165
+    },
+    {
+      "id": "poas__s2",
+      "name": "Poás · Sur-Oeste",
+      "latitude": 10.02083,
+      "longitude": -84.29181
     }
   ],
   "orotina": [
     {
       "id": "orotina__s1",
-      "name": "Orotina · Sur-Oeste",
+      "name": "Orotina · Centro",
       "latitude": 9.89225,
       "longitude": -84.5756
     },
     {
       "id": "orotina__s2",
-      "name": "Orotina · Norte-Este",
-      "latitude": 9.93189,
-      "longitude": -84.48068
+      "name": "Orotina · Este",
+      "latitude": 9.93,
+      "longitude": -84.47797
+    },
+    {
+      "id": "orotina__s3",
+      "name": "Orotina · Oeste",
+      "latitude": 9.8998,
+      "longitude": -84.68136
     }
   ],
   "san-carlos": [
     {
       "id": "san-carlos__s1",
-      "name": "San Carlos · Sur-Este",
-      "latitude": 10.55808,
-      "longitude": -84.3944
+      "name": "San Carlos · Este",
+      "latitude": 10.674,
+      "longitude": -84.33603
     },
     {
       "id": "san-carlos__s2",
-      "name": "San Carlos · Norte-Este",
-      "latitude": 10.93258,
-      "longitude": -84.3944
+      "name": "San Carlos · Oeste",
+      "latitude": 10.54025,
+      "longitude": -84.78635
     },
     {
       "id": "san-carlos__s3",
-      "name": "San Carlos · Sur-Oeste",
-      "latitude": 10.55808,
-      "longitude": -84.77384
+      "name": "San Carlos · Sur",
+      "latitude": 10.2995,
+      "longitude": -84.46111
     },
     {
       "id": "san-carlos__s4",
-      "name": "San Carlos · Sur-Este",
-      "latitude": 10.30842,
-      "longitude": -84.30684
+      "name": "San Carlos · Norte",
+      "latitude": 10.9415,
+      "longitude": -84.38606
     },
     {
       "id": "san-carlos__s5",
-      "name": "San Carlos · Norte-Este",
-      "latitude": 10.74533,
-      "longitude": -84.19009
+      "name": "San Carlos · Centro",
+      "latitude": 10.54025,
+      "longitude": -84.53617
+    },
+    {
+      "id": "san-carlos__s6",
+      "name": "San Carlos · Sur-Este",
+      "latitude": 10.46,
+      "longitude": -84.28599
     }
   ],
   "zarcero": [
     {
       "id": "zarcero__s1",
-      "name": "Zarcero · Norte-Oeste",
+      "name": "Zarcero · Centro",
       "latitude": 10.21835,
-      "longitude": -84.425
+      "longitude": -84.4238
     },
     {
       "id": "zarcero__s2",
-      "name": "Zarcero · Sur-Este",
-      "latitude": 10.17976,
-      "longitude": -84.33201
+      "name": "Zarcero · Este",
+      "latitude": 10.18895,
+      "longitude": -84.32959
+    },
+    {
+      "id": "zarcero__s3",
+      "name": "Zarcero · Oeste",
+      "latitude": 10.24408,
+      "longitude": -84.51075
     }
   ],
   "sarchi": [
     {
       "id": "sarchi__s1",
       "name": "Sarchí · Norte-Este",
-      "latitude": 10.22711,
-      "longitude": -84.28252
+      "latitude": 10.22576,
+      "longitude": -84.28413
     },
     {
       "id": "sarchi__s2",
-      "name": "Sarchí · Sur-Oeste",
-      "latitude": 10.05724,
-      "longitude": -84.35549
+      "name": "Sarchí · Sur",
+      "latitude": 10.08016,
+      "longitude": -84.34667
+    },
+    {
+      "id": "sarchi__s3",
+      "name": "Sarchí · Centro",
+      "latitude": 10.15296,
+      "longitude": -84.32261
     }
   ],
   "upala": [
     {
       "id": "upala__s1",
       "name": "Upala · Centro",
-      "latitude": 10.88458,
-      "longitude": -85.14073
+      "latitude": 10.89631,
+      "longitude": -85.18478
     },
     {
       "id": "upala__s2",
-      "name": "Upala · Norte-Oeste",
-      "latitude": 10.91744,
-      "longitude": -85.40166
+      "name": "Upala · Este",
+      "latitude": 10.89631,
+      "longitude": -84.92046
     },
     {
       "id": "upala__s3",
-      "name": "Upala · Sur-Este",
-      "latitude": 10.85172,
-      "longitude": -84.92724
+      "name": "Upala · Oeste",
+      "latitude": 10.92448,
+      "longitude": -85.40844
     },
     {
       "id": "upala__s4",
       "name": "Upala · Sur-Este",
-      "latitude": 10.73672,
-      "longitude": -85.04585
+      "latitude": 10.74141,
+      "longitude": -85.04246
     },
     {
       "id": "upala__s5",
+      "name": "Upala · Este",
+      "latitude": 10.96673,
+      "longitude": -85.06279
+    },
+    {
+      "id": "upala__s6",
       "name": "Upala · Norte-Oeste",
-      "latitude": 11.03244,
-      "longitude": -85.23561
+      "latitude": 10.98081,
+      "longitude": -85.28644
     }
   ],
   "los-chiles": [
     {
       "id": "los-chiles__s1",
-      "name": "Los Chiles · Norte",
-      "latitude": 10.93267,
+      "name": "Los Chiles · Centro",
+      "latitude": 10.92188,
       "longitude": -84.6737
     },
     {
       "id": "los-chiles__s2",
-      "name": "Los Chiles · Sur-Este",
-      "latitude": 10.68724,
-      "longitude": -84.59953
+      "name": "Los Chiles · Sur",
+      "latitude": 10.67915,
+      "longitude": -84.61013
     },
     {
       "id": "los-chiles__s3",
-      "name": "Los Chiles · Sur-Oeste",
-      "latitude": 10.83827,
-      "longitude": -84.85912
+      "name": "Los Chiles · Oeste",
+      "latitude": 10.87333,
+      "longitude": -84.84852
     },
     {
       "id": "los-chiles__s4",
       "name": "Los Chiles · Norte-Este",
       "latitude": 10.97043,
-      "longitude": -84.50682
+      "longitude": -84.49888
     }
   ],
   "guatuso": [
     {
       "id": "guatuso__s1",
-      "name": "Guatuso · Oeste",
+      "name": "Guatuso · Centro",
       "latitude": 10.70365,
-      "longitude": -84.84585
+      "longitude": -84.84366
     },
     {
       "id": "guatuso__s2",
       "name": "Guatuso · Sur-Este",
-      "latitude": 10.65423,
-      "longitude": -84.6623
+      "latitude": 10.6507,
+      "longitude": -84.66011
     },
     {
       "id": "guatuso__s3",
       "name": "Guatuso · Sur-Oeste",
-      "latitude": 10.64188,
-      "longitude": -84.96821
+      "latitude": 10.64011,
+      "longitude": -84.96166
     },
     {
       "id": "guatuso__s4",
-      "name": "Guatuso · Norte-Este",
-      "latitude": 10.80248,
-      "longitude": -84.78466
+      "name": "Guatuso · Norte",
+      "latitude": 10.82013,
+      "longitude": -84.80433
     }
   ],
   "rio-cuarto": [
     {
       "id": "rio-cuarto__s1",
-      "name": "Río Cuarto · Norte",
-      "latitude": 10.42342,
-      "longitude": -84.20866
+      "name": "Río Cuarto · Centro",
+      "latitude": 10.42142,
+      "longitude": -84.20928
     },
     {
       "id": "rio-cuarto__s2",
       "name": "Río Cuarto · Sur",
-      "latitude": 10.26974,
-      "longitude": -84.23471
+      "latitude": 10.26575,
+      "longitude": -84.23905
+    },
+    {
+      "id": "rio-cuarto__s3",
+      "name": "Río Cuarto · Norte",
+      "latitude": 10.56513,
+      "longitude": -84.17206
     }
   ],
   "cartago-centro": [
     {
       "id": "cartago-centro__s1",
-      "name": "Cartago · Norte-Oeste",
-      "latitude": 9.90965,
-      "longitude": -83.92625
+      "name": "Cartago · Norte",
+      "latitude": 9.80045,
+      "longitude": -83.90324
     },
     {
       "id": "cartago-centro__s2",
       "name": "Cartago · Sur-Este",
-      "latitude": 9.61919,
-      "longitude": -83.77862
+      "latitude": 9.617,
+      "longitude": -83.78821
+    },
+    {
+      "id": "cartago-centro__s3",
+      "name": "Cartago · Oeste",
+      "latitude": 9.77425,
+      "longitude": -84.0758
     }
   ],
   "paraiso": [
     {
       "id": "paraiso__s1",
-      "name": "Paraíso · Sur-Este",
-      "latitude": 9.6702,
-      "longitude": -83.73853
+      "name": "Paraíso · Centro",
+      "latitude": 9.67869,
+      "longitude": -83.74171
     },
     {
       "id": "paraiso__s2",
       "name": "Paraíso · Norte-Oeste",
-      "latitude": 9.8484,
-      "longitude": -83.83873
+      "latitude": 9.84416,
+      "longitude": -83.83714
+    },
+    {
+      "id": "paraiso__s3",
+      "name": "Paraíso · Sur-Este",
+      "latitude": 9.57686,
+      "longitude": -83.68446
+    }
+  ],
+  "la-union": [
+    {
+      "id": "la-union__s1",
+      "name": "La Unión · Este",
+      "latitude": 9.9098,
+      "longitude": -83.98513
+    },
+    {
+      "id": "la-union__s2",
+      "name": "La Unión · Oeste",
+      "latitude": 9.89393,
+      "longitude": -84.03856
     }
   ],
   "jimenez": [
     {
       "id": "jimenez__s1",
       "name": "Jiménez · Sur-Este",
-      "latitude": 9.7758,
-      "longitude": -83.67638
+      "latitude": 9.76344,
+      "longitude": -83.67195
     },
     {
       "id": "jimenez__s2",
       "name": "Jiménez · Norte-Oeste",
-      "latitude": 9.93799,
-      "longitude": -83.76172
+      "latitude": 9.93953,
+      "longitude": -83.76505
+    },
+    {
+      "id": "jimenez__s3",
+      "name": "Jiménez · Centro",
+      "latitude": 9.83759,
+      "longitude": -83.7318
     }
   ],
   "turrialba": [
     {
       "id": "turrialba__s1",
-      "name": "Turrialba · Sur-Este",
-      "latitude": 9.83388,
-      "longitude": -83.50252
+      "name": "Turrialba · Centro",
+      "latitude": 9.84816,
+      "longitude": -83.51158
     },
     {
       "id": "turrialba__s2",
       "name": "Turrialba · Norte-Oeste",
-      "latitude": 10.00882,
-      "longitude": -83.75602
+      "latitude": 10.01954,
+      "longitude": -83.76508
     },
     {
       "id": "turrialba__s3",
-      "name": "Turrialba · Sur-Oeste",
-      "latitude": 9.58397,
-      "longitude": -83.58702
+      "name": "Turrialba · Sur",
+      "latitude": 9.56969,
+      "longitude": -83.54779
     },
     {
       "id": "turrialba__s4",
       "name": "Turrialba · Norte-Este",
-      "latitude": 9.95884,
-      "longitude": -83.35465
+      "latitude": 9.95527,
+      "longitude": -83.36672
     },
     {
       "id": "turrialba__s5",
-      "name": "Turrialba · Norte-Oeste",
-      "latitude": 9.88387,
-      "longitude": -83.6504
+      "name": "Turrialba · Oeste",
+      "latitude": 9.89101,
+      "longitude": -83.67454
+    },
+    {
+      "id": "turrialba__s6",
+      "name": "Turrialba · Sur",
+      "latitude": 9.69821,
+      "longitude": -83.47536
+    }
+  ],
+  "alvarado": [
+    {
+      "id": "alvarado__s1",
+      "name": "Alvarado · Sur",
+      "latitude": 9.92903,
+      "longitude": -83.8016
+    },
+    {
+      "id": "alvarado__s2",
+      "name": "Alvarado · Norte",
+      "latitude": 10.01154,
+      "longitude": -83.81624
     }
   ],
   "oreamuno": [
     {
       "id": "oreamuno__s1",
-      "name": "Oreamuno · Norte-Este",
-      "latitude": 10.03476,
-      "longitude": -83.84364
+      "name": "Oreamuno · Centro",
+      "latitude": 10.06149,
+      "longitude": -83.85321
     },
     {
       "id": "oreamuno__s2",
-      "name": "Oreamuno · Sur-Oeste",
-      "latitude": 9.86017,
-      "longitude": -83.89847
+      "name": "Oreamuno · Sur",
+      "latitude": 9.87977,
+      "longitude": -83.88454
+    },
+    {
+      "id": "oreamuno__s3",
+      "name": "Oreamuno · Norte-Oeste",
+      "latitude": 10.13631,
+      "longitude": -83.93676
     }
   ],
   "el-guarco": [
     {
       "id": "el-guarco__s1",
       "name": "El Guarco · Norte-Oeste",
-      "latitude": 9.72248,
-      "longitude": -83.91983
+      "latitude": 9.81071,
+      "longitude": -83.97828
     },
     {
       "id": "el-guarco__s2",
       "name": "El Guarco · Sur-Este",
-      "latitude": 9.62123,
-      "longitude": -83.81006
+      "latitude": 9.61978,
+      "longitude": -83.80721
+    },
+    {
+      "id": "el-guarco__s3",
+      "name": "El Guarco · Centro",
+      "latitude": 9.71524,
+      "longitude": -83.90985
     }
   ],
   "heredia-centro": [
     {
       "id": "heredia-centro__s1",
-      "name": "Heredia · Norte-Este",
+      "name": "Heredia · Este",
       "latitude": 10.12855,
-      "longitude": -84.02879
+      "longitude": -84.03028
     },
     {
       "id": "heredia-centro__s2",
-      "name": "Heredia · Sur-Oeste",
-      "latitude": 9.98767,
-      "longitude": -84.13287
+      "name": "Heredia · Sur",
+      "latitude": 9.98365,
+      "longitude": -84.13734
+    },
+    {
+      "id": "heredia-centro__s3",
+      "name": "Heredia · Norte",
+      "latitude": 10.26137,
+      "longitude": -84.14626
+    }
+  ],
+  "barva": [
+    {
+      "id": "barva__s1",
+      "name": "Barva · Norte",
+      "latitude": 10.09161,
+      "longitude": -84.10896
+    },
+    {
+      "id": "barva__s2",
+      "name": "Barva · Sur",
+      "latitude": 10.01463,
+      "longitude": -84.13729
+    }
+  ],
+  "santo-domingo": [
+    {
+      "id": "santo-domingo__s1",
+      "name": "Santo Domingo · Sur-Oeste",
+      "latitude": 9.98219,
+      "longitude": -84.06815
+    },
+    {
+      "id": "santo-domingo__s2",
+      "name": "Santo Domingo · Norte-Este",
+      "latitude": 10.01345,
+      "longitude": -84.02604
+    }
+  ],
+  "santa-barbara": [
+    {
+      "id": "santa-barbara__s1",
+      "name": "Santa Bárbara · Sur",
+      "latitude": 10.07136,
+      "longitude": -84.1473
+    },
+    {
+      "id": "santa-barbara__s2",
+      "name": "Santa Bárbara · Norte",
+      "latitude": 10.15268,
+      "longitude": -84.1584
+    }
+  ],
+  "san-rafael": [
+    {
+      "id": "san-rafael__s1",
+      "name": "San Rafael · Sur",
+      "latitude": 10.05107,
+      "longitude": -84.07082
+    },
+    {
+      "id": "san-rafael__s2",
+      "name": "San Rafael · Norte",
+      "latitude": 10.11616,
+      "longitude": -84.08423
+    }
+  ],
+  "san-isidro": [
+    {
+      "id": "san-isidro__s1",
+      "name": "San Isidro · Norte-Este",
+      "latitude": 10.03371,
+      "longitude": -84.02914
+    },
+    {
+      "id": "san-isidro__s2",
+      "name": "San Isidro · Sur-Oeste",
+      "latitude": 9.99873,
+      "longitude": -84.07366
+    }
+  ],
+  "belen": [
+    {
+      "id": "belen__s1",
+      "name": "Belén · Norte-Este",
+      "latitude": 9.9855,
+      "longitude": -84.1768
+    },
+    {
+      "id": "belen__s2",
+      "name": "Belén · Sur-Oeste",
+      "latitude": 9.97002,
+      "longitude": -84.19825
+    }
+  ],
+  "flores": [
+    {
+      "id": "flores__s1",
+      "name": "Flores · Oeste",
+      "latitude": 10.0056,
+      "longitude": -84.15673
+    },
+    {
+      "id": "flores__s2",
+      "name": "Flores · Este",
+      "latitude": 10.01003,
+      "longitude": -84.13551
+    }
+  ],
+  "san-pablo": [
+    {
+      "id": "san-pablo__s1",
+      "name": "San Pablo · Sur-Oeste",
+      "latitude": 9.99479,
+      "longitude": -84.09926
+    },
+    {
+      "id": "san-pablo__s2",
+      "name": "San Pablo · Norte-Este",
+      "latitude": 10.01093,
+      "longitude": -84.07521
     }
   ],
   "sarapiqui": [
     {
       "id": "sarapiqui__s1",
-      "name": "Sarapiquí · Norte-Oeste",
-      "latitude": 10.56403,
-      "longitude": -84.01103
+      "name": "Sarapiquí · Centro",
+      "latitude": 10.53136,
+      "longitude": -84.00031
     },
     {
       "id": "sarapiqui__s2",
-      "name": "Sarapiquí · Sur-Este",
-      "latitude": 10.23372,
-      "longitude": -83.93595
+      "name": "Sarapiquí · Sur",
+      "latitude": 10.22646,
+      "longitude": -83.98422
     },
     {
       "id": "sarapiqui__s3",
       "name": "Sarapiquí · Norte-Este",
-      "latitude": 10.74188,
-      "longitude": -83.76701
+      "latitude": 10.72736,
+      "longitude": -83.77506
     },
     {
       "id": "sarapiqui__s4",
-      "name": "Sarapiquí · Sur-Oeste",
-      "latitude": 10.36076,
-      "longitude": -84.12366
+      "name": "Sarapiquí · Norte-Oeste",
+      "latitude": 10.72736,
+      "longitude": -84.12902
     },
     {
       "id": "sarapiqui__s5",
-      "name": "Sarapiquí · Norte-Oeste",
-      "latitude": 10.71647,
-      "longitude": -84.12366
+      "name": "Sarapiquí · Sur-Oeste",
+      "latitude": 10.37891,
+      "longitude": -84.12902
+    },
+    {
+      "id": "sarapiqui__s6",
+      "name": "Sarapiquí · Sur",
+      "latitude": 10.37891,
+      "longitude": -83.91986
     }
   ],
   "liberia": [
     {
       "id": "liberia__s1",
-      "name": "Liberia · Norte-Este",
-      "latitude": 10.73751,
-      "longitude": -85.4781
+      "name": "Liberia · Centro",
+      "latitude": 10.73103,
+      "longitude": -85.4951
     },
     {
       "id": "liberia__s2",
-      "name": "Liberia · Sur-Este",
-      "latitude": 10.46536,
-      "longitude": -85.5121
+      "name": "Liberia · Sur",
+      "latitude": 10.45888,
+      "longitude": -85.50967
     },
     {
       "id": "liberia__s3",
-      "name": "Liberia · Norte-Este",
-      "latitude": 10.91894,
+      "name": "Liberia · Norte",
+      "latitude": 10.92542,
       "longitude": -85.4951
     },
     {
       "id": "liberia__s4",
-      "name": "Liberia · Sur-Oeste",
-      "latitude": 10.62411,
-      "longitude": -85.6821
+      "name": "Liberia · Este",
+      "latitude": 10.76991,
+      "longitude": -85.33481
     }
   ],
   "nicoya": [
     {
       "id": "nicoya__s1",
-      "name": "Nicoya · Norte-Este",
-      "latitude": 10.20463,
-      "longitude": -85.37975
+      "name": "Nicoya · Norte",
+      "latitude": 10.20753,
+      "longitude": -85.38881
     },
     {
       "id": "nicoya__s2",
       "name": "Nicoya · Sur-Oeste",
-      "latitude": 9.94078,
-      "longitude": -85.63355
+      "latitude": 9.92919,
+      "longitude": -85.60636
     },
     {
       "id": "nicoya__s3",
-      "name": "Nicoya · Norte-Oeste",
+      "name": "Nicoya · Oeste",
       "latitude": 10.10315,
-      "longitude": -85.54895
+      "longitude": -85.55197
     },
     {
       "id": "nicoya__s4",
-      "name": "Nicoya · Sur-Este",
-      "latitude": 10.06256,
-      "longitude": -85.21055
+      "name": "Nicoya · Este",
+      "latitude": 10.06836,
+      "longitude": -85.20753
     }
   ],
   "santa-cruz": [
     {
       "id": "santa-cruz__s1",
-      "name": "Santa Cruz · Sur-Oeste",
-      "latitude": 10.21505,
-      "longitude": -85.6992
+      "name": "Santa Cruz · Centro",
+      "latitude": 10.21805,
+      "longitude": -85.69081
     },
     {
       "id": "santa-cruz__s2",
       "name": "Santa Cruz · Norte-Este",
       "latitude": 10.36202,
-      "longitude": -85.42527
+      "longitude": -85.42247
     },
     {
       "id": "santa-cruz__s3",
       "name": "Santa Cruz · Norte-Oeste",
-      "latitude": 10.42501,
-      "longitude": -85.73833
+      "latitude": 10.43401,
+      "longitude": -85.74113
     },
     {
       "id": "santa-cruz__s4",
-      "name": "Santa Cruz · Sur-Oeste",
-      "latitude": 10.02609,
-      "longitude": -85.6992
+      "name": "Santa Cruz · Sur",
+      "latitude": 10.02009,
+      "longitude": -85.69081
     }
   ],
   "bagaces": [
     {
       "id": "bagaces__s1",
-      "name": "Bagaces · Sur-Oeste",
-      "latitude": 10.51205,
-      "longitude": -85.2776
+      "name": "Bagaces · Centro",
+      "latitude": 10.49321,
+      "longitude": -85.28649
     },
     {
       "id": "bagaces__s2",
       "name": "Bagaces · Norte-Este",
-      "latitude": 10.70986,
-      "longitude": -85.16875
+      "latitude": 10.6816,
+      "longitude": -85.11321
     },
     {
       "id": "bagaces__s3",
       "name": "Bagaces · Sur",
-      "latitude": 10.29226,
+      "latitude": 10.28598,
       "longitude": -85.2465
     },
     {
       "id": "bagaces__s4",
-      "name": "Bagaces · Norte-Oeste",
-      "latitude": 10.6659,
-      "longitude": -85.3087
+      "name": "Bagaces · Norte",
+      "latitude": 10.6816,
+      "longitude": -85.29981
     }
   ],
   "carrillo": [
     {
       "id": "carrillo__s1",
-      "name": "Carrillo · Norte-Oeste",
-      "latitude": 10.50738,
-      "longitude": -85.64641
+      "name": "Carrillo · Centro",
+      "latitude": 10.49259,
+      "longitude": -85.63847
     },
     {
       "id": "carrillo__s2",
-      "name": "Carrillo · Sur-Este",
+      "name": "Carrillo · Este",
       "latitude": 10.40385,
-      "longitude": -85.42416
+      "longitude": -85.4321
     },
     {
       "id": "carrillo__s3",
       "name": "Carrillo · Sur",
-      "latitude": 10.36502,
-      "longitude": -85.60937
+      "latitude": 10.37057,
+      "longitude": -85.60672
     },
     {
       "id": "carrillo__s4",
-      "name": "Carrillo · Norte-Oeste",
-      "latitude": 10.50738,
-      "longitude": -85.77606
+      "name": "Carrillo · Oeste",
+      "latitude": 10.50369,
+      "longitude": -85.78135
     }
   ],
   "canas": [
     {
       "id": "canas__s1",
-      "name": "Cañas · Sur",
-      "latitude": 10.36427,
-      "longitude": -85.11139
+      "name": "Cañas · Centro",
+      "latitude": 10.37655,
+      "longitude": -85.09895
     },
     {
       "id": "canas__s2",
-      "name": "Cañas · Norte-Este",
-      "latitude": 10.66521,
-      "longitude": -85.0492
+      "name": "Cañas · Norte",
+      "latitude": 10.65292,
+      "longitude": -85.05631
     },
     {
       "id": "canas__s3",
-      "name": "Cañas · Norte-Este",
-      "latitude": 10.51474,
-      "longitude": -85.08651
+      "name": "Cañas · Sur-Oeste",
+      "latitude": 10.22915,
+      "longitude": -85.21622
     },
     {
       "id": "canas__s4",
-      "name": "Cañas · Sur-Oeste",
-      "latitude": 10.2138,
-      "longitude": -85.22333
+      "name": "Cañas · Norte",
+      "latitude": 10.52395,
+      "longitude": -85.10961
     }
   ],
   "abangares": [
     {
       "id": "abangares__s1",
-      "name": "Abangares · Norte-Este",
-      "latitude": 10.26229,
-      "longitude": -84.9598
+      "name": "Abangares · Centro",
+      "latitude": 10.26064,
+      "longitude": -84.9693
     },
     {
       "id": "abangares__s2",
-      "name": "Abangares · Oeste",
-      "latitude": 10.2046,
-      "longitude": -85.1593
+      "name": "Abangares · Sur-Oeste",
+      "latitude": 10.2013,
+      "longitude": -85.18305
     },
     {
       "id": "abangares__s3",
-      "name": "Abangares · Sur-Este",
-      "latitude": 10.13537,
-      "longitude": -84.94318
+      "name": "Abangares · Oeste",
+      "latitude": 10.25075,
+      "longitude": -85.0833
     },
     {
       "id": "abangares__s4",
-      "name": "Abangares · Norte-Oeste",
-      "latitude": 10.22767,
-      "longitude": -85.05955
+      "name": "Abangares · Norte-Este",
+      "latitude": 10.32986,
+      "longitude": -84.8553
     }
   ],
   "tilaran": [
     {
       "id": "tilaran__s1",
-      "name": "Tilarán · Oeste",
-      "latitude": 10.4866,
-      "longitude": -84.94129
+      "name": "Tilarán · Centro",
+      "latitude": 10.47475,
+      "longitude": -84.93628
     },
     {
       "id": "tilaran__s2",
       "name": "Tilarán · Sur-Este",
-      "latitude": 10.36218,
-      "longitude": -84.80114
+      "latitude": 10.35625,
+      "longitude": -84.79613
     },
     {
       "id": "tilaran__s3",
       "name": "Tilarán · Norte-Oeste",
-      "latitude": 10.5972,
-      "longitude": -85.01136
+      "latitude": 10.6051,
+      "longitude": -85.01637
     },
     {
       "id": "tilaran__s4",
       "name": "Tilarán · Este",
-      "latitude": 10.47278,
-      "longitude": -84.8245
+      "latitude": 10.47475,
+      "longitude": -84.81615
     }
   ],
   "nandayure": [
     {
       "id": "nandayure__s1",
       "name": "Nandayure · Sur-Este",
-      "latitude": 9.8582,
-      "longitude": -85.27723
+      "latitude": 9.85201,
+      "longitude": -85.25897
     },
     {
       "id": "nandayure__s2",
       "name": "Nandayure · Norte-Este",
-      "latitude": 10.0314,
-      "longitude": -85.23888
+      "latitude": 10.02521,
+      "longitude": -85.23706
     },
     {
       "id": "nandayure__s3",
       "name": "Nandayure · Sur-Oeste",
-      "latitude": 9.87263,
-      "longitude": -85.43063
+      "latitude": 9.87676,
+      "longitude": -85.41237
     },
     {
       "id": "nandayure__s4",
-      "name": "Nandayure · Norte",
-      "latitude": 9.95923,
-      "longitude": -85.31558
+      "name": "Nandayure · Centro",
+      "latitude": 9.96336,
+      "longitude": -85.33567
     }
   ],
   "la-cruz": [
     {
       "id": "la-cruz__s1",
-      "name": "La Cruz · Norte-Este",
-      "latitude": 11.06161,
-      "longitude": -85.56315
+      "name": "La Cruz · Centro",
+      "latitude": 11.05412,
+      "longitude": -85.54144
     },
     {
       "id": "la-cruz__s2",
-      "name": "La Cruz · Sur-Oeste",
-      "latitude": 10.88674,
-      "longitude": -85.83672
+      "name": "La Cruz · Oeste",
+      "latitude": 10.88924,
+      "longitude": -85.82803
     },
     {
       "id": "la-cruz__s3",
-      "name": "La Cruz · Norte-Este",
-      "latitude": 11.06161,
-      "longitude": -85.28959
+      "name": "La Cruz · Este",
+      "latitude": 11.05412,
+      "longitude": -85.28091
     },
     {
       "id": "la-cruz__s4",
-      "name": "La Cruz · Sur-Oeste",
-      "latitude": 10.88674,
-      "longitude": -85.62395
+      "name": "La Cruz · Centro",
+      "latitude": 10.87425,
+      "longitude": -85.64566
     }
   ],
   "hojancha": [
     {
       "id": "hojancha__s1",
-      "name": "Hojancha · Sur",
-      "latitude": 9.96398,
+      "name": "Hojancha · Centro",
+      "latitude": 9.96547,
       "longitude": -85.40905
     },
     {
       "id": "hojancha__s2",
       "name": "Hojancha · Norte",
-      "latitude": 10.06815,
-      "longitude": -85.41626
+      "latitude": 10.07261,
+      "longitude": -85.42141
+    },
+    {
+      "id": "hojancha__s3",
+      "name": "Hojancha · Sur-Oeste",
+      "latitude": 9.86726,
+      "longitude": -85.47087
     }
   ],
   "puntarenas-centro": [
     {
       "id": "puntarenas-centro__s1",
-      "name": "Puntarenas · Sur-Oeste",
-      "latitude": 9.73245,
-      "longitude": -85.06767
+      "name": "Puntarenas · Centro",
+      "latitude": 9.81887,
+      "longitude": -85.09664
     },
     {
       "id": "puntarenas-centro__s2",
-      "name": "Puntarenas · Norte-Este",
-      "latitude": 10.13575,
-      "longitude": -84.86488
+      "name": "Puntarenas · Centro",
+      "latitude": 10.16456,
+      "longitude": -84.83591
     },
     {
       "id": "puntarenas-centro__s3",
-      "name": "Puntarenas · Sur-Oeste",
-      "latitude": 9.9341,
-      "longitude": -85.16906
+      "name": "Puntarenas · Centro",
+      "latitude": 9.99171,
+      "longitude": -84.74901
     },
     {
       "id": "puntarenas-centro__s4",
-      "name": "Puntarenas · Sur-Este",
-      "latitude": 9.9341,
-      "longitude": -84.96627
+      "name": "Puntarenas · Centro",
+      "latitude": 9.64603,
+      "longitude": -85.09664
     },
     {
       "id": "puntarenas-centro__s5",
-      "name": "Puntarenas · Norte-Oeste",
-      "latitude": 10.13575,
-      "longitude": -85.06767
+      "name": "Puntarenas · Centro",
+      "latitude": 9.81887,
+      "longitude": -84.92282
+    },
+    {
+      "id": "puntarenas-centro__s6",
+      "name": "Puntarenas · Centro",
+      "latitude": 10.16456,
+      "longitude": -85.00973
     }
   ],
   "esparza": [
     {
       "id": "esparza__s1",
-      "name": "Esparza · Norte-Este",
-      "latitude": 10.00622,
-      "longitude": -84.62377
+      "name": "Esparza · Este",
+      "latitude": 10.00465,
+      "longitude": -84.6204
     },
     {
       "id": "esparza__s2",
       "name": "Esparza · Sur-Oeste",
-      "latitude": 9.89597,
-      "longitude": -84.7104
+      "latitude": 9.89125,
+      "longitude": -84.70815
+    },
+    {
+      "id": "esparza__s3",
+      "name": "Esparza · Norte",
+      "latitude": 10.11805,
+      "longitude": -84.68115
     }
   ],
   "buenos-aires": [
     {
       "id": "buenos-aires__s1",
-      "name": "Buenos Aires · Norte",
-      "latitude": 9.12927,
-      "longitude": -83.26655
+      "name": "Buenos Aires · Centro",
+      "latitude": 9.12203,
+      "longitude": -83.24536
     },
     {
       "id": "buenos-aires__s2",
       "name": "Buenos Aires · Sur-Este",
-      "latitude": 8.82527,
+      "latitude": 8.81803,
       "longitude": -83.11822
     },
     {
       "id": "buenos-aires__s3",
-      "name": "Buenos Aires · Este",
-      "latitude": 9.0786,
-      "longitude": -83.01934
+      "name": "Buenos Aires · Norte-Oeste",
+      "latitude": 9.29574,
+      "longitude": -83.43606
     },
     {
       "id": "buenos-aires__s4",
-      "name": "Buenos Aires · Norte-Oeste",
-      "latitude": 9.3066,
-      "longitude": -83.4396
+      "name": "Buenos Aires · Este",
+      "latitude": 9.05689,
+      "longitude": -83.01228
     },
     {
       "id": "buenos-aires__s5",
-      "name": "Buenos Aires · Sur-Oeste",
-      "latitude": 9.05327,
-      "longitude": -83.46432
+      "name": "Buenos Aires · Oeste",
+      "latitude": 9.05689,
+      "longitude": -83.47844
+    },
+    {
+      "id": "buenos-aires__s6",
+      "name": "Buenos Aires · Norte",
+      "latitude": 9.29574,
+      "longitude": -83.24536
     }
   ],
   "montes-de-oro": [
     {
       "id": "montes-de-oro__s1",
-      "name": "Montes de Oro · Sur-Oeste",
-      "latitude": 10.08884,
-      "longitude": -84.7337
+      "name": "Montes de Oro · Sur",
+      "latitude": 10.1069,
+      "longitude": -84.73929
     },
     {
       "id": "montes-de-oro__s2",
-      "name": "Montes de Oro · Norte-Este",
-      "latitude": 10.27271,
-      "longitude": -84.6815
+      "name": "Montes de Oro · Norte",
+      "latitude": 10.27435,
+      "longitude": -84.68336
+    },
+    {
+      "id": "montes-de-oro__s3",
+      "name": "Montes de Oro · Centro",
+      "latitude": 10.1857,
+      "longitude": -84.70014
     }
   ],
   "osa": [
     {
       "id": "osa__s1",
-      "name": "Osa · Sur-Este",
-      "latitude": 8.86011,
-      "longitude": -83.44102
+      "name": "Osa · Centro",
+      "latitude": 8.86472,
+      "longitude": -83.45426
     },
     {
       "id": "osa__s2",
       "name": "Osa · Norte-Oeste",
-      "latitude": 9.18302,
-      "longitude": -83.71905
+      "latitude": 9.25222,
+      "longitude": -83.85144
     },
     {
       "id": "osa__s3",
       "name": "Osa · Sur-Oeste",
-      "latitude": 8.56948,
-      "longitude": -83.65727
+      "latitude": 8.61561,
+      "longitude": -83.69257
     },
     {
       "id": "osa__s4",
-      "name": "Osa · Sur-Este",
-      "latitude": 8.79552,
-      "longitude": -83.19389
+      "name": "Osa · Norte",
+      "latitude": 9.08615,
+      "longitude": -83.61314
     },
     {
       "id": "osa__s5",
-      "name": "Osa · Norte-Oeste",
-      "latitude": 9.02157,
-      "longitude": -83.59548
+      "name": "Osa · Este",
+      "latitude": 8.80936,
+      "longitude": -83.21596
+    },
+    {
+      "id": "osa__s6",
+      "name": "Osa · Sur",
+      "latitude": 8.69865,
+      "longitude": -83.5337
     }
   ],
   "quepos": [
     {
       "id": "quepos__s1",
-      "name": "Quepos · Norte-Oeste",
-      "latitude": 9.43981,
-      "longitude": -84.09761
+      "name": "Quepos · Centro",
+      "latitude": 9.44737,
+      "longitude": -84.10495
     },
     {
       "id": "quepos__s2",
       "name": "Quepos · Sur-Este",
-      "latitude": 9.32075,
-      "longitude": -83.89216
+      "latitude": 9.29996,
+      "longitude": -83.88483
     },
     {
       "id": "quepos__s3",
-      "name": "Quepos · Sur-Este",
-      "latitude": 9.37366,
-      "longitude": -83.99489
+      "name": "Quepos · Este",
+      "latitude": 9.37933,
+      "longitude": -83.98755
     },
     {
       "id": "quepos__s4",
       "name": "Quepos · Norte-Oeste",
-      "latitude": 9.50595,
-      "longitude": -84.23458
+      "latitude": 9.49273,
+      "longitude": -84.22235
     }
   ],
   "golfito": [
     {
       "id": "golfito__s1",
       "name": "Golfito · Norte",
-      "latitude": 8.67932,
-      "longitude": -83.09243
+      "latitude": 8.69761,
+      "longitude": -83.09511
     },
     {
       "id": "golfito__s2",
       "name": "Golfito · Sur-Este",
-      "latitude": 8.07092,
-      "longitude": -82.90477
+      "latitude": 8.06635,
+      "longitude": -82.90209
     },
     {
       "id": "golfito__s3",
-      "name": "Golfito · Sur",
-      "latitude": 8.35911,
-      "longitude": -83.09243
+      "name": "Golfito · Centro",
+      "latitude": 8.36826,
+      "longitude": -83.09511
     },
     {
       "id": "golfito__s4",
       "name": "Golfito · Norte-Oeste",
-      "latitude": 8.71134,
-      "longitude": -83.26133
+      "latitude": 8.69761,
+      "longitude": -83.30423
     }
   ],
   "coto-brus": [
     {
       "id": "coto-brus__s1",
       "name": "Coto Brus · Norte",
-      "latitude": 8.94442,
-      "longitude": -82.90955
+      "latitude": 8.95166,
+      "longitude": -82.89553
     },
     {
       "id": "coto-brus__s2",
-      "name": "Coto Brus · Sur-Oeste",
-      "latitude": 8.72505,
-      "longitude": -82.94226
+      "name": "Coto Brus · Sur",
+      "latitude": 8.73469,
+      "longitude": -82.9516
     },
     {
       "id": "coto-brus__s3",
       "name": "Coto Brus · Oeste",
-      "latitude": 8.86005,
-      "longitude": -83.07309
+      "latitude": 8.87934,
+      "longitude": -83.03571
     },
     {
       "id": "coto-brus__s4",
       "name": "Coto Brus · Norte-Este",
-      "latitude": 8.94442,
-      "longitude": -82.76236
+      "latitude": 8.93719,
+      "longitude": -82.74134
     }
   ],
   "parrita": [
     {
       "id": "parrita__s1",
-      "name": "Parrita · Este",
-      "latitude": 9.55787,
-      "longitude": -84.30948
+      "name": "Parrita · Centro",
+      "latitude": 9.56381,
+      "longitude": -84.31449
     },
     {
       "id": "parrita__s2",
       "name": "Parrita · Oeste",
-      "latitude": 9.54955,
-      "longitude": -84.51993
+      "latitude": 9.54242,
+      "longitude": -84.52494
+    },
+    {
+      "id": "parrita__s3",
+      "name": "Parrita · Este",
+      "latitude": 9.59947,
+      "longitude": -84.16416
     }
   ],
   "corredores": [
     {
       "id": "corredores__s1",
-      "name": "Corredores · Sur-Este",
-      "latitude": 8.5374,
-      "longitude": -82.92985
+      "name": "Corredores · Centro",
+      "latitude": 8.52343,
+      "longitude": -82.92289
     },
     {
       "id": "corredores__s2",
       "name": "Corredores · Sur-Oeste",
-      "latitude": 8.3581,
-      "longitude": -83.0371
+      "latitude": 8.35577,
+      "longitude": -83.03989
     },
     {
       "id": "corredores__s3",
-      "name": "Corredores · Norte-Oeste",
-      "latitude": 8.7004,
-      "longitude": -82.9786
+      "name": "Corredores · Norte",
+      "latitude": 8.67711,
+      "longitude": -82.97303
     },
     {
       "id": "corredores__s4",
       "name": "Corredores · Norte-Este",
-      "latitude": 8.6352,
-      "longitude": -82.87135
+      "latitude": 8.62123,
+      "longitude": -82.86439
     }
   ],
   "garabito": [
     {
       "id": "garabito__s1",
-      "name": "Garabito · Sur",
-      "latitude": 9.66591,
-      "longitude": -84.62282
+      "name": "Garabito · Centro",
+      "latitude": 9.6841,
+      "longitude": -84.62794
     },
     {
       "id": "garabito__s2",
       "name": "Garabito · Norte",
-      "latitude": 9.83566,
-      "longitude": -84.63716
+      "latitude": 9.85385,
+      "longitude": -84.66482
+    },
+    {
+      "id": "garabito__s3",
+      "name": "Garabito · Sur-Este",
+      "latitude": 9.56285,
+      "longitude": -84.56033
     }
   ],
   "puerto-jimenez": [
     {
       "id": "puerto-jimenez__s1",
-      "name": "Puerto Jiménez · Sur",
-      "latitude": 8.51962,
-      "longitude": -83.44596
+      "name": "Puerto Jiménez · Centro",
+      "latitude": 8.52151,
+      "longitude": -83.44823
     },
     {
       "id": "puerto-jimenez__s2",
       "name": "Puerto Jiménez · Sur-Este",
-      "latitude": 8.40007,
-      "longitude": -83.30297
+      "latitude": 8.41904,
+      "longitude": -83.31205
     },
     {
       "id": "puerto-jimenez__s3",
-      "name": "Puerto Jiménez · Norte-Oeste",
-      "latitude": 8.59932,
-      "longitude": -83.62073
+      "name": "Puerto Jiménez · Oeste",
+      "latitude": 8.60121,
+      "longitude": -83.61165
     },
     {
       "id": "puerto-jimenez__s4",
       "name": "Puerto Jiménez · Norte",
-      "latitude": 8.66573,
+      "latitude": 8.65814,
       "longitude": -83.46185
     }
   ],
   "limon-centro": [
     {
       "id": "limon-centro__s1",
-      "name": "Limón · Norte-Este",
-      "latitude": 9.80039,
-      "longitude": -83.08477
+      "name": "Limón · Centro",
+      "latitude": 9.77605,
+      "longitude": -83.07707
     },
     {
       "id": "limon-centro__s2",
       "name": "Limón · Sur-Oeste",
-      "latitude": 9.55701,
-      "longitude": -83.48895
+      "latitude": 9.5883,
+      "longitude": -83.46971
     },
     {
       "id": "limon-centro__s3",
-      "name": "Limón · Oeste",
-      "latitude": 9.75171,
-      "longitude": -83.32728
+      "name": "Limón · Norte",
+      "latitude": 10.00552,
+      "longitude": -83.14636
     },
     {
       "id": "limon-centro__s4",
-      "name": "Limón · Norte-Este",
-      "latitude": 9.99509,
-      "longitude": -83.13866
+      "name": "Limón · Oeste",
+      "latitude": 9.75519,
+      "longitude": -83.30803
     },
     {
       "id": "limon-centro__s5",
       "name": "Limón · Sur-Este",
-      "latitude": 9.65436,
-      "longitude": -82.95004
+      "latitude": 9.65089,
+      "longitude": -82.96159
+    },
+    {
+      "id": "limon-centro__s6",
+      "name": "Limón · Este",
+      "latitude": 9.79691,
+      "longitude": -82.93849
     }
   ],
   "pococi": [
     {
       "id": "pococi__s1",
-      "name": "Pococí · Norte",
-      "latitude": 10.53872,
-      "longitude": -83.67028
+      "name": "Pococí · Centro",
+      "latitude": 10.5335,
+      "longitude": -83.66668
     },
     {
       "id": "pococi__s2",
       "name": "Pococí · Sur-Oeste",
-      "latitude": 10.13644,
-      "longitude": -83.8465
+      "latitude": 10.12599,
+      "longitude": -83.81773
     },
     {
       "id": "pococi__s3",
       "name": "Pococí · Sur-Este",
-      "latitude": 10.3193,
-      "longitude": -83.41853
+      "latitude": 10.34542,
+      "longitude": -83.42931
     },
     {
       "id": "pococi__s4",
-      "name": "Pococí · Norte-Este",
-      "latitude": 10.86786,
+      "name": "Pococí · Norte",
+      "latitude": 10.87831,
       "longitude": -83.6451
     },
     {
       "id": "pococi__s5",
       "name": "Pococí · Sur-Oeste",
-      "latitude": 10.35587,
+      "latitude": 10.34542,
       "longitude": -83.79615
+    },
+    {
+      "id": "pococi__s6",
+      "name": "Pococí · Norte",
+      "latitude": 10.69023,
+      "longitude": -83.60194
     }
   ],
   "siquirres": [
     {
       "id": "siquirres__s1",
-      "name": "Siquirres · Norte-Este",
-      "latitude": 10.13423,
+      "name": "Siquirres · Centro",
+      "latitude": 10.13621,
       "longitude": -83.4941
     },
     {
       "id": "siquirres__s2",
       "name": "Siquirres · Norte-Este",
-      "latitude": 10.24517,
-      "longitude": -83.34543
+      "latitude": 10.2313,
+      "longitude": -83.33481
     },
     {
       "id": "siquirres__s3",
       "name": "Siquirres · Sur-Oeste",
-      "latitude": 10.03717,
-      "longitude": -83.67993
+      "latitude": 10.04113,
+      "longitude": -83.68524
     },
     {
       "id": "siquirres__s4",
-      "name": "Siquirres · Sur-Oeste",
-      "latitude": 10.0233,
-      "longitude": -83.54985
+      "name": "Siquirres · Sur",
+      "latitude": 10.01736,
+      "longitude": -83.55781
     }
   ],
   "talamanca": [
     {
       "id": "talamanca__s1",
-      "name": "Talamanca · Norte-Oeste",
-      "latitude": 9.47953,
-      "longitude": -83.1771
+      "name": "Talamanca · Centro",
+      "latitude": 9.4466,
+      "longitude": -83.08784
     },
     {
       "id": "talamanca__s2",
-      "name": "Talamanca · Norte-Este",
+      "name": "Talamanca · Este",
       "latitude": 9.5948,
-      "longitude": -82.66945
+      "longitude": -82.65271
     },
     {
       "id": "talamanca__s3",
-      "name": "Talamanca · Sur-Este",
-      "latitude": 9.19137,
-      "longitude": -82.98185
+      "name": "Talamanca · Oeste",
+      "latitude": 9.5207,
+      "longitude": -83.42256
     },
     {
       "id": "talamanca__s4",
-      "name": "Talamanca · Oeste",
-      "latitude": 9.45072,
-      "longitude": -83.45045
+      "name": "Talamanca · Sur",
+      "latitude": 9.1255,
+      "longitude": -82.95396
     },
     {
       "id": "talamanca__s5",
       "name": "Talamanca · Norte-Este",
-      "latitude": 9.56598,
-      "longitude": -82.9428
+      "latitude": 9.7183,
+      "longitude": -82.88701
+    },
+    {
+      "id": "talamanca__s6",
+      "name": "Talamanca · Oeste",
+      "latitude": 9.6195,
+      "longitude": -83.22173
     }
   ],
   "matina": [
     {
       "id": "matina__s1",
-      "name": "Matina · Norte-Este",
-      "latitude": 10.0819,
-      "longitude": -83.28298
+      "name": "Matina · Norte",
+      "latitude": 10.07178,
+      "longitude": -83.28676
     },
     {
       "id": "matina__s2",
-      "name": "Matina · Sur-Este",
-      "latitude": 9.83393,
-      "longitude": -83.29619
+      "name": "Matina · Sur",
+      "latitude": 9.84405,
+      "longitude": -83.28676
     },
     {
       "id": "matina__s3",
-      "name": "Matina · Norte-Oeste",
+      "name": "Matina · Oeste",
       "latitude": 10.01105,
-      "longitude": -83.42827
+      "longitude": -83.44526
     },
     {
       "id": "matina__s4",
       "name": "Matina · Este",
-      "latitude": 9.95791,
-      "longitude": -83.24336
+      "latitude": 9.95032,
+      "longitude": -83.24147
     }
   ],
   "guacimo": [
     {
       "id": "guacimo__s1",
-      "name": "Guácimo · Sur-Oeste",
-      "latitude": 10.13499,
-      "longitude": -83.68648
+      "name": "Guácimo · Centro",
+      "latitude": 10.19234,
+      "longitude": -83.6665
     },
     {
       "id": "guacimo__s2",
-      "name": "Guácimo · Norte",
-      "latitude": 10.32878,
-      "longitude": -83.61018
+      "name": "Guácimo · Norte-Este",
+      "latitude": 10.27539,
+      "longitude": -83.5139
     },
     {
       "id": "guacimo__s3",
-      "name": "Guácimo · Sur",
-      "latitude": 10.21804,
-      "longitude": -83.61018
+      "name": "Guácimo · Norte",
+      "latitude": 10.32284,
+      "longitude": -83.6338
     },
     {
       "id": "guacimo__s4",
-      "name": "Guácimo · Norte-Este",
-      "latitude": 10.27341,
-      "longitude": -83.50845
+      "name": "Guácimo · Sur-Oeste",
+      "latitude": 10.07369,
+      "longitude": -83.7319
     }
   ]
 }
