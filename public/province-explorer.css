@@ -79,8 +79,9 @@
   .province-explorer .flight-panel{bottom:155px!important;right:4%!important;left:auto!important;width:44%!important;max-height:29dvh!important;padding:12px!important}
   .province-explorer .flight-panel .weather-console{position:static!important;left:auto!important;right:auto!important;bottom:auto!important;width:auto!important;max-height:none!important;padding:10px 0 0!important;overflow:visible!important}
   .province-explorer #weather-clean-view{top:90px!important;bottom:auto!important;right:4%!important;font-size:7px!important}
-  .province-explorer .flight-bottom{bottom:30px!important;left:50%!important;right:auto!important;width:max-content!important;gap:12px!important}
+  .province-explorer .flight-bottom{bottom:14px!important;left:50%!important;right:auto!important;width:max-content!important;gap:10px!important}
   .province-explorer .flight-controls{width:310px!important;max-width:calc(100vw - 28px)!important}
+  body.immersive-mode:not(.lab-open) #gaia-chat{bottom:124px!important;left:12px!important}
 }
 
 #immersive .panel-moved{position:fixed!important;left:var(--panel-x)!important;top:var(--panel-y)!important;right:auto!important;bottom:auto!important;transform:none}
@@ -93,4 +94,4 @@
 #immersive .panel-dock{position:fixed;z-index:8;left:0;border:1px solid #71cdbb77;border-left:0;border-radius:0 8px 8px 0;background:#102d3df2;color:#d8f8ec;padding:10px 12px;cursor:pointer;font-size:11px}
 #immersive .panel-dock[data-side="right"]{left:auto;right:0;border-left:1px solid #71cdbb77;border-right:0;border-radius:8px 0 0 8px}
 #immersive .panel-dock[hidden],.lab-open #immersive .panel-dock,.intro-playing #immersive .panel-dock,.clean-cockpit #immersive .panel-dock{display:none}
-@media(max-width:700px){#weather-rain-status{top:125px;left:auto;right:12px;width:190px;max-width:48vw;transform:none}}
+@media(max-width:700px){#weather-rain-status{top:182px;left:12px;right:auto;width:auto;max-width:calc(100vw - 24px);transform:none}}
