@@ -68,6 +68,10 @@ Copiá `.env.example` a `.env.local` si deseás habilitar consultas libres con I
 
 ---
 
-## Despliegue en Vercel
+## Aviso Legal, NASA Space Apps Challenge y Licencia No Comercial
 
-El proyecto incluye `vercel.json` y funciones serverless en `api/` (`/api/current`, `/api/forecast`, `/api/chat`). Cada `git push` a la rama `main` despliega automáticamente la versión de producción en Vercel.
+- **Proyecto de Hackathon:** GaiaTrack fue diseñado y desarrollado específicamente para el hackathon **NASA International Space Apps Challenge**.
+- **Sin afiliación oficial:** Este es un proyecto independiente. **No es una aplicación oficial de la NASA**, ni cuenta con patrocinio, aval o respaldo institucional de la NASA (de acuerdo con las *NASA Media Usage Guidelines*).
+- **Uso de datos científicos:** Todos los datos mostrados provienen de fuentes abiertas y públicas (**NASA POWER / MERRA-2 / CERES**, **Open-Meteo / GFS**, **GBIF / UICN**, **Copernicus DEM**, **geoBoundaries** y **Natural Earth**). No contiene ni redistribuye información clasificada o confidencial.
+- **Prohibido el uso comercial o con fines de lucro:** El código fuente original de este repositorio se publica bajo la licencia **PolyForm Noncommercial 1.0.0** ([LICENSE](LICENSE)). Se permite su consulta, estudio y uso educativo o de investigación **estrictamente sin fines de lucro**. Queda prohibida su venta, explotación comercial o redistribución con fines comerciales (incluyendo las restricciones de uso no comercial de las APIs gratuitas de Open-Meteo y Vercel Hobby; ver [docs/LICENSING.md](docs/LICENSING.md)).
+

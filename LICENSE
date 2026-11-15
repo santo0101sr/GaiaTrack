@@ -1,0 +1,48 @@
+PolyForm Noncommercial License 1.0.0
+https://polyformproject.org/licenses/noncommercial/1.0.0/
+
+Copyright (c) 2026 Equipo GaiaTrack (Santiago Joel Ramírez Víquez, Kendall Rojas Cartín, Camila Garay Jiménez, Derling Torres Campos, Francinny Saldaña Abarca, Darren Araya Monge)
+Proyecto desarrollado para el hackathon NASA International Space Apps Challenge.
+
+Acceptance
+----------
+In order to get any license under these terms, you must agree to them as both strict obligations and conditions to all your licenses.
+
+Copyright License
+-----------------
+The licensor grants you a copyright license for the software to do everything you might do with the software that would otherwise infringe the licensor's copyright in it for any permitted purpose. However, you may only distribute the software according to Distribution License and make changes or new works based on the software according to Changes and New Works License.
+
+Distribution License
+--------------------
+The licensor grants you an Additional License to distribute copies of the software under the terms of this license, provided you give a copy of this license to anyone to whom you distribute the software, and keep all copyright, patent, trademark, and attribution notices intact.
+
+Changes and New Works License
+-----------------------------
+The licensor grants you an Additional License to make changes and new works based on the software for any permitted purpose, provided you distribute them only under the terms of this license.
+
+Permitted Purpose (Noncommercial Use Only)
+------------------------------------------
+A permitted purpose is any purpose other than a commercial purpose. You may not use, copy, modify, or redistribute this software or any derivative work for any commercial purpose, commercial advantage, monetary compensation, paid service, resale, or for-profit activity.
+
+Patent License
+--------------
+The licensor grants you a patent license for the software that covers patent claims the licensor can license, or becomes able to license, that you would infringe by using the software.
+
+Fair Use
+--------
+You may have "fair use" rights for the software under the law. These terms do not limit them.
+
+No Liability
+------------
+As far as the law allows, the software comes as is, without any warranty or condition, and the licensor will not be liable to you for any damages arising out of these terms or the use or nature of the software, under any kind of legal claim.
+
+-------------------------------------------------------------------------------
+THIRD-PARTY LIBRARIES & SCIENTIFIC DATA NOTICES
+-------------------------------------------------------------------------------
+This license applies only to original code and assets created by the GaiaTrack Team.
+Third-party libraries and public scientific datasets retain their own licenses and terms:
+- NASA POWER (MERRA-2 / CERES): NASA Open Science data; attribution required, no NASA endorsement implied.
+- Open-Meteo & GFS Ensemble: Data under CC BY 4.0; free API tier restricted to non-commercial use.
+- GBIF / IUCN & Copernicus DEM: Retain their respective source licenses and attributions.
+- geoBoundaries CRI ADM2: CC0 1.0; Natural Earth: Public Domain.
+- Three.js: MIT License; Leaflet: BSD-2-Clause License (see public/vendor and docs/LICENSING.md).
