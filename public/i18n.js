@@ -17,13 +17,13 @@ export function applyStaticI18n(){
   if(typeof document==='undefined')return;
   const es=getLang()==='es';
   document.documentElement.lang=es?'es':'en';
-  document.title=es?'GaiaTrack · Observatorio de Costa Rica':'GaiaTrack · Costa Rica Climate Observatory';
+  document.title=es?'Gaia E&B · Observatorio Ambiental de Costa Rica':'Gaia E&B · Costa Rica Environment & Benefits';
   setAttr('meta[name="description"]','content',es
     ?'Explorá temperatura, lluvia, radiación y humedad en las siete provincias de Costa Rica con datos históricos de NASA POWER.'
     :'Explore temperature, rainfall, solar radiation, and moisture across all seven provinces of Costa Rica with NASA POWER historical data.');
 
-  setText('.brand small',es?'OBSERVATORIO CLIMÁTICO · COSTA RICA':'CLIMATE OBSERVATORY · COSTA RICA');
-  setAttr('.brand','aria-label',es?'GaiaTrack, inicio':'GaiaTrack, home');
+  setText('.brand small',es?'ENVIRONMENT & BENEFITS · COSTA RICA':'ENVIRONMENT & BENEFITS · COSTA RICA');
+  setAttr('.brand','aria-label',es?'Gaia E&B, inicio':'Gaia E&B, home');
   setText('.topbar nav a[href="#explorador"]',es?'Explorador':'Explorer');
   setText('.topbar nav a[href="#tendencias"]',es?'Tendencias':'Trends');
   setText('.topbar nav a[href="#pronostico"]',es?'Contexto y pronóstico':'Context & Forecast');
@@ -170,10 +170,10 @@ export function applyStaticI18n(){
   });
 
   const footerBrand=document.querySelector('.footer-brand');
-  if(footerBrand)footerBrand.innerHTML=`<span class="cr-flag" aria-hidden="true"></span> GaiaTrack <span>/</span> ${es?'Costa Rica, del Pacífico al Caribe.':'Costa Rica, from Pacific to Caribbean.'}`;
+  if(footerBrand)footerBrand.innerHTML=`<span class="cr-flag" aria-hidden="true"></span> Gaia E&amp;B <span>/</span> ${es?'Environment &amp; Benefits · Costa Rica.':'Environment &amp; Benefits · Costa Rica.'}`;
   setText('#sources-open',es?'Fuentes y limitaciones ↗':'Sources & limitations ↗');
 
-  setText('#method-dialog .eyebrow',es?'GAIATRACK / CIENCIA TRANSPARENTE':'GAIATRACK / TRANSPARENT SCIENCE');
+  setText('#method-dialog .eyebrow',es?'GAIA E&B / CIENCIA TRANSPARENTE':'GAIA E&B / TRANSPARENT SCIENCE');
   setText('#method-dialog h2',es?'Datos que podés investigar.':'Data you can investigate.');
   setText('#method-done',es?'Volver al observatorio':'Back to observatory');
 

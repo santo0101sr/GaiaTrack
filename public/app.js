@@ -41,7 +41,7 @@ const signed=(n,d=v().digits)=>(n>0?'+':'')+format(n,d);
 const series=(id=state.site)=>{if(!id)return [];const key=id+':'+state.variable;if(!annualCache.has(key))annualCache.set(key,annualPoints(annual,id,state.variable));return annualCache.get(key);};
 const valueAt=(id,year)=>annualValue(annual,id,state.variable,year);
 const deltaUnit=()=>state.variable==='RH2M'?tx('pp','p.p.'):v().unit;
-const currentColor='#c3f77a';
+const currentColor='#18d86b';
 
 function ensureHistory(id){
   if(!data[id])return Promise.reject(Error('Territorio inválido.'));
@@ -248,7 +248,7 @@ function renderMap(){
       const cVal=readVal(f.properties.id);
       return {opacity:shown?1:0,color:selected?'#f1ffda':'#0d1c24',weight:selected?2.5:1,fillColor:riskColor(cVal).css,fillOpacity:shown?(selected?.84:.64):0};
     }
-    return {opacity:shown?1:0,color:selected?'#c3f77a':'#617f85',weight:selected?2:1,fillColor:'#344b48',fillOpacity:shown?(selected?.18:.04):0};
+    return {opacity:shown?1:0,color:selected?'#18d86b':'#4a739c',weight:selected?2:1,fillColor:'#15385c',fillOpacity:shown?(selected?.18:.04):0};
   });
 }
 
@@ -307,12 +307,12 @@ function renderChart(){
     html+=`<path d="${path(primary)} L${x(primary.at(-1).year)},${H-bottom} L${x(primary[0].year)},${H-bottom} Z" fill="url(#area)"/><path d="${path(primary)}" stroke="${currentColor}" fill="none" stroke-width="2"/>`;
     if(primary.length>1)html+=`<path d="M${x(primary[0].year)},${y(displayTrend(primary[0]))} L${x(primary.at(-1).year)},${y(displayTrend(primary.at(-1)))}" stroke="${currentColor}" stroke-width="2.2" stroke-dasharray="7 4" opacity=".9"/>`;
   }
-  if(secondary.length)html+=`<path d="${path(secondary)}" fill="none" stroke="#62c9ed" stroke-width="2"/>`;
-  if(state.year>=state.start&&state.year<=state.end)html+=`<line x1="${x(state.year)}" x2="${x(state.year)}" y1="${top}" y2="${H-bottom}" stroke="#c3f77a" opacity=".25"/>`;
+  if(secondary.length)html+=`<path d="${path(secondary)}" fill="none" stroke="#14b8e6" stroke-width="2"/>`;
+  if(state.year>=state.start&&state.year<=state.end)html+=`<line x1="${x(state.year)}" x2="${x(state.year)}" y1="${top}" y2="${H-bottom}" stroke="#18d86b" opacity=".25"/>`;
   for(const [kind,pts] of [['main',primary],['compare',secondary]])for(const p of pts){
     const name=kind==='main'?data[state.site].name:data[state.compareSite].name;
     const label=`${name}, ${p.year}: ${signed(p.value)} ${state.anomaly?deltaUnit():v().unit}`;
-    html+=`<circle class="chart-point" data-kind="${kind}" data-year="${p.year}" data-value="${p.value}" cx="${x(p.year)}" cy="${y(p.value)}" r="${mobile?4.5:3.8}" fill="${kind==='main'?currentColor:'#62c9ed'}" tabindex="0" aria-label="${label}"><title>${label}</title></circle>`;
+    html+=`<circle class="chart-point" data-kind="${kind}" data-year="${p.year}" data-value="${p.value}" cx="${x(p.year)}" cy="${y(p.value)}" r="${mobile?4.5:3.8}" fill="${kind==='main'?currentColor:'#14b8e6'}" tabindex="0" aria-label="${label}"><title>${label}</title></circle>`;
   }
   svg.innerHTML=html;
 
@@ -428,7 +428,7 @@ function renderStats(){
   const isSig=t.n>=10&&!t.autocorrelated&&t.p<.05;
   $('#slope').textContent=slopeStr;
   $('#significance').textContent=t.n<10?tx('Period too short','Período insuficiente'):t.autocorrelated?tx('Check dependence','Revisar dependencia'):isSig?tx('Statistical signal','Señal estadística'):tx('Insufficient evidence','Sin evidencia suficiente');
-  $('#significance').style.color=isSig?'var(--accent)':t.autocorrelated?'#f5b942':'var(--text)';
+  $('#significance').style.color=isSig?'var(--accent)':t.autocorrelated?'#f5b316':'var(--text)';
   $('#pvalue').textContent=t.p===null?tx('At least 10 complete years required','Se requieren al menos 10 años completos'):`p ${t.p<.001?'< 0.001':'= '+format(t.p,3)} · ${tx('Two-sided Mann–Kendall · α = 0.05','Mann–Kendall bilateral · α = 0,05')}`;
   $('#sample-count').textContent=`${t.n} ${tx('years','años')} / ${state.start}–${state.end}`;
   $('#coverage-note').textContent=tx('Daily data aggregation · years with 12 valid months','Agregación de datos diarios · años con 12 meses válidos');

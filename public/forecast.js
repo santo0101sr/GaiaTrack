@@ -87,19 +87,19 @@ function renderForecastChartSvg(days,varKey,variable){
   }
   const yAt=val=>top+((max-val)/(max-min||1))*ph;
 
-  let html=`<defs><linearGradient id="fc-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#c3f77a" stop-opacity=".24"/><stop offset="100%" stop-color="#c3f77a" stop-opacity=".01"/></linearGradient></defs>`;
+  let html=`<defs><linearGradient id="fc-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#18d86b" stop-opacity=".24"/><stop offset="100%" stop-color="#18d86b" stop-opacity=".01"/></linearGradient></defs>`;
   for(let t=0;t<=4;t++){
     const tick=min+(max-min)*t/4,y=yAt(tick);
-    html+=`<line x1="${left}" x2="${W-right}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#263440" stroke-dasharray="3 5"/>`;
-    html+=`<text x="${left-9}" y="${(y+3.5).toFixed(1)}" text-anchor="end" fill="#8ea1af" font-size="10" font-family="monospace">${fmt(tick,variable.digits)}</text>`;
+    html+=`<line x1="${left}" x2="${W-right}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#1d3b5c" stroke-dasharray="3 5"/>`;
+    html+=`<text x="${left-9}" y="${(y+3.5).toFixed(1)}" text-anchor="end" fill="#93aec9" font-size="10" font-family="monospace">${fmt(tick,variable.digits)}</text>`;
   }
 
   if(isTemp){
     const tempPairs=days.map((d,i)=>Number.isFinite(d.T2M_MIN)&&Number.isFinite(d.T2M_MAX)?{x:xAt(i),lowY:yAt(d.T2M_MIN),highY:yAt(d.T2M_MAX)}:null);
-    html+=buildBandSvg(tempPairs,'#62c9ed17','#62c9ed55');
+    html+=buildBandSvg(tempPairs,'#14b8e61a','#14b8e666');
     if(varKey==='T2M'){
       const ensPairs=days.map((d,i)=>d.ensemble&&Number.isFinite(d.ensemble.p10)&&Number.isFinite(d.ensemble.p90)?{x:xAt(i),lowY:yAt(d.ensemble.p10),highY:yAt(d.ensemble.p90)}:null);
-      html+=buildBandSvg(ensPairs,'#f5b94218','#f5b94277');
+      html+=buildBandSvg(ensPairs,'#f5b3161c','#f5b31677');
     }
   }
 
@@ -108,7 +108,7 @@ function renderForecastChartSvg(days,varKey,variable){
     days.forEach((d,i)=>{
       if(!Number.isFinite(d.PRECTOTCORR)||d.PRECTOTCORR<=0)return;
       const topY=yAt(d.PRECTOTCORR),h=Math.max(2,baseY-topY);
-      html+=`<rect x="${(xAt(i)-barW/2).toFixed(1)}" y="${topY.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="#62c9ed38" stroke="#62c9ed99" stroke-width="1"/>`;
+      html+=`<rect x="${(xAt(i)-barW/2).toFixed(1)}" y="${topY.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="#14b8e638" stroke="#14b8e699" stroke-width="1"/>`;
     });
   }
 
@@ -119,17 +119,17 @@ function renderForecastChartSvg(days,varKey,variable){
     html+=`<path d="${area}" fill="url(#fc-area)"/>`;
   }
   const linePath=buildLinePath(pts);
-  if(linePath)html+=`<path d="${linePath}" fill="none" stroke="${varKey==='PRECTOTCORR'?'#62c9ed':'#c3f77a'}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
+  if(linePath)html+=`<path d="${linePath}" fill="none" stroke="${varKey==='PRECTOTCORR'?'#14b8e6':'#18d86b'}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
 
   days.forEach((d,i)=>{
     const x=xAt(i),p=pts[i];
     const dayTag=i===0?tx('TOMORROW','MAÑANA'):dateText(d.date,{weekday:'short'}).toUpperCase();
-    html+=`<text x="${x.toFixed(1)}" y="${H-22}" text-anchor="middle" fill="#a8b9c5" font-size="10" font-weight="600">${dayTag}</text>`;
-    html+=`<text x="${x.toFixed(1)}" y="${H-8}" text-anchor="middle" fill="#7c909f" font-size="9.5" font-family="monospace">${dateText(d.date)}</text>`;
+    html+=`<text x="${x.toFixed(1)}" y="${H-22}" text-anchor="middle" fill="#a8c2da" font-size="10" font-weight="600">${dayTag}</text>`;
+    html+=`<text x="${x.toFixed(1)}" y="${H-8}" text-anchor="middle" fill="#7c9ab8" font-size="9.5" font-family="monospace">${dateText(d.date)}</text>`;
     if(p){
-      const col=varKey==='PRECTOTCORR'?'#62c9ed':'#c3f77a';
-      html+=`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4.5" fill="${col}" stroke="#0a121a" stroke-width="1.5"/>`;
-      html+=`<text x="${p.x.toFixed(1)}" y="${Math.max(14,p.y-10).toFixed(1)}" text-anchor="middle" fill="#edf3f5" font-size="11" font-weight="600">${fmt(p.val,variable.digits)}</text>`;
+      const col=varKey==='PRECTOTCORR'?'#14b8e6':'#18d86b';
+      html+=`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4.5" fill="${col}" stroke="#071426" stroke-width="1.5"/>`;
+      html+=`<text x="${p.x.toFixed(1)}" y="${Math.max(14,p.y-10).toFixed(1)}" text-anchor="middle" fill="#edf6fc" font-size="11" font-weight="600">${fmt(p.val,variable.digits)}</text>`;
     }
   });
   return `<svg id="forecast-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${variable.name} (${variable.unit})">${html}</svg>`;
