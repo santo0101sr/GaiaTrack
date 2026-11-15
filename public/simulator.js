@@ -375,46 +375,21 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
           <p class="sim-footnote">${footnote}</p>
         </section>
 
-        <section class="sim-playground">
+        <section class="sim-bottom-grid">
           <div class="sim-panel">
-            <div class="sim-panel-head"><h3>${tx('What-if Scenario Stress Test','Simulador de Escenarios ("¿Qué pasa si…?")')}</h3></div>
-            <div class="sim-presets">
-              <button type="button" class="sim-preset ${!state.deltaT&&!state.deltaP?'is-on':''}" data-dt="0" data-dp="0">${tx('Real baseline','Base real')}</button>
-              <button type="button" class="sim-preset ${state.deltaT===1.5&&!state.deltaP?'is-on':''}" data-dt="1.5" data-dp="0">+1.5 °C ${tx('Warming','Calor')}</button>
-              <button type="button" class="sim-preset ${state.deltaT===2.5&&state.deltaP===-30?'is-on':''}" data-dt="2.5" data-dp="-30">+2.5 °C · −30% ${tx('Drought','Sequía')}</button>
-              <button type="button" class="sim-preset ${!state.deltaT&&state.deltaP===50?'is-on':''}" data-dt="0" data-dp="50">+50% ${tx('Heavy rain','Temporal')}</button>
-            </div>
-            <label class="sim-slider-box">
-              <div class="sim-slider-top"><span>${tx('Temperature shift (ΔT)','Cambio de temperatura (ΔT)')}</span><strong>${signed(state.deltaT,1)} °C</strong></div>
-              <input id="sim-dt" type="range" min="-3" max="4" step="0.5" value="${state.deltaT}">
-            </label>
-            <label class="sim-slider-box">
-              <div class="sim-slider-top"><span>${tx('Precipitation shift (ΔP)','Variación de lluvia (ΔP)')}</span><strong>${signed(state.deltaP,0)} %</strong></div>
-              <input id="sim-dp" type="range" min="-50" max="80" step="10" value="${state.deltaP}">
-            </label>
-          </div>
-
-          <div class="sim-panel">
-            <div class="sim-panel-head"><h3>${tx('Simulated Difference vs. Real','Diferencia Simulada vs. Real')}</h3></div>
-            <div class="sim-compare-grid">
-              <div class="sim-cmp-item"><span>${tx('TEMP (BASE → SIM)','TEMP (BASE → SIM)')}</span><strong>${m?`${fmt(m.baseObserved?.t,1)} → ${fmt(m.observed.t,1)} °C`:'—'}</strong><small>${tx('Norm','Normal')}: ${m?fmt(m.refs.t.mean,1):'—'} °C</small></div>
-              <div class="sim-cmp-item"><span>${tx('RAIN (BASE → SIM)','LLUVIA (BASE → SIM)')}</span><strong>${m?`${fmt(m.baseObserved?.p,2)} → ${fmt(m.observed.p,2)}`:'—'}</strong><small>${tx('Norm','Normal')}: ${m?fmt(m.refs.p.mean,2):'—'} mm/d</small></div>
-              <div class="sim-cmp-item"><span>${tx('IEA (BASE → SIM)','IEA (BASE → SIM)')}</span><strong>${m?`${fmt(m.baseIea,2)} → ${fmt(m.iea,2)}`:'—'}</strong><small>${m?m.ieaLevel:'—'}</small></div>
+            <div class="sim-panel-head"><h3>${tx('Historical Extremes (2001–2025)','Récords Históricos (2001–2025)')} · ${vMeta.name()}</h3></div>
+            <div class="sim-anom-list">
+              ${anoms.length?anoms.map(a=>{
+                const posLbl=vMeta.key==='PRECTOTCORR'?tx('Wetter','Más lluvioso'):vMeta.key.startsWith('T2M')?tx('Warmer','Más cálido'):tx('Higher','Más alto');
+                const negLbl=vMeta.key==='PRECTOTCORR'?tx('Drier','Más seco'):vMeta.key.startsWith('T2M')?tx('Cooler','Más fresco'):tx('Lower','Más bajo');
+                return `<div class="sim-anom-row"><strong>${a.year}</strong><span>${fmt(a.value,vMeta.d)} ${vMeta.unit} (${signed(a.diff,vMeta.d)})</span><span class="sim-pill ${a.z>0?'is-warm':'is-cool'}">${a.z>0?posLbl:negLbl}</span></div>`;
+              }).join(''):`<small>${tx('Stable series with no extreme years between 2001 and 2025.','Serie estable sin años extremos entre 2001 y 2025.')}</small>`}
             </div>
             ${topTip?`<div class="sim-rec-box"><strong>${topTip.tag} · ${topTip.title}</strong>${topTip.body}</div>`:''}
           </div>
-        </section>
-
-        <section class="sim-bottom-grid">
-          <div class="sim-panel">
-            <div class="sim-panel-head"><h3>${tx('Irregularities','Irregularidades')} (${vMeta.name()})</h3></div>
-            <div class="sim-anom-list">
-              ${anoms.length?anoms.map(a=>`<div class="sim-anom-row"><strong>${a.year}</strong><span>${fmt(a.value,vMeta.d)} ${vMeta.unit} (${signed(a.diff,vMeta.d)})</span><span class="sim-pill ${a.z>0?'is-warm':'is-cool'}">${signed(a.z,1)}σ</span></div>`).join(''):`<small>${tx('No extreme years (|Z| ≥ 1.3) in this series.','Sin años extremos (|Z| ≥ 1,3) en esta serie.')}</small>`}
-            </div>
-          </div>
 
           <div class="sim-panel">
-            <div class="sim-panel-head"><h3>${tx('Specific Data & Prediction by Variable','Datos Específicos y Predicción por Variable')}</h3></div>
+            <div class="sim-panel-head"><h3>${tx('Historical Summary & Prediction by Variable','Resumen Histórico y Predicción por Variable')}</h3></div>
             <div class="sim-table-wrap"><table class="sim-table"><thead><tr><th>${tx('Variable','Variable')}</th><th>${tx('Base 01–10','Base 01–10')}</th><th>${tx('Latest','Último')}</th><th>${tx('Diff (Δ)','Diferencia')}</th><th>${tx('Rate/dec','Tasa/déc')}</th><th>${tx('Pred.','Pred.')} ${state.targetYear}</th></tr></thead><tbody>${rowsHtml}</tbody></table></div>
           </div>
         </section>
@@ -429,10 +404,7 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
     el.querySelector('#sim-dist')?.addEventListener('change',e=>{state.district=e.target.value||null;onSelectTerritory?.(state.site,state.district);render();});
     el.querySelectorAll('[data-var-pill]').forEach(b=>b.onclick=()=>{state.varKey=b.dataset.varPill;render();});
     el.querySelector('#sim-year')?.addEventListener('input',e=>{state.targetYear=+e.target.value;render();});
-    el.querySelector('#sim-dt').oninput=e=>{state.deltaT=+e.target.value;render();};
-    el.querySelector('#sim-dp').oninput=e=>{state.deltaP=+e.target.value;render();};
     el.querySelectorAll('[data-hz]').forEach(b=>b.onclick=()=>{state.horizon=b.dataset.hz;render();});
-    el.querySelectorAll('.sim-preset').forEach(b=>b.onclick=()=>{state.deltaT=+b.dataset.dt;state.deltaP=+b.dataset.dp;render();});
     el.querySelectorAll('[data-pick-var]').forEach(r=>r.onclick=()=>{state.varKey=r.dataset.pickVar;render();});
     wireChartHover(el.querySelector('.sim-svg'),activeHoverPts);
   }
