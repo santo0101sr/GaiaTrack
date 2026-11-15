@@ -53,10 +53,22 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
     return vals.map((v,i)=>({year:start+i,value:v})).filter(p=>Number.isFinite(p.value));
   }
 
+  function buildYAxisGrid(vMin,vMax,yOf,padL,W,padR,digits,unit,steps=5){
+    const suffix=unit==='°C'?'°':'';
+    let out='';
+    for(let i=0;i<=steps;i++){
+      const val=vMin+(vMax-vMin)*(i/steps);
+      const y=yOf(val).toFixed(1);
+      if(i>0)out+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="rgba(148,163,184,.13)" stroke-dasharray="3 3"/>`;
+      out+=`<text x="${padL-6}" y="${(+y+3).toFixed(1)}" text-anchor="end" fill="#8bb0cc" font-size="10">${fmt(val,digits)}${suffix}</text>`;
+    }
+    return out;
+  }
+
   function buildHourlySvg(hPred){
     const pts=hPred.points;
     if(pts.length<2)return `<p class="sim-footnote">${tx('Loading live 48-hour forecast from Open-Meteo…','Cargando pronóstico horario en vivo de Open-Meteo…')}</p>`;
-    const W=680,H=220,padL=48,padR=20,padT=28,padB=30;
+    const W=680,H=220,padL=54,padR=20,padT=28,padB=30;
     const vals=pts.map(p=>p.value);
     let vMin=Math.min(...vals),vMax=Math.max(...vals);
     if(vMax-vMin<1e-6){vMin-=1;vMax+=1;}
@@ -80,27 +92,23 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
 
     const peakX=xOf(hPred.max.timeMs),peakY=yOf(hPred.max.value);
     const peakAnchor=peakX<padL+95?'start':peakX>W-padR-95?'end':'middle';
-    const midV=(vMin+vMax)/2;
     return `<svg viewBox="0 0 ${W} ${H}" class="sim-svg" role="img" aria-label="${tx('Live 48-hour hourly forecast','Pronóstico horario en vivo 48 h')}">
       <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(148,163,184,.25)"/>
-      <line x1="${padL}" y1="${yOf(midV).toFixed(1)}" x2="${W-padR}" y2="${yOf(midV).toFixed(1)}" stroke="rgba(148,163,184,.12)" stroke-dasharray="3 3"/>
       <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="rgba(148,163,184,.25)"/>
+      ${buildYAxisGrid(vMin,vMax,yOf,padL,W,padR,hPred.digits,hPred.unit,5)}
       ${ticks.map(t=>`<line x1="${t.x.toFixed(1)}" y1="${padT}" x2="${t.x.toFixed(1)}" y2="${H-padB}" stroke="${t.midnight?'rgba(56,189,248,.22)':'rgba(148,163,184,.08)'}" stroke-dasharray="3 3"/><text x="${t.x.toFixed(1)}" y="${H-9}" text-anchor="middle" fill="${t.midnight?'#bae6fd':'#8bb0cc'}" font-size="10">${t.text}</text>`).join('')}
       <path d="${area}" fill="rgba(56,189,248,.12)"/>
       <path d="${path}" fill="none" stroke="#38bdf8" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
       <circle cx="${xOf(t0).toFixed(1)}" cy="${yOf(pts[0].value).toFixed(1)}" r="4.5" fill="#4ade80"/>
       <circle cx="${peakX.toFixed(1)}" cy="${peakY.toFixed(1)}" r="4" fill="#f5b316"/>
       <text x="${peakX.toFixed(1)}" y="${Math.max(15,peakY-9)}" text-anchor="${peakAnchor}" fill="#fde68a" font-size="10.5" font-weight="600">${hPred.max.label}: ${fmt(hPred.max.value,hPred.digits)} ${hPred.unit}</text>
-      <text x="${padL-6}" y="${padT+4}" text-anchor="end" fill="#8bb0cc" font-size="10">${fmt(vMax,hPred.digits)}</text>
-      <text x="${padL-6}" y="${yOf(midV).toFixed(1)}" text-anchor="end" fill="#8bb0cc" font-size="10">${fmt(midV,hPred.digits)}</text>
-      <text x="${padL-6}" y="${H-padB}" text-anchor="end" fill="#8bb0cc" font-size="10">${fmt(vMin,hPred.digits)}</text>
     </svg>`;
   }
 
   function buildDailySvg(dPred,unit,digits){
     const pts=dPred.points;
     if(pts.length<2)return `<p class="sim-footnote">${tx('Loading 7-day forecast from Open-Meteo…','Cargando pronóstico de 7 días desde Open-Meteo…')}</p>`;
-    const W=680,H=210,padL=48,padR=18,padT=18,padB=28;
+    const W=680,H=220,padL=54,padR=18,padT=24,padB=30;
     const all=[...pts.map(p=>p.value),...pts.map(p=>p.lo).filter(Number.isFinite),...pts.map(p=>p.hi).filter(Number.isFinite)];
     let vMin=Math.min(...all),vMax=Math.max(...all);
     if(vMax-vMin<1e-6){vMin-=1;vMax+=1;}
@@ -113,18 +121,17 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
     return `<svg viewBox="0 0 ${W} ${H}" class="sim-svg" role="img" aria-label="${tx('7-day forecast','Pronóstico 7 días')}">
       <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(148,163,184,.25)"/>
       <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="rgba(148,163,184,.25)"/>
+      ${buildYAxisGrid(vMin,vMax,yOf,padL,W,padR,digits,unit,5)}
       ${hasBand?`<polygon points="${bandPoly}" fill="rgba(245,179,22,.16)"/>`:''}
       <path d="${path}" fill="none" stroke="#f5b316" stroke-width="2.4"/>
-      ${pts.map((p,i)=>`<circle cx="${xOf(i).toFixed(1)}" cy="${yOf(p.value).toFixed(1)}" r="4" fill="#f5b316"/><text x="${xOf(i).toFixed(1)}" y="${Math.max(12,yOf(p.value)-8)}" text-anchor="middle" fill="#fde68a" font-size="10">${fmt(p.value,digits)}</text><text x="${xOf(i).toFixed(1)}" y="${H-8}" text-anchor="middle" fill="#8bb0cc" font-size="10">${p.label}</text>`).join('')}
-      <text x="${padL-6}" y="${padT+8}" text-anchor="end" fill="#8bb0cc" font-size="10">${fmt(vMax,digits)}</text>
-      <text x="${padL-6}" y="${H-padB}" text-anchor="end" fill="#8bb0cc" font-size="10">${fmt(vMin,digits)}</text>
+      ${pts.map((p,i)=>`<circle cx="${xOf(i).toFixed(1)}" cy="${yOf(p.value).toFixed(1)}" r="4" fill="#f5b316"/><text x="${xOf(i).toFixed(1)}" y="${Math.max(14,yOf(p.value)-8)}" text-anchor="middle" fill="#fde68a" font-size="10">${fmt(p.value,digits)}</text><text x="${xOf(i).toFixed(1)}" y="${H-9}" text-anchor="middle" fill="#8bb0cc" font-size="10">${p.label}</text>`).join('')}
     </svg>`;
   }
 
   function buildMonthlySvg(mPred,unit,digits){
     const pts=mPred.points;
     if(pts.length<3)return `<p class="sim-footnote">${tx('Monthly climatology unavailable for this site.','Climatología mensual no disponible para este sitio.')}</p>`;
-    const W=680,H=210,padL=48,padR=18,padT=18,padB=28;
+    const W=680,H=220,padL=54,padR=18,padT=24,padB=30;
     const all=[...pts.map(p=>p.predicted),...pts.map(p=>p.normal),...pts.map(p=>p.p10).filter(Number.isFinite),...pts.map(p=>p.p90).filter(Number.isFinite)];
     let vMin=Math.min(...all),vMax=Math.max(...all);
     if(vMax-vMin<1e-6){vMin-=1;vMax+=1;}
@@ -138,19 +145,18 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
     return `<svg viewBox="0 0 ${W} ${H}" class="sim-svg" role="img" aria-label="${tx('12-month seasonal projection','Proyección estacional 12 meses')}">
       <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(148,163,184,.25)"/>
       <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="rgba(148,163,184,.25)"/>
+      ${buildYAxisGrid(vMin,vMax,yOf,padL,W,padR,digits,unit,5)}
       ${hasBand?`<polygon points="${bandPoly}" fill="rgba(56,189,248,.13)"/>`:''}
       <path d="${normPath}" fill="none" stroke="#38bdf8" stroke-width="1.8" stroke-dasharray="4 3" opacity="0.8"/>
       <path d="${predPath}" fill="none" stroke="#f5b316" stroke-width="2.5"/>
-      ${pts.map((p,i)=>`<circle cx="${xOf(i).toFixed(1)}" cy="${yOf(p.predicted).toFixed(1)}" r="3.4" fill="#f5b316"/><text x="${xOf(i).toFixed(1)}" y="${H-8}" text-anchor="middle" fill="#8bb0cc" font-size="9.5">${i%2===0||i===pts.length-1?p.shortLabel:''}</text>`).join('')}
-      <text x="${padL-6}" y="${padT+8}" text-anchor="end" fill="#8bb0cc" font-size="10">${fmt(vMax,digits)}</text>
-      <text x="${padL-6}" y="${H-padB}" text-anchor="end" fill="#8bb0cc" font-size="10">${fmt(vMin,digits)}</text>
-      <text x="${W-padR}" y="${padT+8}" text-anchor="end" fill="#fde68a" font-size="10">${tx('Amber: model · Blue dashed: 25y norm · Band: P10–P90','Ámbar: modelo · Azul: normal 25a · Banda: P10–P90')}</text>
+      ${pts.map((p,i)=>`<circle cx="${xOf(i).toFixed(1)}" cy="${yOf(p.predicted).toFixed(1)}" r="3.4" fill="#f5b316"/><text x="${xOf(i).toFixed(1)}" y="${H-9}" text-anchor="middle" fill="#8bb0cc" font-size="9.5">${i%2===0||i===pts.length-1?p.shortLabel:''}</text>`).join('')}
+      <text x="${W-padR}" y="${padT-8}" text-anchor="end" fill="#fde68a" font-size="10">${tx('Amber: model · Blue dashed: 25y norm · Band: P10–P90','Ámbar: modelo · Azul: normal 25a · Banda: P10–P90')}</text>
     </svg>`;
   }
 
   function buildAnnualSvg(pts,annPred,targetYear,unit,digits){
     if(pts.length<3||!annPred)return `<p class="sim-footnote">${tx('Insufficient historical series for chart.','Serie histórica insuficiente para graficar.')}</p>`;
-    const W=680,H=210,padL=48,padR=18,padT=18,padB=28;
+    const W=680,H=220,padL=54,padR=18,padT=24,padB=30;
     const minYYear=pts[0].year,maxYYear=Math.max(targetYear,annPred.lastYear+2);
     const last=pts[pts.length-1];
     const allVals=[...pts.map(p=>p.value),annPred.predicted,annPred.trendBand[0],annPred.trendBand[1],annPred.variabilityBand[0],annPred.variabilityBand[1]];
@@ -170,6 +176,7 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
     return `<svg viewBox="0 0 ${W} ${H}" class="sim-svg" role="img" aria-label="${tx('Historical series and future projection','Serie histórica y proyección futura')}">
       <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(148,163,184,.25)"/>
       <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="rgba(148,163,184,.25)"/>
+      ${buildYAxisGrid(vMin,vMax,yOf,padL,W,padR,digits,unit,5)}
       <line x1="${xLast}" y1="${padT}" x2="${xLast}" y2="${H-padB}" stroke="rgba(148,163,184,.2)" stroke-dasharray="3 3"/>
       <polygon points="${varPoly}" fill="rgba(56,189,248,.11)"/>
       <polygon points="${ciPoly}" fill="rgba(245,179,22,.22)"/>
@@ -177,10 +184,8 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
       <path d="${histPath}" fill="none" stroke="#38bdf8" stroke-width="2.2"/>
       <line x1="${xLast}" y1="${yAnchorLast}" x2="${xTarget}" y2="${yTarget}" stroke="#f5b316" stroke-width="2.3" stroke-dasharray="5 4"/>
       <circle cx="${xTarget}" cy="${yTarget}" r="4.5" fill="#f5b316"/>
-      <text x="${padL-6}" y="${padT+8}" text-anchor="end" fill="#8bb0cc" font-size="10">${fmt(vMax,digits)}</text>
-      <text x="${padL-6}" y="${H-padB}" text-anchor="end" fill="#8bb0cc" font-size="10">${fmt(vMin,digits)}</text>
-      <text x="${xTarget}" y="${Math.max(12,yOf(annPred.predicted)-9)}" text-anchor="end" fill="#fde68a" font-size="11" font-weight="600">${targetYear}: ${fmt(annPred.predicted,digits)} ${unit}</text>
-      ${[...new Set(ticks)].map(yr=>`<text x="${xOf(yr).toFixed(1)}" y="${H-8}" text-anchor="middle" fill="#8bb0cc" font-size="10">${yr}</text>`).join('')}
+      <text x="${xTarget}" y="${Math.max(14,yOf(annPred.predicted)-9)}" text-anchor="end" fill="#fde68a" font-size="11" font-weight="600">${targetYear}: ${fmt(annPred.predicted,digits)} ${unit}</text>
+      ${[...new Set(ticks)].map(yr=>`<text x="${xOf(yr).toFixed(1)}" y="${H-9}" text-anchor="middle" fill="#8bb0cc" font-size="10">${yr}</text>`).join('')}
     </svg>`;
   }
 
