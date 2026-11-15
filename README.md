@@ -6,14 +6,14 @@ Observatorio ambiental interactivo para **Costa Rica** (7 provincias, 83 cantone
 
 ## Equipo Creador
 
-| Integrante | Rol |
-| --- | --- |
-| **Santiago Joel Ramírez Víquez** | Desarrollo de Página Web |
-| **Kendall Rojas Cartín** | Desarrollo de Página Web |
-| **Camila Garay Jiménez** | Diseño UI/UX |
-| **Derling Torres Campos** | Investigación / Recolección API |
-| **Francinny Saldaña Abarca** | Investigación / Trabajo Escrito |
-| **Darren Araya Monge** | Investigación / Trabajo Escrito |
+| Integrante | Rol | Correo de contacto |
+| --- | --- | --- |
+| **Santiago Joel Ramírez Víquez** | Desarrollo de Página Web | santo0101sr@gmail.com |
+| **Kendall Rojas Cartín** | Desarrollo de Página Web | kendallrc05@gmail.com |
+| **Camila Garay Jiménez** | Diseño UI/UX | Camy.sanji@gmail.com |
+| **Derling Torres Campos** | Investigación / Recolección API | derling072008@gmail.com |
+| **Francinny Saldaña Abarca** | Investigación / Trabajo Escrito | francinnygabriela28@gmail.com |
+| **Darren Araya Monge** | Investigación / Trabajo Escrito | DarrenAraya08@gmail.com |
 
 ---
 
