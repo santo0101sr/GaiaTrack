@@ -59,8 +59,8 @@ body.immersive-mode{overflow:hidden;background:#03090f}.immersive-mode>.topbar{p
 @media(max-width:1100px){.weather-console{top:auto;bottom:23%;max-height:calc(100vh - 250px);width:260px}.flight-panel{top:auto;bottom:23%;max-height:calc(100vh - 250px)}}
 @media(max-width:580px){.weather-console{width:190px;max-height:44vh;bottom:24%}.flight-panel{max-height:38vh}}
 .weather-actions{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:2px}
-.weather-console #weather-focus,.weather-console #weather-locate{font-size:8.5px;padding:6px 9px;color:#94bfc6;border-color:#7bbbc127}
-.weather-console #weather-locate:hover{color:#c3f77a;border-color:#c3f77a66}
+.weather-console #weather-focus{font-size:8.5px;padding:6px 9px;color:#94bfc6;border-color:#7bbbc127}
+.weather-console #weather-focus:hover{color:#c3f77a;border-color:#c3f77a66}
 .wx-tip{margin-top:12px;padding:10px 11px;border-radius:7px;background:#07141da8;border:1px solid #8bc8af2a;display:flex;flex-direction:column;gap:5px}
 .wx-tip strong{font-size:9px;letter-spacing:.4px;color:#b6efd1}
 .wx-tip span{font-size:9.5px;line-height:1.55;color:#a8c1c8}

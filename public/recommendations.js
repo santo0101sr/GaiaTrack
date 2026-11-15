@@ -186,6 +186,8 @@ export function evaluateTerritoryMetrics(monthlyRows = [], weather = {}, { month
   const activeObs = scenario ? simulateScenario(baseObs, scenario) : baseObs;
   const anomT = temperatureAnomaly(activeObs.t, refT.mean);
   const anomP = precipitationAnomaly(activeObs.p, refP.mean);
+  const baseIndicators = stressIndicators(baseObs, { t: refT, p: refP, sm: refS });
+  const baseIeaResult = experimentalStressIndex(baseIndicators);
   const indicators = stressIndicators(activeObs, { t: refT, p: refP, sm: refS });
   const ieaResult = experimentalStressIndex(indicators);
 
@@ -212,6 +214,8 @@ export function evaluateTerritoryMetrics(monthlyRows = [], weather = {}, { month
     tempScale,
     isScenario: Boolean(scenario && (scenario.deltaT || scenario.deltaPPercent)),
     refs: { t: refT, p: refP, sm: refS },
+    baseObserved: baseObs,
+    baseIea: baseIeaResult.iea,
     observed: activeObs,
     anomalies: { tempC: anomT, precipAbs: anomP.abs, precipPct: anomP.pct },
     indicators,

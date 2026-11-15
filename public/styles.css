@@ -7,9 +7,9 @@
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
 .layers,.inspector{min-width:0}.inspector>*{min-width:0}.resolution-note p{min-width:0}.map-panel{overflow:hidden}
 @media(max-width:580px){.workspace{grid-template-columns:minmax(0,1fr)}.inspector{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.forecast-panel{margin-top:20px;border:1px solid #3a5149;border-radius:8px;background:linear-gradient(125deg,#14231f55,#101922 65%);padding:24px 25px 0;overflow:hidden}.forecast-heading{display:flex;justify-content:space-between;align-items:center;gap:15px;margin:22px 0 17px}.forecast-heading>div{display:flex;align-items:center;gap:13px;flex-wrap:wrap}.forecast-heading strong{font:500 14px var(--display)}.forecast-heading>div>span:last-child,.forecast-heading>a{font-size:10px;color:var(--muted)}.forecast-heading>a{white-space:nowrap}.forecast-badge{font-size:8px;letter-spacing:1px;padding:6px 8px;border:1px solid #62c9ed44;color:var(--blue);border-radius:3px}.forecast-status{font-size:12px;color:var(--muted);line-height:1.7;padding:12px;border:1px solid var(--line);border-radius:5px}.forecast-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:9px;margin-bottom:19px}.forecast-day{border:1px solid var(--line);border-radius:5px;padding:14px 8px;background:#0c151d;display:flex;flex-direction:column;align-items:center;min-width:0}.forecast-day.selected{border-color:#c3f77a77;background:#c3f77a08}.forecast-day:hover{border-color:var(--muted)}.forecast-weekday{font-size:8px;letter-spacing:1px;color:var(--muted)}.forecast-date{font-size:11px;margin-top:5px}.forecast-symbol{font-size:28px;color:var(--blue);line-height:1.2;margin:10px 0}.forecast-day strong{font:500 27px var(--display);letter-spacing:-1px}.forecast-day>small{font-size:10px;color:var(--muted);margin-top:3px}.forecast-day-sub{font-size:8px;color:var(--muted);text-align:center;margin-top:11px;line-height:1.5;min-height:24px}.forecast-detail{background:#0a131b70;border:1px solid var(--line);border-radius:5px;padding:18px}.forecast-detail:empty{display:none}.forecast-detail-top{display:flex;justify-content:space-between;align-items:center;gap:12px}.forecast-detail-top>span:last-child{font-size:9px;color:var(--muted)}.forecast-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:20px 15px;margin:20px 0}.forecast-metrics>div{display:flex;flex-direction:column;gap:8px}.forecast-metrics>div>span{font-size:10px;color:var(--muted)}.forecast-metrics strong{font:500 21px var(--display)}.forecast-metrics small{font:10px var(--font);color:var(--muted)}.ensemble-note{display:flex;gap:12px;border-top:1px solid var(--line);padding-top:13px}.ensemble-note>span{color:var(--blue);font-size:26px}.ensemble-note p{font-size:10px;color:var(--muted);line-height:1.8;margin:0}.ensemble-note strong{color:var(--blue);font-weight:500}.forecast-unit-note{font-size:9px;color:var(--muted);line-height:1.8;margin:13px 0 0}.forecast-footer{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:14px 0}.forecast-footer p{font-size:9px;color:var(--muted);line-height:1.8;margin:0}.text-button{font-size:10px;color:var(--accent);white-space:nowrap}.forecast-panel>.science-note{margin-top:0}
+.forecast-panel{margin-top:20px;border:1px solid #3a5149;border-radius:8px;background:linear-gradient(125deg,#14231f55,#101922 65%);padding:24px 25px 0;overflow:hidden}.forecast-heading{display:flex;justify-content:space-between;align-items:center;gap:15px;margin:22px 0 17px}.forecast-heading>div{display:flex;align-items:center;gap:13px;flex-wrap:wrap}.forecast-heading strong{font:500 14px var(--display)}.forecast-heading>div>span:last-child,.forecast-heading>a{font-size:10px;color:var(--muted)}.forecast-heading>a{white-space:nowrap}.forecast-badge{font-size:8px;letter-spacing:1px;padding:6px 8px;border:1px solid #62c9ed44;color:var(--blue);border-radius:3px}.forecast-status{font-size:12px;color:var(--muted);line-height:1.7;padding:12px;border:1px solid var(--line);border-radius:5px}.forecast-days{display:flex;flex-direction:column;gap:16px;margin-bottom:19px}.forecast-day{border:1px solid var(--line);border-radius:5px;padding:14px 8px;background:#0c151d;display:flex;flex-direction:column;align-items:center;min-width:0}.forecast-day.selected{border-color:#c3f77a77;background:#c3f77a08}.forecast-day:hover{border-color:var(--muted)}.forecast-weekday{font-size:8px;letter-spacing:1px;color:var(--muted)}.forecast-date{font-size:11px;margin-top:5px}.forecast-symbol{font-size:28px;color:var(--blue);line-height:1.2;margin:10px 0}.forecast-day strong{font:500 27px var(--display);letter-spacing:-1px}.forecast-day>small{font-size:10px;color:var(--muted);margin-top:3px}.forecast-day-sub{font-size:8px;color:var(--muted);text-align:center;margin-top:11px;line-height:1.5;min-height:24px}.forecast-detail{background:#0a131b70;border:1px solid var(--line);border-radius:5px;padding:18px}.forecast-detail:empty{display:none}.forecast-detail-top{display:flex;justify-content:space-between;align-items:center;gap:12px}.forecast-detail-top>span:last-child{font-size:9px;color:var(--muted)}.forecast-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:20px 15px;margin:20px 0}.forecast-metrics>div{display:flex;flex-direction:column;gap:8px}.forecast-metrics>div>span{font-size:10px;color:var(--muted)}.forecast-metrics strong{font:500 21px var(--display)}.forecast-metrics small{font:10px var(--font);color:var(--muted)}.ensemble-note{display:flex;gap:12px;border-top:1px solid var(--line);padding-top:13px}.ensemble-note>span{color:var(--blue);font-size:26px}.ensemble-note p{font-size:10px;color:var(--muted);line-height:1.8;margin:0}.ensemble-note strong{color:var(--blue);font-weight:500}.forecast-unit-note{font-size:9px;color:var(--muted);line-height:1.8;margin:13px 0 0}.forecast-footer{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:14px 0}.forecast-footer p{font-size:9px;color:var(--muted);line-height:1.8;margin:0}.text-button{font-size:10px;color:var(--accent);white-space:nowrap}.forecast-panel>.science-note{margin-top:0}
 @media(max-width:850px){.forecast-days{gap:5px}.forecast-day{padding:12px 4px}.forecast-day strong{font-size:22px}.forecast-weekday{font-size:7px;letter-spacing:.3px}.forecast-metrics{grid-template-columns:repeat(3,1fr)}.forecast-heading>div{gap:10px}.forecast-detail-top{align-items:start}.forecast-detail-top>span:last-child{font-size:8px;max-width:130px;text-align:right}}
-@media(max-width:580px){.forecast-panel{padding:20px 15px 0}.forecast-panel .history-heading{flex-wrap:wrap}.forecast-panel h2{font-size:23px;max-width:100%}.forecast-heading{align-items:start}.forecast-heading>div{gap:8px}.forecast-heading strong{font-size:13px}.forecast-heading>div>span:last-child{font-size:9px}.forecast-heading>a{font-size:9px}.forecast-days{display:flex;overflow-x:auto;gap:8px;padding-bottom:9px;scroll-snap-type:x mandatory}.forecast-day{flex:0 0 110px;padding:13px 7px;scroll-snap-align:start}.forecast-weekday{font-size:9px}.forecast-day strong{font-size:28px}.forecast-day-sub{font-size:9px}.forecast-metrics{grid-template-columns:repeat(2,1fr);gap:19px 12px}.forecast-metrics strong{font-size:23px}.forecast-metrics>div>span{font-size:10px}.forecast-detail{padding:14px}.forecast-detail-top{flex-direction:column}.forecast-detail-top>span:last-child{max-width:none;font-size:9px}.ensemble-note p,.forecast-unit-note{font-size:10px}.forecast-footer{flex-direction:column;align-items:start}.forecast-footer p{font-size:10px}.forecast-panel>.science-note{margin-left:-15px;margin-right:-15px}.forecast-panel .history-heading>.outline-button{margin-top:5px}}
+@media(max-width:580px){.forecast-panel{padding:20px 15px 0}.forecast-panel .history-heading{flex-wrap:wrap}.forecast-panel h2{font-size:23px;max-width:100%}.forecast-heading{align-items:start}.forecast-heading>div{gap:8px}.forecast-heading strong{font-size:13px}.forecast-heading>div>span:last-child{font-size:9px}.forecast-heading>a{font-size:9px}.forecast-days{display:flex;flex-direction:column;gap:14px}.forecast-day{flex:0 0 110px;padding:13px 7px;scroll-snap-align:start}.forecast-weekday{font-size:9px}.forecast-day strong{font-size:28px}.forecast-day-sub{font-size:9px}.forecast-metrics{grid-template-columns:repeat(2,1fr);gap:19px 12px}.forecast-metrics strong{font-size:23px}.forecast-metrics>div>span{font-size:10px}.forecast-detail{padding:14px}.forecast-detail-top{flex-direction:column}.forecast-detail-top>span:last-child{max-width:none;font-size:9px}.ensemble-note p,.forecast-unit-note{font-size:10px}.forecast-footer{flex-direction:column;align-items:start}.forecast-footer p{font-size:10px}.forecast-panel>.science-note{margin-left:-15px;margin-right:-15px}.forecast-panel .history-heading>.outline-button{margin-top:5px}}
 /* Interactive & visual polish */
 .topbar{backdrop-filter:blur(12px);background:#0a1016d9}
 .forecast-day{transition:transform .22s cubic-bezier(.22,1,.36,1),border-color .22s ease,background .22s ease,box-shadow .22s ease}
@@ -44,11 +44,21 @@ dialog[open]{animation:dialogIn .28s cubic-bezier(.22,1,.36,1) both}
 .ep-metrics span{font-size:8.5px;letter-spacing:.9px;color:var(--muted)}
 .ep-metrics strong{font:500 18px var(--display);color:var(--accent)}
 .ep-metrics small{font-size:9.5px;color:#93a6b3}
-.ep-scenario{display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px;margin:0 0 16px;padding:12px 14px;border:1px solid #62c9ed33;border-radius:6px;background:#0a1621a8}
-.ep-scenario>div{flex:1 1 220px;display:flex;flex-direction:column;gap:4px}
-.ep-scenario>div small{font-size:10px;color:var(--muted);line-height:1.5}
-.ep-scenario label{display:flex;flex-direction:column;gap:5px;font-size:10px;color:var(--text);min-width:130px}
-.ep-scenario label strong{color:var(--blue);font-family:var(--display);font-weight:500}
+.ep-scenario{display:flex;flex-direction:column;gap:12px;margin:0 0 16px;padding:14px 16px;border:1px solid #62c9ed33;border-radius:6px;background:#0a1621a8}
+.ep-scenario-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.ep-scenario-head p{margin:4px 0 0;font-size:10.5px;color:#b4c5ce;line-height:1.5;max-width:760px}
+.ep-scenario-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.ep-slider-card{display:flex;flex-direction:column;gap:6px;padding:11px 13px;background:#09121a99;border:1px solid #253646;border-radius:5px}
+.ep-slider-top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:10.5px;color:var(--text)}
+.ep-slider-top strong{color:var(--blue);font-family:var(--display);font-weight:600;font-size:13px}
+.ep-sim-readout{font-size:10.5px;color:#d6e4ec;font-family:var(--font)}
+.ep-sim-readout b{color:var(--accent);font-weight:600}
+.ep-slider-card small{font-size:9.5px;color:var(--muted);line-height:1.45}
+.ep-sim-summary{margin:0;padding-top:10px;border-top:1px solid #253646;font-size:10.5px;color:#c9d6de;line-height:1.5}
+.ep-sim-summary b.is-active{color:var(--accent)}
+.ep-explainer{margin:0 0 12px;padding:12px 14px;border:1px solid #304452;border-radius:6px;background:#0b151ecc}
+.ep-explainer p{margin:0;font-size:11px;line-height:1.6;color:#c5d3db}
+.ep-scale-note{font-size:9px;color:#8297a6;line-height:1.4;margin-top:2px}
 .ep-note{margin:12px 0 0;font-size:9.5px;color:var(--muted);line-height:1.6}
 .calc-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
 .calc-grid>div{background:#0c151d;border:1px solid var(--line);border-radius:6px;padding:13px 14px;display:flex;flex-direction:column;gap:5px;min-width:0}
@@ -70,4 +80,39 @@ dialog[open]{animation:dialogIn .28s cubic-bezier(.22,1,.36,1) both}
 .sticky-kicker{font-size:9px;letter-spacing:1.4px;font-weight:600;color:var(--accent);white-space:nowrap}
 .sticky-territory-bar select{padding:6px 10px;font-size:12px;border-color:#2c3b48;background:#101b24}
 .sticky-territory-bar select.has-selection{border-color:#c3f77a66;color:var(--accent)}
-@media(max-width:850px){.calc-grid{grid-template-columns:1fr}.sticky-territory-bar{margin:8px -8px 4px;padding:8px 10px}}
+.forecast-chart-box{background:#0b131bb8;border:1px solid var(--line);border-radius:6px;padding:14px 16px 10px}
+.forecast-chart-head{display:flex;justify-content:space-between;align-items:center;gap:10px 16px;flex-wrap:wrap;margin-bottom:8px}
+.forecast-chart-head>div:first-child{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.fc-legend{display:inline-flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);flex-wrap:wrap}
+.fc-legend i{display:inline-block;width:12px;height:2px;background:var(--accent)}
+.fc-legend b{display:inline-block;width:10px;height:8px;border-radius:2px;margin-left:6px}
+.fc-legend b.band{background:#62c9ed33;border:1px dashed #62c9ed99}
+.fc-legend b.ens{background:#f5b9422e;border:1px dashed #f5b94299}
+.forecast-var-pills{display:flex;flex-wrap:wrap;gap:6px}
+.forecast-var-pills button{font-size:10px;padding:5px 9px;border-radius:4px;border:1px solid var(--line);color:var(--muted);background:#0e1720;transition:border-color .18s,color .18s,background .18s}
+.forecast-var-pills button:hover{color:var(--text);border-color:var(--muted)}
+.forecast-var-pills button.selected{color:var(--accent);border-color:#c3f77a77;background:#c3f77a12}
+#forecast-chart{display:block;width:100%;height:auto;max-height:240px;overflow:visible}
+.forecast-days-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:9px}
+.forecast-day-card{border:1px solid var(--line);border-radius:6px;padding:12px 10px;background:#0c151d;display:flex;flex-direction:column;gap:8px;min-width:0}
+.forecast-day-head{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
+.forecast-day-head>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.forecast-day-card .forecast-symbol{font-size:18px;margin:0;line-height:1}
+.forecast-day-focus{padding:6px 0 8px;border-bottom:1px solid #1e2b36;display:flex;flex-direction:column;gap:2px}
+.forecast-day-focus strong{font:500 20px var(--display);color:var(--text);letter-spacing:-.5px}
+.forecast-day-focus strong small{font:400 10.5px var(--font);color:var(--muted)}
+.forecast-day-card .forecast-day-sub{margin:0;text-align:left;min-height:0;font-size:9px}
+.forecast-day-metrics{margin:0;display:flex;flex-direction:column;gap:4px;font-size:9.5px}
+.forecast-day-metrics>div{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+.forecast-day-metrics dt{color:var(--muted)}
+.forecast-day-metrics dd{margin:0;color:#dce6ec;font-weight:500;text-align:right}
+.forecast-day-metrics dd small{color:var(--muted);font-weight:400}
+.forecast-synthesis{margin:12px 0 14px;font-size:12px;line-height:1.65;color:#dbe6ed}
+.forecast-analysis-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 16px}
+.forecast-analysis-grid>div{background:#0c151dc4;border:1px solid var(--line);border-radius:5px;padding:11px 12px;display:flex;flex-direction:column;gap:4px}
+.forecast-analysis-grid span{font-size:8.5px;letter-spacing:.9px;color:var(--muted)}
+.forecast-analysis-grid strong{font:500 17px var(--display);color:var(--accent)}
+.forecast-analysis-grid small{font-size:9.5px;color:#9fb1be;line-height:1.45}
+@media(max-width:1180px){.forecast-days-grid{grid-template-columns:repeat(auto-fit,minmax(175px,1fr))}.forecast-analysis-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:850px){.calc-grid,.ep-scenario-grid{grid-template-columns:1fr}.sticky-territory-bar{margin:8px -8px 4px;padding:8px 10px}}
+@media(max-width:580px){.forecast-analysis-grid{grid-template-columns:1fr}}

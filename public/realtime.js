@@ -1,6 +1,6 @@
 import {loadHistory} from './data-client.js';
 import {publishWeather,readWeather} from './weather-state.js';
-import {buildRecommendations,nearestSite} from './recommendations.js';
+import {buildRecommendations} from './recommendations.js';
 import {getLang,locale,tx} from './i18n.js';
 
 const section=document.createElement('section');section.id='tiempo-actual';section.className='forecast-panel current-panel';
@@ -102,37 +102,76 @@ mountExtras();
 const monthlyCache=new Map(),scenario={deltaT:0,deltaPPercent:0};
 async function loadMonthly(id){try{return (await loadHistory(id)).monthly;}catch{return null;}}
 const fmtNum=(n,d=2)=>Number.isFinite(n)?new Intl.NumberFormat(locale(),{maximumFractionDigits:d,signDisplay:'exceptZero'}).format(n):'—';
+const fmtPlain=(n,d=1)=>Number.isFinite(n)?new Intl.NumberFormat(locale(),{minimumFractionDigits:d,maximumFractionDigits:d}).format(n):'—';
 
-async function renderRecs(result){
+function renderEpMetricsInner(metrics,scaleTag){
+  const monthName=new Intl.DateTimeFormat(locale(),{month:'long',timeZone:'UTC'}).format(new Date(Date.UTC(2025,(metrics.month||1)-1,15)));
+  return `<div><span>${tx('EXPERIMENTAL IEA','IEA EXPERIMENTAL')}</span><strong>${Number.isFinite(metrics.iea)?metrics.iea.toFixed(2):'—'}</strong><small>${metrics.ieaLevel} · ${metrics.activeIndicators} ${tx('indicators','indicadores')}</small><span class="ep-scale-note">${tx('Average of thermal (Iₜ), rain-deficit (Iₚ) & dry-soil (Iₛ) Z-scores; ≥ 0.35 indicates stress.','Promedio de Z-scores de calor (Iₜ), déficit de lluvia (Iₚ) y suelo seco (Iₛ); ≥ 0,35 indica estrés.')}</span></div>`
+    +`<div><span>${tx('THERMAL ANOMALY (Aₜ)','ANOMALÍA TÉRMICA (Aₜ)')}</span><strong>${fmtNum(metrics.anomalies.tempC,1)} °C</strong><small>${tx(`Active ${fmtPlain(metrics.observed.t,1)} °C vs. ${monthName} norm ${fmtPlain(metrics.refs.t.mean,1)} °C · Z = ${fmtNum(metrics.indicators.I_T,2)}`,`Activo ${fmtPlain(metrics.observed.t,1)} °C vs. normal de ${monthName} (${fmtPlain(metrics.refs.t.mean,1)} °C) · Z = ${fmtNum(metrics.indicators.I_T,2)}`)}</small><span class="ep-scale-note">${scaleTag}</span></div>`
+    +`<div><span>${tx('RAINFALL ANOMALY (Aₚ%)','ANOMALÍA LLUVIA (Aₚ%)')}</span><strong>${Number.isFinite(metrics.anomalies.precipPct)?fmtNum(metrics.anomalies.precipPct,0)+' %':fmtNum(metrics.anomalies.precipAbs,2)+' mm/d'}</strong><small>${tx(`Active ${fmtPlain(metrics.observed.p,2)} vs. NASA avg ${fmtPlain(metrics.refs.p.mean,2)} mm/d · Iₚ = ${fmtNum(metrics.indicators.I_P,2)} · Iₛ = ${fmtNum(metrics.indicators.I_S,2)}`,`Activo ${fmtPlain(metrics.observed.p,2)} vs. prom. NASA ${fmtPlain(metrics.refs.p.mean,2)} mm/d · Iₚ = ${fmtNum(metrics.indicators.I_P,2)} · Iₛ = ${fmtNum(metrics.indicators.I_S,2)}`)}</small><span class="ep-scale-note">${tx(`NASA ${metrics.historyYear} vs 2001–2025 · Iₚ > 0 means drier than usual`,`NASA ${metrics.historyYear} vs 2001–2025 · Iₚ > 0 indica menos lluvia de lo normal`)}</span></div>`
+    +`<div><span>${tx('CORRELATION r(T, P)','CORRELACIÓN r(T, P)')}</span><strong>${Number.isFinite(metrics.pearsonTP)?metrics.pearsonTP.toFixed(2):'—'}</strong><small>${tx('Month-to-month relationship between temperature and rain (2001–2025)','Relación histórica mes a mes entre temperatura y lluvia (2001–2025)')}</small><span class="ep-scale-note">${tx('r < 0: drier years for this month tend to be warmer · not causation','r < 0: meses más secos suelen ser más cálidos · no implica causalidad')}</span></div>`;
+}
+
+function simSummaryHtml(metrics){
+  const deltaIea=Number.isFinite(metrics.iea)&&Number.isFinite(metrics.baseIea)?metrics.iea-metrics.baseIea:null;
+  const dtReadout=tx(
+    `Base: ${fmtPlain(metrics.baseObserved?.t,1)} °C → Simulated: <b>${fmtPlain(metrics.observed.t,1)} °C</b> (NASA norm: ${fmtPlain(metrics.refs.t.mean,1)} °C)`,
+    `Base: ${fmtPlain(metrics.baseObserved?.t,1)} °C → Simulado: <b>${fmtPlain(metrics.observed.t,1)} °C</b> (Normal NASA: ${fmtPlain(metrics.refs.t.mean,1)} °C)`
+  );
+  const dpReadout=tx(
+    `Base: ${fmtPlain(metrics.baseObserved?.p,2)} mm/d → Simulated: <b>${fmtPlain(metrics.observed.p,2)} mm/d</b> (NASA norm: ${fmtPlain(metrics.refs.p.mean,2)} mm/d)`,
+    `Base: ${fmtPlain(metrics.baseObserved?.p,2)} mm/d → Simulado: <b>${fmtPlain(metrics.observed.p,2)} mm/d</b> (Normal NASA: ${fmtPlain(metrics.refs.p.mean,2)} mm/d)`
+  );
+  const summary=tx(
+    `<strong>Simulated effect:</strong> Base IEA ${fmtPlain(metrics.baseIea,2)} → Simulated IEA <b class="${metrics.isScenario?'is-active':''}">${fmtPlain(metrics.iea,2)}</b>${deltaIea!==null?` (shift ${fmtNum(deltaIea,2)} · ${metrics.ieaLevel})`:''}. Soil moisture Iₛ stays at its latest NASA record (${fmtPlain(metrics.observed.sm,2)} index); recommendation cards below update live.`,
+    `<strong>Efecto simulado:</strong> IEA base ${fmtPlain(metrics.baseIea,2)} → IEA simulado <b class="${metrics.isScenario?'is-active':''}">${fmtPlain(metrics.iea,2)}</b>${deltaIea!==null?` (cambio ${fmtNum(deltaIea,2)} · ${metrics.ieaLevel})`:''}. La humedad del suelo Iₛ se mantiene en su último cierre NASA (${fmtPlain(metrics.observed.sm,2)} índice); los consejos de abajo se recalculan al instante.`
+  );
+  return {dtReadout,dpReadout,summary};
+}
+
+async function renderRecs(result,{fromSlider=false}={}){
   if(!result)return;
   const monthly=await loadMonthly(result.site);
   if(site!==result.site)return;
   const forecastDays=readWeather('forecast',result.site)?.days||[];
   const {profile,metrics,tips}=buildRecommendations(result.site,result,forecastDays,{monthly,scenario:(scenario.deltaT||scenario.deltaPPercent)?scenario:null,lang:getLang()});
   const scaleTag=metrics?(metrics.tempScale==='daily-24h'
-    ?tx('24h daily mean vs 2001–2025','Media diaria 24 h vs 2001–2025')
+    ?tx('Uses 24h forecast mean vs. 24h NASA baseline (aligned scales)','Usa media diaria de 24 h vs. línea base NASA de 24 h (escalas alineadas)')
     :metrics.tempScale==='instant'
-      ?tx('Instant reading vs 24h mean','Lectura puntual vs media 24 h')
+      ?tx('Instant reading vs. 24h monthly mean','Lectura puntual vs. media mensual de 24 h')
       :tx(`NASA ${metrics.historyYear} vs 2001–2025`,`NASA ${metrics.historyYear} vs 2001–2025`)):'';
-  const epHtml=metrics?`<div class="ep-metrics"><div><span>${tx('EXPERIMENTAL IEA','IEA EXPERIMENTAL')}</span><strong>${Number.isFinite(metrics.iea)?metrics.iea.toFixed(2):'—'}</strong><small>${metrics.ieaLevel} · ${metrics.activeIndicators} ${tx('indicators','indicadores')}</small></div><div><span>${tx('THERMAL ANOMALY (Aₜ)','ANOMALÍA TÉRMICA (Aₜ)')}</span><strong>${fmtNum(metrics.anomalies.tempC,1)} °C</strong><small>${tx('Month','Mes')} ${metrics.month} · Z = ${fmtNum(metrics.indicators.I_T,2)}</small><span class="ep-scale-note">${scaleTag}</span></div><div><span>${tx('RAINFALL ANOMALY (Aₚ%)','ANOMALÍA LLUVIA (Aₚ%)')}</span><strong>${Number.isFinite(metrics.anomalies.precipPct)?fmtNum(metrics.anomalies.precipPct,0)+' %':fmtNum(metrics.anomalies.precipAbs,2)+' mm/d'}</strong><small>Iₚ = ${fmtNum(metrics.indicators.I_P,2)} · Iₛ = ${fmtNum(metrics.indicators.I_S,2)}</small><span class="ep-scale-note">${tx(`NASA closure ${metrics.historyYear} vs 2001–2025`,`Cierre NASA ${metrics.historyYear} vs 2001–2025`)}</span></div><div><span>${tx('CORRELATION r(T, P)','CORRELACIÓN r(T, P)')}</span><strong>${Number.isFinite(metrics.pearsonTP)?metrics.pearsonTP.toFixed(2):'—'}</strong><small>${tx('Monthly association · not causation','Asociación mensual · no implica causalidad')}</small></div></div>
-  <div class="ep-scenario"><div><span class="eyebrow">${tx('SCENARIO SIMULATOR (EARTH PULSE)','SIMULADOR DE ESCENARIOS (EARTH PULSE)')}</span><small>${tx('Adjust ΔT and ΔP to recompute anomalies, IEA stress, and advice against the same monthly historical baseline.','Ajustá ΔT y ΔP para recalcular anomalías, IEA y consejos usando la misma referencia histórica del mes.')}</small></div><label>ΔT: <strong id="sc-dt-val">${fmtNum(scenario.deltaT,1)} °C</strong><input id="sc-dt" type="range" min="-3" max="4" step="0.5" value="${scenario.deltaT}"></label><label>ΔP: <strong id="sc-dp-val">${fmtNum(scenario.deltaPPercent,0)} %</strong><input id="sc-dp" type="range" min="-50" max="80" step="10" value="${scenario.deltaPPercent}"></label><button type="button" id="sc-reset" class="text-button">${tx('Reset','Restablecer')}</button></div>`:'';
 
-  recSection.innerHTML=`<div class="rec-head"><div><span class="eyebrow">${tx('ECOLOGICAL & CLIMATE ENGINE · EARTH PULSE','MOTOR ECOLÓGICO Y CLIMÁTICO · EARTH PULSE')}</span><h3>${result.name} · ${profile.zone}</h3></div><button type="button" id="rec-locate" class="outline-button">${tx('📍 Detect my location','📍 Detectar mi ubicación')}</button></div>${epHtml}<div class="rec-grid">${tips.map(t=>`<article class="rec-card tone-${t.tone}"><span>${t.tag}</span><strong>${t.title}</strong><p>${t.body}</p></article>`).join('')}</div>${metrics?`<p class="ep-note">${metrics.ieaNote} ${tx('Simple hypothetical scenarios: they do not by themselves predict real ecosystem responses.','Escenarios hipotéticos sencillos: no predicen por sí solos la respuesta real del ecosistema.')}</p>`:''}`;
-  recSection.querySelector('#sc-dt')?.addEventListener('input',e=>{scenario.deltaT=+e.target.value;renderRecs(result);});
-  recSection.querySelector('#sc-dp')?.addEventListener('input',e=>{scenario.deltaPPercent=+e.target.value;renderRecs(result);});
+  if(fromSlider&&metrics&&recSection.querySelector('#ep-metrics-slot')){
+    const {dtReadout,dpReadout,summary}=simSummaryHtml(metrics);
+    recSection.querySelector('#ep-metrics-slot').innerHTML=renderEpMetricsInner(metrics,scaleTag);
+    const dtVal=recSection.querySelector('#sc-dt-val');if(dtVal)dtVal.textContent=`${fmtNum(scenario.deltaT,1)} °C`;
+    const dpVal=recSection.querySelector('#sc-dp-val');if(dpVal)dpVal.textContent=`${fmtNum(scenario.deltaPPercent,0)} %`;
+    const dtOut=recSection.querySelector('#ep-dt-readout');if(dtOut)dtOut.innerHTML=dtReadout;
+    const dpOut=recSection.querySelector('#ep-dp-readout');if(dpOut)dpOut.innerHTML=dpReadout;
+    const simOut=recSection.querySelector('#ep-sim-summary');if(simOut)simOut.innerHTML=summary;
+    const recGrid=recSection.querySelector('.rec-grid');if(recGrid)recGrid.innerHTML=tips.map(t=>`<article class="rec-card tone-${t.tone}"><span>${t.tag}</span><strong>${t.title}</strong><p>${t.body}</p></article>`).join('');
+    return;
+  }
+
+  let epHtml='';
+  if(metrics){
+    const monthName=new Intl.DateTimeFormat(locale(),{month:'long',timeZone:'UTC'}).format(new Date(Date.UTC(2025,(metrics.month||1)-1,15)));
+    const {dtReadout,dpReadout,summary}=simSummaryHtml(metrics);
+    epHtml=`<div class="ep-explainer"><p>${tx(
+      `<strong>What are you seeing?</strong> Earth Pulse compares ${result.name}'s current thermal and moisture state against its own historical NASA POWER average for <b>${monthName} (2001–2025)</b>. Each indicator is expressed as a <b>Z-score</b> (standard deviations away from normal for this month) and averaged into the <b>IEA</b>: values &lt; 0 indicate cool/wet surplus, −0.35 to +0.35 normal conditions, +0.35 to +0.99 moderate stress, and ≥ 1.00 elevated stress.`,
+      `<strong>¿Qué estás viendo aquí?</strong> Earth Pulse compara las condiciones actuales de ${result.name} contra su propio promedio histórico NASA POWER para <b>${monthName} (2001–2025)</b>. Cada indicador se expresa como <b>Z-score</b> (cuántas desviaciones estándar se aleja de lo habitual en este mes) y se resume en el <b>IEA</b>: &lt; 0 indica holgura fresca/húmeda, −0,35 a +0,35 rango habitual, +0,35 a +0,99 estrés moderado y ≥ 1,00 estrés elevado.`
+    )}</p></div>`
+    +`<div id="ep-metrics-slot" class="ep-metrics">${renderEpMetricsInner(metrics,scaleTag)}</div>`
+    +`<div class="ep-scenario"><div class="ep-scenario-head"><div><span class="eyebrow">${tx('SCENARIO SIMULATOR (WHAT IF…?)','SIMULADOR DE ESCENARIOS (¿QUÉ PASARÍA SI…?)')}</span><p>${tx('These sliders do not alter real data: they apply hypothetical shifts to test how the territory\'s thermal anomaly, rainfall anomaly, IEA stress index, and recommendations respond against the same historical baseline for this month.','Estos controles no alteran datos reales: aplican variaciones hipotéticas para explorar cómo responderían las anomalías, el índice de estrés IEA y los consejos usando la misma línea base histórica del mes.')}</p></div><button type="button" id="sc-reset" class="text-button">${tx('↻ Reset to real baseline','↻ Restablecer datos base')}</button></div>`
+    +`<div class="ep-scenario-grid"><label class="ep-slider-card"><div class="ep-slider-top"><span>${tx('ΔT · Hypothetical temperature shift','ΔT · Cambio hipotético de temperatura')}</span><strong id="sc-dt-val">${fmtNum(scenario.deltaT,1)} °C</strong></div><input id="sc-dt" type="range" min="-3" max="4" step="0.5" value="${scenario.deltaT}"><span id="ep-dt-readout" class="ep-sim-readout">${dtReadout}</span><small>${tx('Adds or subtracts °C relative to the current 24h thermal reference to simulate heatwaves (+) or cooler periods (−), shifting Z-score Iₜ.','Suma o resta °C sobre la referencia térmica actual de 24 h para probar olas de calor (+) o enfriamiento (−), ajustando el Z-score Iₜ.')}</small></label>`
+    +`<label class="ep-slider-card"><div class="ep-slider-top"><span>${tx('ΔP · Hypothetical monthly rain change','ΔP · Variación porcentual de lluvia')}</span><strong id="sc-dp-val">${fmtNum(scenario.deltaPPercent,0)} %</strong></div><input id="sc-dp" type="range" min="-50" max="80" step="10" value="${scenario.deltaPPercent}"><span id="ep-dp-readout" class="ep-sim-readout">${dpReadout}</span><small>${tx('Scales the latest NASA monthly rainfall rate (mm/day) by percentage: negative values test drought stress and positive values test wet excess (Iₚ).','Escala por porcentaje la tasa diaria de lluvia del cierre NASA (mm/día): valores negativos simulan sequía y positivos exceso hídrico (Iₚ).')}</small></label></div>`
+    +`<p id="ep-sim-summary" class="ep-sim-summary">${summary}</p></div>`;
+  }
+
+  recSection.innerHTML=`<div class="rec-head"><div><span class="eyebrow">${tx('ECOLOGICAL & CLIMATE ENGINE · EARTH PULSE','MOTOR ECOLÓGICO Y CLIMÁTICO · EARTH PULSE')}</span><h3>${result.name} · ${profile.zone}</h3></div></div>${epHtml}<div class="rec-grid">${tips.map(t=>`<article class="rec-card tone-${t.tone}"><span>${t.tag}</span><strong>${t.title}</strong><p>${t.body}</p></article>`).join('')}</div>${metrics?`<p class="ep-note">${metrics.ieaNote} ${tx('Simple hypothetical scenarios: they do not by themselves predict real ecosystem responses.','Escenarios hipotéticos sencillos: no predicen por sí solos la respuesta real del ecosistema.')}</p>`:''}`;
+  recSection.querySelector('#sc-dt')?.addEventListener('input',e=>{scenario.deltaT=+e.target.value;renderRecs(result,{fromSlider:true});});
+  recSection.querySelector('#sc-dp')?.addEventListener('input',e=>{scenario.deltaPPercent=+e.target.value;renderRecs(result,{fromSlider:true});});
   recSection.querySelector('#sc-reset')?.addEventListener('click',()=>{scenario.deltaT=0;scenario.deltaPPercent=0;renderRecs(result);});
-  recSection.querySelector('#rec-locate').onclick=()=>{
-    const b=recSection.querySelector('#rec-locate');
-    if(!navigator.geolocation){b.textContent=tx('GPS unavailable','GPS no disponible');return;}
-    b.textContent=tx('Locating…','Ubicando…');
-    navigator.geolocation.getCurrentPosition(async pos=>{
-      try{
-        const sites=(await (await fetch('data/manifest.json?v=18')).json()).sites;
-        const m=nearestSite(pos.coords.latitude,pos.coords.longitude,sites);
-        if(m){document.dispatchEvent(new CustomEvent('gaiatrack:select-site',{detail:{site:m.site.id}}));b.textContent=`📍 ${m.site.name} (${m.distanceKm.toFixed(1)} km)`;}
-      }catch{b.textContent=tx('📍 Detect my location','📍 Detectar mi ubicación');}
-    },()=>{b.textContent=tx('Permission denied','Permiso denegado');},{timeout:8000});
-  };
 }
 
 document.addEventListener('gaiatrack:weather-data',e=>{
