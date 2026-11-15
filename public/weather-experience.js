@@ -70,10 +70,25 @@ function renderRainStatus(){
     return;
   }
   const known=activeLayers.filter(item=>Number.isFinite(item.normalized.precipitation));
-  const wet=known.filter(item=>item.normalized.precipitation>0).sort((a,b)=>b.normalized.precipitation-a.normalized.precipitation);
-  const title=!known.length?tx('Querying precipitation…','Consultando precipitación…'):wet.length?tx(`Rain reported · ${wet.length} points`,`Lluvia reportada · ${wet.length} puntos`):tx('No precipitation reported','Sin precipitación reportada');
+  const wetEntries=[];
+  for(const item of known){
+    const secRaw=readSectors(item.territory.id)||[];
+    const secNorm=secRaw.map(s=>({raw:s,norm:weatherForScene('current',s.site,s)})).filter(x=>x.norm&&Number.isFinite(x.norm.precipitation));
+    if(secNorm.length){
+      const wetSec=secNorm.filter(x=>x.norm.precipitation>0);
+      const maxRate=Math.max(item.normalized.precipitation,...secNorm.map(x=>x.norm.precipitation));
+      if(maxRate>0){
+        const label=wetSec.length?`${item.territory.name} (${wetSec.length}/${secNorm.length} ${tx('sectors','sectores')})`:item.territory.name;
+        wetEntries.push({id:item.territory.id,label,rate:maxRate});
+      }
+    }else if(item.normalized.precipitation>0){
+      wetEntries.push({id:item.territory.id,label:item.territory.name,rate:item.normalized.precipitation});
+    }
+  }
+  const wet=wetEntries.sort((a,b)=>b.rate-a.rate);
+  const title=!known.length?tx('Querying precipitation…','Consultando precipitación…'):wet.length?tx(`Rain reported · ${wet.length} territories`,`Lluvia reportada · ${wet.length} territorios`):tx('No precipitation reported','Sin precipitación reportada');
   const stamp=known.length?new Date(Math.max(...known.map(item=>Date.parse(item.raw.observedAt)))).toLocaleTimeString(locale(),{timeZone:'America/Costa_Rica',hour:'2-digit',minute:'2-digit'}):'—';
-  rainStatus.innerHTML=`<summary><span class="rain-status-dot ${wet.length?'is-raining':''}"></span><span>${title}</span><span class="rain-status-caret">⌄</span></summary><div class="rain-status-body"><small>${known.length} ${tx('reference points · model valid time','puntos de referencia · hora del modelo')}: ${stamp}</small>${wet.slice(0,6).map(item=>`<button type="button" data-rain-site="${safe(item.territory.id)}"><span>${safe(item.territory.name)}</span><strong>${fmt(item.normalized.precipitation,'mm/h',2)}</strong></button>`).join('')}<p>${tx('Intensity is equivalent to the reported interval. Indicators use point estimates; they are not weather radar.','La intensidad equivale al intervalo reportado. Son indicadores de estimaciones por punto, no un radar meteorológico.')}</p></div>`;
+  rainStatus.innerHTML=`<summary><span class="rain-status-dot ${wet.length?'is-raining':''}"></span><span>${title}</span><span class="rain-status-caret">⌄</span></summary><div class="rain-status-body"><small>${known.length} ${tx('reference points · model valid time','puntos de referencia · hora del modelo')}: ${stamp}</small>${wet.slice(0,6).map(item=>`<button type="button" data-rain-site="${safe(item.id)}"><span>${safe(item.label)}</span><strong>${fmt(item.rate,'mm/h',2)}</strong></button>`).join('')}<p>${tx('Intensity is equivalent to the reported interval. Indicators use point estimates; they are not weather radar.','La intensidad equivale al intervalo reportado. Son indicadores de estimaciones por punto, no un radar meteorológico.')}</p></div>`;
   rainStatus.querySelectorAll('[data-rain-site]').forEach(button=>button.onclick=()=>{rainStatus.open=false;document.dispatchEvent(new CustomEvent('gaiatrack:select-site',{detail:{site:button.dataset.rainSite}}));});
 }
 function refreshLayers(){

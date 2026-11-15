@@ -246,5 +246,5 @@ export function createSkyField(initialDomain,{maxClusters=20,marchSteps=16,showS
     group.userData.cloudCover=appearance.cover;group.userData.sunStrength=appearance.sun;
   }
   setDomain(initialDomain);setWeather({});
-  return {group,layers,sun,halo,setDomain,setOrigin,setWeather,setFlash,animate,get appearance(){return appearance;},get cloudFootprints(){return activeClusters.map(({cluster,cover,rain})=>({...cluster,effectiveRadius:cluster.radius*(.76+.24*cover)*.90,rain}));},get footprint(){return anchor?{...anchor,radius:radius*2.5}:null;}};
+  return {group,layers,sun,halo,setDomain,setOrigin,setWeather,setFlash,animate,get appearance(){return appearance;},get cloudFootprints(){return activeClusters.map(({cluster,cover,rain})=>({...cluster,effectiveRadius:cluster.radius*(.46+.20*cover),rain}));},get footprint(){return anchor?{...anchor,radius:radius*2.5}:null;}};
 }
