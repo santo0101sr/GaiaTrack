@@ -5,6 +5,8 @@ import {siteZSummary} from './earth-pulse.js';
 import {initForecast,updateForecast} from './forecast.js';
 import {getLang,locale,tx,applyStaticI18n} from './i18n.js';
 import {computeAllRisks,driverLabel,fetchLiveRadarTemps,riskColor,riskLevel,RISK_GRADIENT_CSS} from './ecological-risk.js';
+import {validateGaiaAction} from './gaia-actions.js';
+import {resolveLocalRequest,historicalEvidence,summarizeEvidence} from './gaia-guide.js';
 
 const $=s=>document.querySelector(s);
 const rawVariables=[
@@ -656,5 +658,40 @@ async function boot(){
     console.error(e);
     showError(tx('Could not load observatory data. Run npm run data and start GaiaTrack with npm start; do not open index.html directly.','No se pudieron cargar los datos del observatorio. Ejecutá npm run data y abrí GaiaTrack con npm start; no abras index.html directamente.'));
   }
+}
+let gaiaView='3d';
+document.addEventListener('gaiatrack:view',event=>{gaiaView=event.detail.view;});
+export function getGaiaSelection() {
+  return {site:state.site, compareSite:state.compare?state.compareSite:null, variable:state.variable, start:state.start, end:state.end, year:state.year, anomaly:state.anomaly, view:$('#method-dialog')?.open?'method':gaiaView};
+}
+
+export function getGaiaLocalReply(question) {
+  if(!manifest||!annual)return null;
+  const selection=getGaiaSelection();
+  const local=resolveLocalRequest(question,selection,manifest);
+  if(!local)return null;
+  if(local.reply)return {reply:local.reply,actions:[],evidence:[],mode:'local'};
+  const next={...selection,...local.action};
+  const evidence=historicalEvidence(next,manifest,annual);
+  return {reply:summarizeEvidence(next,evidence),actions:[next],evidence,mode:'local'};
+}
+
+export function applyGaiaAction(input) {
+  if (!manifest) throw Error('El observatorio todavía está cargando. Reintentá en un momento.');
+  const action=validateGaiaAction(input,manifest.sites,annual.start,annual.end);
+  const next={...getGaiaSelection(),...action};
+  if(next.start>next.end)throw Error('Período inválido.');
+  stop();
+  Object.assign(state,{site:next.site,variable:next.variable,start:next.start,end:next.end,year:next.year,anomaly:next.anomaly,compare:Boolean(next.compareSite)});
+  if(next.compareSite)state.compareSite=next.compareSite;
+  state.year=Math.max(state.start,Math.min(state.end,state.year));
+  $('#start-year').value=state.start;$('#end-year').value=state.end;
+  $('#compare').checked=state.compare;
+  $('#year-slider').min=state.start;$('#year-slider').max=state.end;
+  $('#year-slider').value=state.year;$('#selected-year').textContent=state.year;
+  for(const [id,active] of [['#annual-view',!state.anomaly],['#anomaly-view',state.anomaly]]){$(id).classList.toggle('selected',active);$(id).setAttribute('aria-pressed',String(active));}
+  setPeriod();
+  if(action.view==='method')showMethod();
+  document.dispatchEvent(new CustomEvent('gaiatrack:assistant-view',{detail:{view:action.view??'trends'}}));
 }
 boot();

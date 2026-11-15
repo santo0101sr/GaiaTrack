@@ -170,7 +170,7 @@ export function applyStaticI18n(){
   });
 
   const footerBrand=document.querySelector('.footer-brand');
-  if(footerBrand)footerBrand.innerHTML=`<span class="cr-flag" aria-hidden="true"></span> Gaia E&amp;B <span>/</span> ${es?'Environment &amp; Benefits · Costa Rica.':'Environment &amp; Benefits · Costa Rica.'}`;
+  if(footerBrand)footerBrand.innerHTML=`<img class="footer-logo" src="assets/gaia-eb-logo.png" alt="Gaia E&amp;B" width="779" height="320"> <span>/</span> ${es?'Environment &amp; Benefits · Costa Rica.':'Environment &amp; Benefits · Costa Rica.'}`;
   setText('#sources-open',es?'Fuentes y limitaciones ↗':'Sources & limitations ↗');
 
   setText('#method-dialog .eyebrow',es?'GAIA E&B / CIENCIA TRANSPARENTE':'GAIA E&B / TRANSPARENT SCIENCE');

@@ -1,5 +1,5 @@
 const stores={current:new Map(),forecast:new Map()};
-export function publishWeather(kind,data){stores[kind].set(data.site,data);document.dispatchEvent(new CustomEvent('gaiatrack:weather-data',{detail:{kind,site:data.site}}));}
+export function publishWeather(kind,data){if(stores[kind].get(data.site)===data)return false;stores[kind].set(data.site,data);document.dispatchEvent(new CustomEvent('gaiatrack:weather-data',{detail:{kind,site:data.site}}));return true;}
 export const readWeather=(kind,site)=>stores[kind].get(site);
 // Current effects expire with the source time, even if a refresh fails.
 export function weatherForScene(kind,site,raw,now=Date.now()){

@@ -1,5 +1,52 @@
 # GaiaTrack — Costa Rica Environmental Observatory
 
+## Preguntale a Gaia — OpenRouter
+
+Copiá `.env.example` a `.env.local` y completá `OPENROUTER_API_KEY` y
+`OPENROUTER_MODEL` con el ID exacto de un modelo compatible con **tool calling**.
+Reiniciá `npm start` después de cambiar la configuración. No requiere instalar paquetes.
+En Vercel, agregá ambas variables al entorno correspondiente y volvé a desplegar.
+La clave permanece en el servidor; nunca la pongás en `public/` ni la subás al repositorio.
+
+El botón “Preguntale a Gaia” permite conversar, seleccionar provincia/cantón,
+comparar dos puntos, elegir variable, período, año, anomalías y abrir tendencias,
+mapa, escena 3D, método, condiciones actuales o pronóstico. Ejemplo:
+“Compará la lluvia entre las provincias de Limón y Guanacaste desde 2010”. Los períodos históricos
+admitidos son 2001–2025. Si falta información, el asistente puede pedirla.
+
+`POST /api/chat` comparte el mismo controlador local y en Vercel. El servidor
+valida las acciones y calcula los resultados con datos reales. Los comandos claros,
+las comparaciones y las preguntas frecuentes se resuelven en el navegador sin usar IA;
+esa guía sigue disponible si el proveedor falla, no hay configuración o se pierde
+la conexión después de cargar el histórico. No implica que la aplicación completa
+funcione sin conexión: los mapas base y el tiempo actual requieren servicios externos.
+
+Las consultas complejas usan **como máximo una llamada a OpenRouter**. El modelo
+elige la selección y la aplicación calcula y redacta el resumen científico sin una
+segunda generación. El catálogo del prompt es compacto y viajan solamente los últimos
+cinco mensajes y la selección. Las series numéricas no se envían al modelo.
+El historial visible está limitado a 24 elementos y la conversación a cinco
+intercambios en memoria; “Nueva” los borra. No se usa localStorage.
+Las respuestas libres de IA pueden contener errores: contrastalas con las fuentes.
+
+El servidor agrupa solicitudes idénticas en curso, permite dos consultas de IA
+simultáneas y conserva hasta 64 respuestas durante cinco minutos (un minuto si
+abren tiempo o pronóstico). La clave del caché incluye el contexto, la selección,
+el modelo y la credencial, mediante un hash; no se comparte por CDN. Un error de
+cuota activa una pausa respetando `Retry-After`; no hay reintentos automáticos ni
+cambio automático a modelos de pago. Los comandos locales siguen disponibles.
+Hay límites de tamaño, tiempo, tokens y 30 mensajes/minuto por cliente en cada proceso.
+Estos controles y el caché **no son globales ni persistentes entre reinicios o réplicas
+de Vercel**. Para alta concurrencia necesitás límites distribuidos en la plataforma.
+La cuota gratuita y la disponibilidad siguen dependiendo de OpenRouter/proveedor.
+
+La escena 3D detiene su ciclo de renderizado mientras está oculta, se abre el
+laboratorio o se oculta la pestaña. En pantallas pequeñas/equipos modestos usa
+menos resolución y desactiva sombras; respeta movimiento reducido. Los datos
+meteorológicos compartidos no vuelven a emitir eventos si son el mismo registro.
+Las pruebas usan respuestas controladas y no consumen créditos; la validación real
+del modelo elegido requiere completar las dos variables.
+
 **Earth-System-Trend-Detective** web observatory built with vanilla ES modules, Leaflet, Three.js WebGL, and Node.js weather APIs for all **7 provinces and 83 cantons of Costa Rica** (90 NASA POWER reference points, 2001–2025).
 
 > **Bilingual interface:** Starts in **English** with an interactive **EN / ES** toggle in the header and 3D HUD.
