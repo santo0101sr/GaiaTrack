@@ -10,7 +10,7 @@ import {siteOptionsHtml,annualValue} from './territories.js';
 import {registerTerritories} from './recommendations.js';
 import {getLang,locale,setLang,tx} from './i18n.js';
 import {computeAllRisks,driverLabel,fetchLiveRadarTemps,riskColor,riskLevel,topRiskCantons,RISK_GRADIENT_CSS} from './ecological-risk.js';
-const host=document.createElement('section');host.id='immersive';host.setAttribute('aria-label',tx('3D exploration of Costa Rica','Exploración tridimensional de Costa Rica'));host.innerHTML=`<div id="world-canvas"></div><div class="scene-vignette"></div><div class="flight-intro"><span class="eyebrow">GAIA E&amp;B · ENVIRONMENT &amp; BENEFITS / ${tx('COSTA RICA MISSION','MISIÓN COSTA RICA')}</span><h1>Costa Rica,<br><em>${tx('a living world.','un mundo vivo.')}</em></h1><p>${tx('AN OBSERVATORY TO EXPLORE<br>Weather, territory &amp; signals of change.','UN OBSERVATORIO PARA EXPLORAR<br>Tiempo, territorio y señales de cambio.')}</p></div><aside class="flight-panel"><div class="flight-kicker"><span class="live-dot"></span> ${tx('SCIENTIFIC TELEMETRY','TELEMETRÍA CIENTÍFICA')}</div><label class="territory-field-label" for="hud-province-select">01 / Provincia</label><select id="hud-province-select" class="hud-select" aria-label="Seleccionar provincia"></select><label class="territory-field-label" for="hud-site-select">02 / Cantón</label><select id="hud-site-select" class="hud-select" aria-label="${tx('Select province or canton','Seleccionar provincia o cantón')}"></select><h2 id="flight-place">${tx('Choose a province','Elegí una provincia')}</h2><span id="flight-coord" class="mono"></span><div class="flight-reading"><strong id="flight-value">—</strong><span id="flight-unit">°C</span></div><p id="flight-variable">${tx('Mean temperature · historical 2025','Temperatura media · histórico 2025')}</p><div class="flight-rule"></div><p class="flight-source">${tx('REAL DATA / NASA POWER<br><span>One reference point per territory.<br>Select a province or canton to investigate.</span>','DATOS REALES / NASA POWER<br><span>Un punto de referencia por territorio.<br>Seleccioná una provincia o cantón para investigar.</span>')}</p><p class="source-integrity"></p><button id="flight-investigate">${tx('Investigate this territory','Investigar este territorio')} <span>↗</span></button></aside><div class="flight-bottom"><div class="flight-controls"><button id="region-mode" class="chosen">${tx('⌖ 3D Territory','⌖ Territorio 3D')}</button><button id="radar-mode-3d" type="button" aria-pressed="false">${tx('🌿 Ecological Risk','🌿 Riesgo ecológico')}</button><button id="lab-mode">${tx('≋ Lab & Trends','≋ Tendencias y Lab')}</button><button id="forecast-mode">${tx('↗ 7-Day Context','↗ Contexto 7 días')}</button></div><div class="flight-guidance"><span>${tx('DRAG TO MOVE · RIGHT-DRAG TO ROTATE · SCROLL TO ZOOM','ARRASTRÁ PARA MOVER · BOTÓN DERECHO PARA GIRAR · RUEDA PARA ZOOM')}</span><button id="hud-lang-toggle" type="button" aria-label="${tx('Cambiar a Español','Switch to English')}">${tx('🌐 ES','🌐 EN')}</button><button id="camera-mode" type="button" aria-pressed="false">${tx('↔ Move','↔ Mover')}</button><button id="camera-reset" type="button">${tx('⌖ Center','⌖ Centrar')}</button><button id="motion-toggle" aria-pressed="true">${tx('Ⅱ Ambient effects','Ⅱ Ambientación')}</button><button id="fullscreen-mode">${tx('⛶ Fullscreen','⛶ Pantalla completa')}</button></div></div><div id="flight-label">${tx('COSTA RICA / ORBITAL DESCENT','COSTA RICA / DESCENSO ORBITAL')}</div><div id="hud-radar-legend" hidden><div class="radar-legend-head"><strong id="radar-legend-title"></strong><span id="radar-legend-range"></span></div><div class="radar-legend-bar"></div><small id="radar-legend-note"></small><div id="radar-breakdown"></div><div id="radar-top5"></div></div><span class="scene-disclaimer">${tx('Weather indicators driven by model data at reference points · not radar or satellite imagery','Indicadores meteorológicos según datos del modelo en puntos de referencia · no son radar ni imagen satelital')}</span><button id="close-lab" hidden>${tx('← Back to 3D exploration','← Volver a la exploración 3D')}</button><p id="scene-loading" role="status">${tx('Initializing 3D territory…','Inicializando territorio 3D…')}</p>`;document.body.append(host);document.body.classList.add('immersive-mode','intro-playing','national-view');
+const host=document.createElement('section');host.id='immersive';host.setAttribute('aria-label',tx('3D exploration of Costa Rica','Exploración tridimensional de Costa Rica'));host.innerHTML=`<div id="world-canvas"></div><div class="scene-vignette"></div><div class="flight-intro"><span class="eyebrow">GAIA E&amp;B · ENVIRONMENT &amp; BENEFITS / ${tx('COSTA RICA MISSION','MISIÓN COSTA RICA')}</span><h1>Costa Rica,<br><em>${tx('a living world.','un mundo vivo.')}</em></h1><p>${tx('AN OBSERVATORY TO EXPLORE<br>Weather, territory &amp; signals of change.','UN OBSERVATORIO PARA EXPLORAR<br>Tiempo, territorio y señales de cambio.')}</p></div><aside class="flight-panel"><div class="flight-kicker"><span class="live-dot"></span> ${tx('SCIENTIFIC TELEMETRY','TELEMETRÍA CIENTÍFICA')}</div><label class="territory-field-label" for="hud-province-select">01 / Provincia</label><select id="hud-province-select" class="hud-select" aria-label="Seleccionar provincia"></select><label class="territory-field-label" for="hud-site-select">02 / Cantón</label><select id="hud-site-select" class="hud-select" aria-label="${tx('Select province or canton','Seleccionar provincia o cantón')}"></select><h2 id="flight-place">${tx('Choose a province','Elegí una provincia')}</h2><span id="flight-coord" class="mono"></span><div class="flight-reading"><strong id="flight-value">—</strong><span id="flight-unit">°C</span></div><p id="flight-variable">${tx('Mean temperature · historical 2025','Temperatura media · histórico 2025')}</p><div class="flight-rule"></div><p class="flight-source">${tx('REAL DATA / NASA POWER<br><span>One reference point per territory.<br>Select a province or canton to investigate.</span>','DATOS REALES / NASA POWER<br><span>Un punto de referencia por territorio.<br>Seleccioná una provincia o cantón para investigar.</span>')}</p><p class="source-integrity"></p><button id="flight-investigate">${tx('Investigate this territory','Investigar este territorio')} <span>↗</span></button></aside><div class="flight-bottom"><div class="flight-controls"><button id="region-mode" type="button" class="chosen" aria-pressed="true">${tx('⌖ 3D Territory','⌖ Territorio 3D')}</button><button id="radar-mode-3d" type="button" aria-pressed="false">${tx('🌿 Ecological Risk','🌿 Riesgo ecológico')}</button><button id="lab-mode">${tx('≋ Lab & Trends','≋ Tendencias y Lab')}</button><button id="forecast-mode">${tx('↗ 7-Day Context','↗ Contexto 7 días')}</button></div><div class="flight-guidance"><span>${tx('DRAG TO MOVE · RIGHT-DRAG TO ROTATE · SCROLL TO ZOOM','ARRASTRÁ PARA MOVER · BOTÓN DERECHO PARA GIRAR · RUEDA PARA ZOOM')}</span><button id="hud-lang-toggle" type="button" aria-label="${tx('Cambiar a Español','Switch to English')}">${tx('🌐 ES','🌐 EN')}</button><button id="camera-mode" type="button" aria-pressed="false">${tx('↔ Move','↔ Mover')}</button><button id="camera-reset" type="button">${tx('⌖ Center','⌖ Centrar')}</button><button id="motion-toggle" aria-pressed="true">${tx('Ⅱ Ambient effects','Ⅱ Ambientación')}</button><button id="fullscreen-mode">${tx('⛶ Fullscreen','⛶ Pantalla completa')}</button></div></div><div id="flight-label">${tx('COSTA RICA / ORBITAL DESCENT','COSTA RICA / DESCENSO ORBITAL')}</div><div id="hud-radar-legend" hidden><div class="radar-legend-head"><strong id="radar-legend-title"></strong><span id="radar-legend-range"></span></div><div class="radar-legend-bar"></div><small id="radar-legend-note"></small><div id="radar-breakdown"></div><div id="radar-top5"></div></div><span class="scene-disclaimer">${tx('Weather indicators driven by model data at reference points · not radar or satellite imagery','Indicadores meteorológicos según datos del modelo en puntos de referencia · no son radar ni imagen satelital')}</span><button id="close-lab" hidden>${tx('← Back to 3D exploration','← Volver a la exploración 3D')}</button><p id="scene-loading" role="status">${tx('Initializing 3D territory…','Inicializando territorio 3D…')}</p>`;document.body.append(host);document.body.classList.add('immersive-mode','intro-playing','national-view');
 const telemetryPanel=host.querySelector('.flight-panel');
 telemetryPanel.prepend(attachMovablePanel(telemetryPanel,{id:'conditions',english:'Conditions',spanish:'Condiciones',parent:host}));
 const $=s=>document.querySelector(s);let explorer,cameraControls,radarMode=false,ecological=null,riskSummary=null,liveTemps=null,liveAt=null;const provinceBorders=[];let renderer,scene,camera,root,planet,planetFades=[],meshes=[],beacons=[],starPoints,pinRing,selection=null,sites=[],annual,territoryManifest,geo,variable='T2M',year=2025,orbital=true,introStart=null,introDone=false,moving=!matchMedia('(prefers-reduced-motion: reduce)').matches,dragging=false,travel=0,yaw=.1026,pitch=.1815,distance=13.5,targetYaw=.1026,targetPitch=.1815,targetDistance=13.5,previous=[0,0],lastFrame=0;
@@ -32,23 +32,70 @@ function syncNav(forcedAnchor=null){
   document.querySelectorAll('.topbar nav a').forEach(a=>a.classList.toggle('active',Boolean(current)&&a.getAttribute('href')===current));
   $('#lab-mode')?.classList.toggle('chosen',labOpen&&current!=='#pronostico');
   $('#forecast-mode')?.classList.toggle('chosen',labOpen&&current==='#pronostico');
-  $('#region-mode')?.classList.toggle('chosen',!labOpen&&!orbital&&!radarMode);
+  const regionActive=!labOpen&&!orbital&&!radarMode;
+  $('#region-mode')?.classList.toggle('chosen',regionActive);
+  $('#region-mode')?.setAttribute('aria-pressed',String(regionActive));
 }
 function panel(anchor){document.body.classList.add('lab-open');$('#close-lab').hidden=false;syncNav(anchor);document.dispatchEvent(new CustomEvent('gaiatrack:view',{detail:{view:({'#tendencias':'trends','#explorador':'explorer','#pronostico':'forecast','#tiempo-actual':'current'})[anchor]??'trends'}}));requestAnimationFrame(()=>{document.querySelector(anchor)?.scrollIntoView({behavior:'instant'});window.dispatchEvent(new Event('resize'));syncNav(anchor);});}
-function close(){document.body.classList.remove('lab-open');$('#close-lab').hidden=true;syncNav(null);$('.flight-panel').scrollTop=0;explorer?.focus();document.dispatchEvent(new CustomEvent('gaiatrack:view',{detail:{view:'3d'}}));}
+function close(){
+  document.body.classList.remove('lab-open');
+  $('#close-lab').hidden=true;
+  if(!introDone||orbital){
+    introDone=true;
+    document.body.classList.remove('intro-playing');
+    mode(false);
+  }
+  syncNav(null);
+  const fp=$('.flight-panel');
+  if(fp)fp.scrollTop=0;
+  explorer?.focus();
+  document.dispatchEvent(new CustomEvent('gaiatrack:view',{detail:{view:'3d'}}));
+}
+function returnToTerritory3d({resetCountry=false}={}){
+  introDone=true;
+  document.body.classList.remove('intro-playing');
+  if(radarMode)setRadarMode3d(false);
+  mode(false);
+  if(document.body.classList.contains('lab-open'))close();
+  else syncNav(null);
+  if(resetCountry)explorer?.country(true);
+  else explorer?.focus();
+  paintMeshes();
+}
 document.addEventListener('gaiatrack:assistant-view',event=>{
   if(event.detail.view==='3d'){close();return;}
   const anchors={trends:'#tendencias',explorer:'#explorador',forecast:'#pronostico',current:'#tiempo-actual'};
   if(anchors[event.detail.view])panel(anchors[event.detail.view]);
 });
 $('#motion-toggle').textContent=moving?tx('Ⅱ Ambient effects','Ⅱ Ambientación'):tx('▶ Ambient effects','▶ Ambientación');$('#motion-toggle').setAttribute('aria-pressed',String(moving));
-$('#close-lab').onclick=close;$('#forecast-mode').onclick=()=>panel('#pronostico');$('#lab-mode').onclick=()=>panel('#tendencias');$('#flight-investigate').onclick=()=>panel('#tendencias');document.querySelectorAll('.topbar nav a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();panel(a.getAttribute('href'));}));$('.brand')?.addEventListener('click',e=>{e.preventDefault();close();});$('.inspector-cta')?.addEventListener('click',e=>{e.preventDefault();panel('#tendencias');});const onNavScroll=()=>{if(document.body.classList.contains('lab-open'))syncNav();};window.addEventListener('scroll',onNavScroll,{passive:true});document.querySelector('main')?.addEventListener('scroll',onNavScroll,{passive:true});syncNav(null);
+$('#close-lab').onclick=close;$('#forecast-mode').onclick=()=>panel('#pronostico');$('#lab-mode').onclick=()=>panel('#tendencias');$('#flight-investigate').onclick=()=>panel('#tendencias');document.querySelectorAll('.topbar nav a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();panel(a.getAttribute('href'));}));$('.brand')?.addEventListener('click',e=>{
+  e.preventDefault();
+  if($('#method-dialog')?.open)$('#method-dialog').close();
+  if(document.body.classList.contains('clean-cockpit'))$('#weather-clean-view')?.click();
+  returnToTerritory3d({resetCountry:true});
+});$('.inspector-cta')?.addEventListener('click',e=>{e.preventDefault();panel('#tendencias');});const onNavScroll=()=>{if(document.body.classList.contains('lab-open'))syncNav();};window.addEventListener('scroll',onNavScroll,{passive:true});document.querySelector('main')?.addEventListener('scroll',onNavScroll,{passive:true});syncNav(null);
 $('#fullscreen-mode').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{$('#fullscreen-mode').textContent=tx('Fullscreen unavailable','Pantalla completa no disponible');}};
 $('#camera-mode').onclick=()=>cameraControls?.setMode(cameraControls.mode==='pan'?'rotate':'pan');$('#camera-reset').onclick=()=>explorer?.focus();
 $('#hud-lang-toggle').onclick=()=>setLang(getLang()==='en'?'es':'en');
 $('#motion-toggle').onclick=()=>{moving=!moving;$('#motion-toggle').textContent=moving?tx('Ⅱ Ambient effects','Ⅱ Ambientación'):tx('▶ Ambient effects','▶ Ambientación');$('#motion-toggle').setAttribute('aria-pressed',String(moving));};
-function mode(value){targetFocus.set(0,0,0);orbital=value;root.visible=!value;root.scale.setScalar(1);planet.visible=value;targetDistance=value?13.5:16;targetPitch=value?.1815:.8;targetYaw=value?.1026:.22;$('#region-mode').classList.toggle('chosen',!value&&!radarMode);$('#flight-label').textContent=value?tx('COSTA RICA / ORBITAL DESCENT','COSTA RICA / DESCENSO ORBITAL'):tx('COSTA RICA / 3D OBSERVATORY','COSTA RICA / OBSERVATORIO 3D');updateRadarLegend();}
-$('#region-mode').onclick=()=>{introDone=true;document.body.classList.remove('intro-playing');mode(false);explorer?.focus();};
+function mode(value){
+  targetFocus.set(0,0,0);
+  orbital=value;
+  if(root){root.visible=!value;root.scale.setScalar(1);}
+  if(planet)planet.visible=value;
+  targetDistance=value?13.5:16;
+  targetPitch=value?.1815:.8;
+  targetYaw=value?.1026:.22;
+  const regionActive=!value&&!radarMode&&!document.body.classList.contains('lab-open');
+  $('#region-mode')?.classList.toggle('chosen',regionActive);
+  $('#region-mode')?.setAttribute('aria-pressed',String(regionActive));
+  $('#flight-label').textContent=value?tx('COSTA RICA / ORBITAL DESCENT','COSTA RICA / DESCENSO ORBITAL'):tx('COSTA RICA / 3D OBSERVATORY','COSTA RICA / OBSERVATORIO 3D');
+  updateRadarLegend();
+}
+$('#region-mode').onclick=()=>{
+  const shouldResetCountry=!radarMode&&Boolean(selection);
+  returnToTerritory3d({resetCountry:shouldResetCountry});
+};
 function updateRadarLegend(){
   const leg=$('#hud-radar-legend');
   if(!leg)return;
@@ -120,7 +167,9 @@ function setRadarMode3d(enabled,{broadcast=true}={}){
   radarMode=Boolean(enabled);
   const btn=$('#radar-mode-3d');
   if(btn){btn.classList.toggle('chosen',radarMode);btn.setAttribute('aria-pressed',String(radarMode));}
-  $('#region-mode').classList.toggle('chosen',!orbital&&!radarMode);
+  const regionActive=!orbital&&!radarMode&&!document.body.classList.contains('lab-open');
+  $('#region-mode')?.classList.toggle('chosen',regionActive);
+  $('#region-mode')?.setAttribute('aria-pressed',String(regionActive));
   if(radarMode&&orbital){introDone=true;document.body.classList.remove('intro-playing');mode(false);}
   paintMeshes();
   if(radarMode&&!liveTemps){
@@ -136,7 +185,7 @@ $('#radar-mode-3d').onclick=()=>setRadarMode3d(!radarMode);
 document.addEventListener('gaiatrack:radar-mode',e=>setRadarMode3d(e.detail?.enabled,{broadcast:false}));
 const coords=(lon,lat)=>new THREE.Vector3((lon+84.2)*4.4,0,-(lat-9.75)*4.4);
 function globe(lon,lat,r=4){const phi=lat*Math.PI/180,theta=lon*Math.PI/180;return new THREE.Vector3(r*Math.cos(phi)*Math.cos(theta),r*Math.sin(phi),-r*Math.cos(phi)*Math.sin(theta));}
-function sync(detail){selection=detail.site;variable=detail.variable;year=detail.year;const hudSel=$('#hud-site-select');if(hudSel&&hudSel.value!==selection)hudSel.value=selection;const site=sites.find(s=>s.id===selection);if(!site){explorer?.sync(null);paintMeshes();return;}if(!annual?.sites?.[selection])return;explorer?.sync(selection);const value=annualValue(annual,selection,variable,year);const units={T2M:'°C',T2M_MIN:'°C',T2M_MAX:'°C',PRECTOTCORR:tx('mm/yr','mm/año'),ALLSKY_SFC_SW_DWN:tx('MJ/m²/day','MJ/m²/día'),GWETTOP:tx('index 0–1','índice 0–1'),RH2M:'%'};$('#flight-place').textContent=site.name;$('#flight-coord').textContent=`${site.latitude.toFixed(3)}° N / ${Math.abs(site.longitude).toFixed(3)}° ${tx('W','O')}`;const fv=$('#flight-value');fv.textContent=Number.isFinite(value)?new Intl.NumberFormat(locale(),{maximumFractionDigits:variable==='GWETTOP'?2:1}).format(value):'—';fv.classList.remove('value-pop');void fv.offsetWidth;fv.classList.add('value-pop');$('#flight-unit').textContent=units[variable];$('#flight-variable').textContent=`${$('#metric-name').textContent} · ${tx('historical','histórico')} ${year}`;paintMeshes();for(const b of beacons){const active=b.id===selection,near=b.province===site.province;b.beacon.material.color.set(active?0x18d86b:0x14b8e6);b.beacon.scale.setScalar(active?1.35:near?1:.7);b.ring.visible=active||near;b.ring.material.opacity=active?.9:.35;b.pulse.visible=active;}}
+function sync(detail){selection=detail.site;variable=detail.variable;year=detail.year;const hudSel=$('#hud-site-select');if(hudSel&&hudSel.value!==selection)hudSel.value=selection;const site=sites.find(s=>s.id===selection);if(!site){explorer?.sync(null);paintMeshes();for(const b of beacons){b.beacon.material.color.set(0x18d86b);b.beacon.scale.setScalar(1);b.ring.material.opacity=.65;b.pulse.visible=false;}return;}if(!annual?.sites?.[selection])return;explorer?.sync(selection);const value=annualValue(annual,selection,variable,year);const units={T2M:'°C',T2M_MIN:'°C',T2M_MAX:'°C',PRECTOTCORR:tx('mm/yr','mm/año'),ALLSKY_SFC_SW_DWN:tx('MJ/m²/day','MJ/m²/día'),GWETTOP:tx('index 0–1','índice 0–1'),RH2M:'%'};$('#flight-place').textContent=site.name;$('#flight-coord').textContent=`${site.latitude.toFixed(3)}° N / ${Math.abs(site.longitude).toFixed(3)}° ${tx('W','O')}`;const fv=$('#flight-value');fv.textContent=Number.isFinite(value)?new Intl.NumberFormat(locale(),{maximumFractionDigits:variable==='GWETTOP'?2:1}).format(value):'—';fv.classList.remove('value-pop');void fv.offsetWidth;fv.classList.add('value-pop');$('#flight-unit').textContent=units[variable];$('#flight-variable').textContent=`${$('#metric-name').textContent} · ${tx('historical','histórico')} ${year}`;paintMeshes();for(const b of beacons){const active=b.id===selection,near=b.province===site.province;b.beacon.material.color.set(active?0x18d86b:0x14b8e6);b.beacon.scale.setScalar(active?1.35:near?1:.7);b.ring.visible=active||near;b.ring.material.opacity=active?.9:.35;b.pulse.visible=active;}}
 document.addEventListener('gaiatrack:selection',e=>sync(e.detail));
 function applyHudLang(){
   host.setAttribute('aria-label',tx('3D exploration of Costa Rica','Exploración tridimensional de Costa Rica'));

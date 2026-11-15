@@ -186,6 +186,7 @@
 @media(max-width:768px){
   #hud-radar-legend{left:12px;bottom:146px;width:205px;padding:8px 10px}
 }
+.lab-open #hud-radar-legend,.clean-cockpit #hud-radar-legend,.intro-playing #hud-radar-legend,#hud-radar-legend[hidden]{display:none!important}
 
 /* Preserve the supplied logo and its proportions. */
 .brand-logo,.footer-logo{display:block;object-fit:contain;background:transparent;border-radius:0;padding:0;flex-shrink:0}
