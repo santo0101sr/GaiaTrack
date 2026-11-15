@@ -1,7 +1,8 @@
-import {loadHistory} from './data-client.js';
+import {fetchJSON,loadHistory} from './data-client.js';
 import {trend} from './science.js';
-import {readWeather,readSectors} from './weather-state.js';
+import {publishWeather,readWeather,readSectors} from './weather-state.js';
 import {buildRecommendations} from './recommendations.js';
+import {buildAnnualPrediction,buildDailyPrediction,buildHourlyPrediction,buildMonthlyPrediction} from './predictor.js';
 import {getLang,locale,tx} from './i18n.js';
 
 const VARS=[
@@ -20,12 +21,31 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
   document.body.append(el);
 
   const monthlyCache=new Map();
-  let state={site:'san-jose',district:null,varKey:'T2M',targetYear:2035,deltaT:0,deltaP:0};
+  const liveFetchInflight=new Map();
+  let state={site:'san-jose',district:null,varKey:'T2M',horizon:'months',targetYear:2035,deltaT:0,deltaP:0};
   const fmt=(n,d=1)=>Number.isFinite(n)?new Intl.NumberFormat(locale(),{minimumFractionDigits:d,maximumFractionDigits:d}).format(n):'—';
   const signed=(n,d=1)=>Number.isFinite(n)?new Intl.NumberFormat(locale(),{minimumFractionDigits:d,maximumFractionDigits:d,signDisplay:'exceptZero'}).format(n):'—';
+
   async function getMonthly(id){
     if(monthlyCache.has(id))return monthlyCache.get(id);
     try{const m=(await loadHistory(id)).monthly;monthlyCache.set(id,m);return m;}catch{return null;}
+  }
+
+  function ensureLiveWeather(siteId){
+    const cur=readWeather('current',siteId);
+    const fc=readWeather('forecast',siteId);
+    const curStale=!cur||!cur.observedAt||(Date.now()-Date.parse(cur.observedAt)>15*60*1000);
+    const fcStale=!fc||!fc.retrievedAt||(Date.now()-Date.parse(fc.retrievedAt)>60*60*1000);
+    if((!curStale&&!fcStale)||liveFetchInflight.has(siteId))return;
+    const tasks=[];
+    if(curStale)tasks.push(fetchJSON(`/api/current?site=${encodeURIComponent(siteId)}`).then(d=>{if(d?.site===siteId)publishWeather('current',d);}).catch(()=>{}));
+    if(fcStale)tasks.push(fetchJSON(`/api/forecast?site=${encodeURIComponent(siteId)}`).then(d=>{if(d?.site===siteId&&Array.isArray(d.days))publishWeather('forecast',d);}).catch(()=>{}));
+    if(!tasks.length)return;
+    const work=Promise.all(tasks).finally(()=>{
+      liveFetchInflight.delete(siteId);
+      if(!el.hidden&&state.site===siteId)render();
+    });
+    liveFetchInflight.set(siteId,work);
   }
 
   function seriesFor(id,key){
@@ -33,18 +53,91 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
     return vals.map((v,i)=>({year:start+i,value:v})).filter(p=>Number.isFinite(p.value));
   }
 
-  function buildChartSvg(pts,mk,targetYear,unit,digits){
-    if(pts.length<3)return `<p class="sim-footnote">${tx('Insufficient historical series for chart.','Serie histórica insuficiente para graficar.')}</p>`;
-    const W=680,H=210,padL=46,padR=18,padT=16,padB=28;
-    const minYYear=pts[0].year,maxYYear=Math.max(targetYear,pts[pts.length-1].year+2);
-    const last=pts[pts.length-1],slope=Number.isFinite(mk.slope)?mk.slope:0;
-    const loSlope=Number.isFinite(mk.slopeCI?.lower)?mk.slopeCI.lower:slope;
-    const hiSlope=Number.isFinite(mk.slopeCI?.upper)?mk.slopeCI.upper:slope;
-    const projVal=y=>last.value+slope*(y-last.year);
-    const projLo=y=>last.value+loSlope*(y-last.year);
-    const projHi=y=>last.value+hiSlope*(y-last.year);
+  function buildHourlySvg(hPred){
+    const pts=hPred.points;
+    if(pts.length<2)return `<p class="sim-footnote">${tx('Loading live 48-hour forecast from Open-Meteo…','Cargando pronóstico horario en vivo de Open-Meteo…')}</p>`;
+    const W=680,H=210,padL=48,padR=18,padT=18,padB=28;
+    const vals=pts.map(p=>p.value);
+    let vMin=Math.min(...vals),vMax=Math.max(...vals);
+    if(vMax-vMin<1e-6){vMin-=1;vMax+=1;}
+    const m=(vMax-vMin)*.16;vMin-=m;vMax+=m;
+    const xOf=i=>padL+(i/Math.max(1,pts.length-1))*(W-padL-padR);
+    const yOf=v=>padT+(1-(v-vMin)/(vMax-vMin))*(H-padT-padB);
+    const path=pts.map((p,i)=>`${i===0?'M':'L'}${xOf(i).toFixed(1)},${yOf(p.value).toFixed(1)}`).join(' ');
+    const area=`${path} L${xOf(pts.length-1).toFixed(1)},${(H-padB).toFixed(1)} L${xOf(0).toFixed(1)},${(H-padB).toFixed(1)} Z`;
+    const peakIdx=pts.indexOf(hPred.max);
+    const tickIdxs=[0,Math.floor(pts.length*0.25),Math.floor(pts.length*0.5),Math.floor(pts.length*0.75),pts.length-1];
+    return `<svg viewBox="0 0 ${W} ${H}" class="sim-svg" role="img" aria-label="${tx('Live 48-hour hourly forecast','Pronóstico horario en vivo 48 h')}">
+      <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(148,163,184,.25)"/>
+      <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="rgba(148,163,184,.25)"/>
+      <path d="${area}" fill="rgba(56,189,248,.12)"/>
+      <path d="${path}" fill="none" stroke="#38bdf8" stroke-width="2.4"/>
+      <circle cx="${xOf(0).toFixed(1)}" cy="${yOf(pts[0].value).toFixed(1)}" r="4.5" fill="#4ade80"/>
+      <circle cx="${xOf(peakIdx).toFixed(1)}" cy="${yOf(hPred.max.value).toFixed(1)}" r="4" fill="#f5b316"/>
+      <text x="${xOf(peakIdx).toFixed(1)}" y="${Math.max(13,yOf(hPred.max.value)-8)}" text-anchor="middle" fill="#fde68a" font-size="10.5" font-weight="600">${hPred.max.label}: ${fmt(hPred.max.value,hPred.digits)} ${hPred.unit}</text>
+      <text x="${padL-6}" y="${padT+8}" text-anchor="end" fill="#8bb0cc" font-size="10">${fmt(vMax,hPred.digits)}</text>
+      <text x="${padL-6}" y="${H-padB}" text-anchor="end" fill="#8bb0cc" font-size="10">${fmt(vMin,hPred.digits)}</text>
+      ${[...new Set(tickIdxs)].map(i=>`<text x="${xOf(i).toFixed(1)}" y="${H-8}" text-anchor="middle" fill="#8bb0cc" font-size="10">${pts[i].label}</text>`).join('')}
+    </svg>`;
+  }
 
-    const allVals=[...pts.map(p=>p.value),projVal(targetYear),projLo(targetYear),projHi(targetYear)];
+  function buildDailySvg(dPred,unit,digits){
+    const pts=dPred.points;
+    if(pts.length<2)return `<p class="sim-footnote">${tx('Loading 7-day forecast from Open-Meteo…','Cargando pronóstico de 7 días desde Open-Meteo…')}</p>`;
+    const W=680,H=210,padL=48,padR=18,padT=18,padB=28;
+    const all=[...pts.map(p=>p.value),...pts.map(p=>p.lo).filter(Number.isFinite),...pts.map(p=>p.hi).filter(Number.isFinite)];
+    let vMin=Math.min(...all),vMax=Math.max(...all);
+    if(vMax-vMin<1e-6){vMin-=1;vMax+=1;}
+    const m=(vMax-vMin)*.16;vMin-=m;vMax+=m;
+    const xOf=i=>padL+(i/Math.max(1,pts.length-1))*(W-padL-padR);
+    const yOf=v=>padT+(1-(v-vMin)/(vMax-vMin))*(H-padT-padB);
+    const hasBand=pts.every(p=>Number.isFinite(p.lo)&&Number.isFinite(p.hi));
+    const bandPoly=hasBand?[...pts.map((p,i)=>`${xOf(i).toFixed(1)},${yOf(p.hi).toFixed(1)}`),...[...pts].reverse().map((p,i)=>`${xOf(pts.length-1-i).toFixed(1)},${yOf(p.lo).toFixed(1)}`)].join(' '):'';
+    const path=pts.map((p,i)=>`${i===0?'M':'L'}${xOf(i).toFixed(1)},${yOf(p.value).toFixed(1)}`).join(' ');
+    return `<svg viewBox="0 0 ${W} ${H}" class="sim-svg" role="img" aria-label="${tx('7-day forecast','Pronóstico 7 días')}">
+      <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(148,163,184,.25)"/>
+      <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="rgba(148,163,184,.25)"/>
+      ${hasBand?`<polygon points="${bandPoly}" fill="rgba(245,179,22,.16)"/>`:''}
+      <path d="${path}" fill="none" stroke="#f5b316" stroke-width="2.4"/>
+      ${pts.map((p,i)=>`<circle cx="${xOf(i).toFixed(1)}" cy="${yOf(p.value).toFixed(1)}" r="4" fill="#f5b316"/><text x="${xOf(i).toFixed(1)}" y="${Math.max(12,yOf(p.value)-8)}" text-anchor="middle" fill="#fde68a" font-size="10">${fmt(p.value,digits)}</text><text x="${xOf(i).toFixed(1)}" y="${H-8}" text-anchor="middle" fill="#8bb0cc" font-size="10">${p.label}</text>`).join('')}
+      <text x="${padL-6}" y="${padT+8}" text-anchor="end" fill="#8bb0cc" font-size="10">${fmt(vMax,digits)}</text>
+      <text x="${padL-6}" y="${H-padB}" text-anchor="end" fill="#8bb0cc" font-size="10">${fmt(vMin,digits)}</text>
+    </svg>`;
+  }
+
+  function buildMonthlySvg(mPred,unit,digits){
+    const pts=mPred.points;
+    if(pts.length<3)return `<p class="sim-footnote">${tx('Monthly climatology unavailable for this site.','Climatología mensual no disponible para este sitio.')}</p>`;
+    const W=680,H=210,padL=48,padR=18,padT=18,padB=28;
+    const all=[...pts.map(p=>p.predicted),...pts.map(p=>p.normal),...pts.map(p=>p.p10).filter(Number.isFinite),...pts.map(p=>p.p90).filter(Number.isFinite)];
+    let vMin=Math.min(...all),vMax=Math.max(...all);
+    if(vMax-vMin<1e-6){vMin-=1;vMax+=1;}
+    const m=(vMax-vMin)*.14;vMin-=m;vMax+=m;
+    const xOf=i=>padL+(i/Math.max(1,pts.length-1))*(W-padL-padR);
+    const yOf=v=>padT+(1-(v-vMin)/(vMax-vMin))*(H-padT-padB);
+    const hasBand=pts.every(p=>Number.isFinite(p.p10)&&Number.isFinite(p.p90));
+    const bandPoly=hasBand?[...pts.map((p,i)=>`${xOf(i).toFixed(1)},${yOf(p.p90).toFixed(1)}`),...[...pts].reverse().map((p,i)=>`${xOf(pts.length-1-i).toFixed(1)},${yOf(p.p10).toFixed(1)}`)].join(' '):'';
+    const normPath=pts.map((p,i)=>`${i===0?'M':'L'}${xOf(i).toFixed(1)},${yOf(p.normal).toFixed(1)}`).join(' ');
+    const predPath=pts.map((p,i)=>`${i===0?'M':'L'}${xOf(i).toFixed(1)},${yOf(p.predicted).toFixed(1)}`).join(' ');
+    return `<svg viewBox="0 0 ${W} ${H}" class="sim-svg" role="img" aria-label="${tx('12-month seasonal projection','Proyección estacional 12 meses')}">
+      <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(148,163,184,.25)"/>
+      <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="rgba(148,163,184,.25)"/>
+      ${hasBand?`<polygon points="${bandPoly}" fill="rgba(56,189,248,.13)"/>`:''}
+      <path d="${normPath}" fill="none" stroke="#38bdf8" stroke-width="1.8" stroke-dasharray="4 3" opacity="0.8"/>
+      <path d="${predPath}" fill="none" stroke="#f5b316" stroke-width="2.5"/>
+      ${pts.map((p,i)=>`<circle cx="${xOf(i).toFixed(1)}" cy="${yOf(p.predicted).toFixed(1)}" r="3.4" fill="#f5b316"/><text x="${xOf(i).toFixed(1)}" y="${H-8}" text-anchor="middle" fill="#8bb0cc" font-size="9.5">${i%2===0||i===pts.length-1?p.shortLabel:''}</text>`).join('')}
+      <text x="${padL-6}" y="${padT+8}" text-anchor="end" fill="#8bb0cc" font-size="10">${fmt(vMax,digits)}</text>
+      <text x="${padL-6}" y="${H-padB}" text-anchor="end" fill="#8bb0cc" font-size="10">${fmt(vMin,digits)}</text>
+      <text x="${W-padR}" y="${padT+8}" text-anchor="end" fill="#fde68a" font-size="10">${tx('Amber: model · Blue dashed: 25y norm · Band: P10–P90','Ámbar: modelo · Azul: normal 25a · Banda: P10–P90')}</text>
+    </svg>`;
+  }
+
+  function buildAnnualSvg(pts,annPred,targetYear,unit,digits){
+    if(pts.length<3||!annPred)return `<p class="sim-footnote">${tx('Insufficient historical series for chart.','Serie histórica insuficiente para graficar.')}</p>`;
+    const W=680,H=210,padL=48,padR=18,padT=18,padB=28;
+    const minYYear=pts[0].year,maxYYear=Math.max(targetYear,annPred.lastYear+2);
+    const last=pts[pts.length-1];
+    const allVals=[...pts.map(p=>p.value),annPred.predicted,annPred.trendBand[0],annPred.trendBand[1],annPred.variabilityBand[0],annPred.variabilityBand[1]];
     let vMin=Math.min(...allVals),vMax=Math.max(...allVals);
     if(vMax-vMin<1e-6){vMin-=1;vMax+=1;}
     const margin=(vMax-vMin)*.14;vMin-=margin;vMax+=margin;
@@ -52,22 +145,25 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
     const yOf=v=>padT+(1-(v-vMin)/(vMax-vMin))*(H-padT-padB);
 
     const histPath=pts.map((p,i)=>`${i===0?'M':'L'}${xOf(p.year).toFixed(1)},${yOf(p.value).toFixed(1)}`).join(' ');
-    const xLast=xOf(last.year).toFixed(1),yLast=yOf(last.value).toFixed(1);
-    const xTarget=xOf(targetYear).toFixed(1),yTarget=yOf(projVal(targetYear)).toFixed(1);
-    const bandPoly=`${xLast},${yLast} ${xTarget},${yOf(projHi(targetYear)).toFixed(1)} ${xTarget},${yOf(projLo(targetYear)).toFixed(1)}`;
+    const xFirst=xOf(minYYear).toFixed(1),xLast=xOf(last.year).toFixed(1),xTarget=xOf(targetYear).toFixed(1);
+    const yAnchorLast=yOf(annPred.anchorLast).toFixed(1),yTarget=yOf(annPred.predicted).toFixed(1);
+    const varPoly=`${xLast},${yOf(annPred.anchorLast+annPred.sigma).toFixed(1)} ${xTarget},${yOf(annPred.variabilityBand[1]).toFixed(1)} ${xTarget},${yOf(annPred.variabilityBand[0]).toFixed(1)} ${xLast},${yOf(annPred.anchorLast-annPred.sigma).toFixed(1)}`;
+    const ciPoly=`${xLast},${yAnchorLast} ${xTarget},${yOf(annPred.trendBand[1]).toFixed(1)} ${xTarget},${yOf(annPred.trendBand[0]).toFixed(1)}`;
     const ticks=[minYYear,Math.round((minYYear+last.year)/2),last.year,targetYear];
 
     return `<svg viewBox="0 0 ${W} ${H}" class="sim-svg" role="img" aria-label="${tx('Historical series and future projection','Serie histórica y proyección futura')}">
       <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(148,163,184,.25)"/>
       <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="rgba(148,163,184,.25)"/>
       <line x1="${xLast}" y1="${padT}" x2="${xLast}" y2="${H-padB}" stroke="rgba(148,163,184,.2)" stroke-dasharray="3 3"/>
-      <polygon points="${bandPoly}" fill="rgba(245,179,22,.16)"/>
+      <polygon points="${varPoly}" fill="rgba(56,189,248,.11)"/>
+      <polygon points="${ciPoly}" fill="rgba(245,179,22,.22)"/>
+      <line x1="${xFirst}" y1="${yOf(annPred.atYear(minYYear)).toFixed(1)}" x2="${xLast}" y2="${yAnchorLast}" stroke="#f5b316" stroke-width="1.3" opacity="0.45"/>
       <path d="${histPath}" fill="none" stroke="#38bdf8" stroke-width="2.2"/>
-      <line x1="${xLast}" y1="${yLast}" x2="${xTarget}" y2="${yTarget}" stroke="#f5b316" stroke-width="2.2" stroke-dasharray="5 4"/>
+      <line x1="${xLast}" y1="${yAnchorLast}" x2="${xTarget}" y2="${yTarget}" stroke="#f5b316" stroke-width="2.3" stroke-dasharray="5 4"/>
       <circle cx="${xTarget}" cy="${yTarget}" r="4.5" fill="#f5b316"/>
       <text x="${padL-6}" y="${padT+8}" text-anchor="end" fill="#8bb0cc" font-size="10">${fmt(vMax,digits)}</text>
       <text x="${padL-6}" y="${H-padB}" text-anchor="end" fill="#8bb0cc" font-size="10">${fmt(vMin,digits)}</text>
-      <text x="${xTarget}" y="${Math.max(12,yOf(projVal(targetYear))-9)}" text-anchor="end" fill="#fde68a" font-size="11" font-weight="600">${targetYear}: ${fmt(projVal(targetYear),digits)} ${unit}</text>
+      <text x="${xTarget}" y="${Math.max(12,yOf(annPred.predicted)-9)}" text-anchor="end" fill="#fde68a" font-size="11" font-weight="600">${targetYear}: ${fmt(annPred.predicted,digits)} ${unit}</text>
       ${[...new Set(ticks)].map(yr=>`<text x="${xOf(yr).toFixed(1)}" y="${H-8}" text-anchor="middle" fill="#8bb0cc" font-size="10">${yr}</text>`).join('')}
     </svg>`;
   }
@@ -77,6 +173,8 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
     const siteObj=sites.find(s=>s.id===state.site)||sites[0];
     if(!siteObj)return;
     state.site=siteObj.id;
+    ensureLiveWeather(siteObj.id);
+
     const provs=sites.filter(s=>s.type==='province');
     const cantons=sites.filter(s=>s.province===siteObj.province&&s.type!=='province');
     const dists=sectorsCatalog[siteObj.id]||[];
@@ -93,16 +191,57 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
     const vMeta=VARS.find(v=>v.key===state.varKey)||VARS[0];
     const pts=seriesFor(siteObj.id,vMeta.key);
     const mk=pts.length>=3?trend(pts):{slope:null,p:null,n:pts.length,slopeCI:null};
-    const last=pts[pts.length-1];
+    const annPred=buildAnnualPrediction(pts,mk,state.targetYear);
+    const hPred=buildHourlyPrediction(forecast?.timeline,activeCur,vMeta.key);
+    const dPred=buildDailyPrediction(forecast?.days,vMeta.key);
+    const mPred=buildMonthlyPrediction(monthly,vMeta.key,{currentObs:activeCur,forecastDays:forecast?.days,annualSlope:mk.slope??0,lang:getLang()});
+
     const basePts=pts.filter(p=>p.year>=2001&&p.year<=2010);
     const baseAvg=basePts.length?basePts.reduce((a,b)=>a+b.value,0)/basePts.length:null;
-    const predVal=(last&&Number.isFinite(mk.slope))?last.value+mk.slope*(state.targetYear-last.year):null;
-    const predLo=(last&&Number.isFinite(mk.slopeCI?.lower))?last.value+mk.slopeCI.lower*(state.targetYear-last.year):null;
-    const predHi=(last&&Number.isFinite(mk.slopeCI?.upper))?last.value+mk.slopeCI.upper*(state.targetYear-last.year):null;
-    const predDiffBase=(predVal!==null&&baseAvg!==null)?predVal-baseAvg:null;
     const meanAll=pts.length?pts.reduce((a,b)=>a+b.value,0)/pts.length:null;
     const stdAll=pts.length>2?Math.sqrt(pts.reduce((a,b)=>a+(b.value-meanAll)**2,0)/(pts.length-1)):0;
     const anoms=stdAll>1e-9?pts.map(p=>({...p,z:(p.value-meanAll)/stdAll,diff:p.value-meanAll})).filter(p=>Math.abs(p.z)>=1.3).sort((a,b)=>Math.abs(b.z)-Math.abs(a.z)).slice(0,5):[];
+
+    let chartHtml='',kpisHtml='',footnote='';
+    if(state.horizon==='hours'){
+      chartHtml=buildHourlySvg(hPred);
+      kpisHtml=`
+        <article class="sim-kpi"><span>${tx('NOW (LIVE)','AHORA (EN VIVO)')}</span><strong>${hPred.points[0]?`${fmt(hPred.points[0].value,hPred.digits)} ${hPred.unit}`:'—'}</strong><small>${activeCur?.observedAt?new Date(activeCur.observedAt).toLocaleTimeString(locale(),{hour:'2-digit',minute:'2-digit',timeZone:'America/Costa_Rica'}):tx('Syncing…','Sincronizando…')}</small></article>
+        <article class="sim-kpi"><span>${tx('48H PEAK','PICO PRÓX. 48H')}</span><strong>${hPred.max?`${fmt(hPred.max.value,hPred.digits)} ${hPred.unit}`:'—'}</strong><small>${hPred.max?`${tx('At','A las')} ${hPred.max.label}`:''}</small></article>
+        <article class="sim-kpi"><span>${tx('48H MINIMUM','MÍNIMO PRÓX. 48H')}</span><strong>${hPred.min?`${fmt(hPred.min.value,hPred.digits)} ${hPred.unit}`:'—'}</strong><small>${hPred.min?`${tx('At','A las')} ${hPred.min.label}`:''}</small></article>
+        <article class="sim-kpi"><span>${vMeta.key==='PRECTOTCORR'?tx('48H ACCUMULATED','ACUMULADO 48H'):tx('48H MEAN','PROMEDIO 48H')}</span><strong>${Number.isFinite(hPred.mean)?`${fmt(vMeta.key==='PRECTOTCORR'?hPred.sum:hPred.mean,hPred.digits)} ${vMeta.key==='PRECTOTCORR'?'mm':hPred.unit}`:'—'}</strong><small>${tx('Open-Meteo hourly NWP','Modelo horario Open-Meteo')}</small></article>`;
+      footnote=tx('Real-time hourly weather forecast from Open-Meteo anchored to the latest live observation.','Pronóstico horario en tiempo real de Open-Meteo anclado a la última observación en vivo.');
+    }else if(state.horizon==='days'){
+      chartHtml=buildDailySvg(dPred,vMeta.unit,vMeta.d);
+      kpisHtml=`
+        <article class="sim-kpi"><span>${tx('7-DAY MEAN','PROMEDIO 7 DÍAS')}</span><strong>${Number.isFinite(dPred.mean)?`${fmt(dPred.mean,vMeta.d)} ${vMeta.unit}`:'—'}</strong><small>${tx('Open-Meteo + GFS ensemble','Open-Meteo + conjunto GFS')}</small></article>
+        <article class="sim-kpi"><span>${tx('7-DAY PEAK','MÁXIMO 7 DÍAS')}</span><strong>${dPred.max?`${fmt(dPred.max.value,vMeta.d)} ${vMeta.unit}`:'—'}</strong><small>${dPred.max?dPred.max.date:''}</small></article>
+        <article class="sim-kpi"><span>${tx('7-DAY LOWEST','MÍNIMO 7 DÍAS')}</span><strong>${dPred.min?`${fmt(dPred.min.value,vMeta.d)} ${vMeta.unit}`:'—'}</strong><small>${dPred.min?dPred.min.date:''}</small></article>
+        <article class="sim-kpi"><span>${tx('7-DAY RAINFALL','LLUVIA TOTAL 7 DÍAS')}</span><strong>${forecast?.days?.length?`${fmt(forecast.days.slice(0,7).reduce((s,d)=>s+(Number.isFinite(d.PRECTOTCORR)?d.PRECTOTCORR:0),0),1)} mm`:'—'}</strong><small>${tx('STRESS (IEA)','ESTRÉS (IEA)')}: ${m&&Number.isFinite(m.iea)?fmt(m.iea,2):'—'}</small></article>`;
+      footnote=tx('7-day deterministic and GFS ensemble P10–P90 forecast updated from Open-Meteo.','Pronóstico diario a 7 días y rango P10–P90 del conjunto GFS actualizado desde Open-Meteo.');
+    }else if(state.horizon==='months'){
+      chartHtml=buildMonthlySvg(mPred,vMeta.unit,vMeta.d);
+      const nextM=mPred.points[0],peakM=mPred.points.reduce((a,b)=>!a||b.predicted>a.predicted?b:a,null),lowM=mPred.points.reduce((a,b)=>!a||b.predicted<a.predicted?b:a,null);
+      kpisHtml=`
+        <article class="sim-kpi"><span>${tx('NEXT MONTH','PRÓXIMO MES')} (${nextM?nextM.label:'—'})</span><strong>${nextM?`${fmt(nextM.predicted,vMeta.d)} ${vMeta.unit}`:'—'}</strong><small>${nextM?`${tx('Normal','Normal')}: ${fmt(nextM.normal,vMeta.d)} ${vMeta.unit}`:''}</small></article>
+        <article class="sim-kpi"><span>${tx('LIVE ANOMALY (A₀)','ANOMALÍA ACTUAL (A₀)')}</span><strong>${signed(mPred.liveAnomaly,vMeta.d)} ${vMeta.unit}</strong><small>${tx('Persistence φ','Persistencia φ')} = ${fmt(mPred.phi,2)}</small></article>
+        <article class="sim-kpi"><span>${tx('SEASONAL PEAK','PICO ESTACIONAL')}</span><strong>${peakM?`${fmt(peakM.predicted,vMeta.d)} ${vMeta.unit}`:'—'}</strong><small>${peakM?peakM.label:''}</small></article>
+        <article class="sim-kpi"><span>${tx('SEASONAL LOW','MÍNIMO ESTACIONAL')}</span><strong>${lowM?`${fmt(lowM.predicted,vMeta.d)} ${vMeta.unit}`:'—'}</strong><small>${lowM?lowM.label:''}</small></article>`;
+      footnote=tx('12-month formula: y(h) = Normal_month(2001–2025) + φ^h · LiveAnomaly + Trend·(h/12), bounded by real P10–P90 climatology.','Fórmula 12 meses: y(h) = Normal_mes(2001–2025) + φ^h · AnomalíaActual + Tendencia·(h/12), con banda real P10–P90.');
+    }else{
+      chartHtml=`${buildAnnualSvg(pts,annPred,state.targetYear,vMeta.unit,vMeta.d)}
+        <label class="sim-slider-box" style="margin-top:8px">
+          <div class="sim-slider-top"><span>${tx('Target future year','Año futuro a predecir')}</span><strong>${state.targetYear}</strong></div>
+          <input id="sim-year" type="range" min="2026" max="2050" step="1" value="${state.targetYear}">
+        </label>`;
+      const predDiffBase=(annPred&&baseAvg!==null)?annPred.predicted-baseAvg:null;
+      kpisHtml=`
+        <article class="sim-kpi"><span>${tx('TREND','TENDENCIA')} ${state.targetYear}</span><strong>${annPred?`${fmt(annPred.predicted,vMeta.d)} ${vMeta.unit}`:'—'}</strong><small>${annPred?`${tx('95% trend CI','IC 95% tendencia')}: [${fmt(annPred.trendBand[0],vMeta.d)}, ${fmt(annPred.trendBand[1],vMeta.d)}]`:''}</small></article>
+        <article class="sim-kpi"><span>${tx('YEAR-TO-YEAR SWING (±1σ)','OSCILACIÓN ANUAL (±1σ)')}</span><strong>±${annPred?`${fmt(annPred.sigma,vMeta.d)} ${vMeta.unit}`:'—'}</strong><small>${annPred?`${tx('Expected range','Rango esperado')}: [${fmt(annPred.variabilityBand[0],vMeta.d)}, ${fmt(annPred.variabilityBand[1],vMeta.d)}]`:''}</small></article>
+        <article class="sim-kpi"><span>${tx('CHANGE VS. 01–10 BASE','DIFERENCIA VS. BASE 01–10')}</span><strong>${predDiffBase!==null?`${signed(predDiffBase,vMeta.d)} ${vMeta.unit}`:'—'}</strong><small>${tx('Rate','Tasa')}: ${Number.isFinite(mk.slope)?`${signed(mk.slope*10,vMeta.d+1)}/${tx('dec','déc')}`:'—'}</small></article>
+        <article class="sim-kpi"><span>${tx('STRESS INDEX (IEA)','ÍNDICE DE ESTRÉS (IEA)')}</span><strong>${m&&Number.isFinite(m.iea)?fmt(m.iea,2):'—'}</strong><small>${m?m.ieaLevel:'—'}</small></article>`;
+      footnote=tx('Anchored Theil–Sen trend (2001–2025) with 95% slope CI (amber) and ±1σ historical interannual variability (blue).','Tendencia Theil–Sen anclada (2001–2025) con IC 95% de pendiente (ámbar) y variabilidad interanual ±1σ (azul).');
+    }
 
     const rowsHtml=VARS.map(v=>{
       const s=seriesFor(siteObj.id,v.key);if(!s.length)return '';
@@ -110,24 +249,22 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
       const bAvg=b.length?b.reduce((a,c)=>a+c.value,0)/b.length:null;
       const diff=bAvg!==null?l.value-bAvg:null;
       const t=s.length>=3?trend(s):{slope:null,n:s.length};
-      const dec=Number.isFinite(t.slope)?t.slope*10:null;
-      const pTarget=Number.isFinite(t.slope)&&t.n>=10?l.value+t.slope*(state.targetYear-l.year):null;
-      return `<tr class="${v.key===state.varKey?'is-row-on':''}" data-pick-var="${v.key}"><td><strong>${v.name()}</strong><small>${v.unit}</small></td><td>${fmt(bAvg,v.d)}</td><td><strong>${fmt(l.value,v.d)}</strong> <small>(${l.year})</small></td><td class="${diff>0?'is-up':diff<0?'is-down':''}">${signed(diff,v.d)}</td><td>${signed(dec,v.d+1)}</td><td><strong>${pTarget!==null?fmt(pTarget,v.d):'—'}</strong></td></tr>`;
+      const ap=t.n>=10?buildAnnualPrediction(s,t,state.targetYear):null;
+      return `<tr class="${v.key===state.varKey?'is-row-on':''}" data-pick-var="${v.key}"><td><strong>${v.name()}</strong><small>${v.unit}</small></td><td>${fmt(bAvg,v.d)}</td><td><strong>${fmt(l.value,v.d)}</strong> <small>(${l.year})</small></td><td class="${diff>0?'is-up':diff<0?'is-down':''}">${signed(diff,v.d)}</td><td>${signed(Number.isFinite(t.slope)?t.slope*10:null,v.d+1)}</td><td><strong>${ap?fmt(ap.predicted,v.d):'—'}</strong></td></tr>`;
     }).join('');
 
     const topTip=rec.tips[0];
-    const fc7=forecast?.days?.slice(0,7)||[];
-    const fcTempAvg=fc7.length?fc7.reduce((s,d)=>s+(Number.isFinite(d.tempMean)?d.tempMean:0),0)/fc7.length:null;
-    const fcRainSum=fc7.length?fc7.reduce((s,d)=>s+(Number.isFinite(d.precipSum)?d.precipSum:0),0):null;
+    const liveTime=activeCur?.observedAt?new Date(activeCur.observedAt).toLocaleTimeString(locale(),{hour:'2-digit',minute:'2-digit',timeZone:'America/Costa_Rica'}):null;
 
     el.innerHTML=`
       <div class="sim-shell">
         <header class="sim-topbar">
           <div class="sim-brand">
-            <span>GAIA E&amp;B · ${tx('FUTURE PREDICTOR & SIMULATOR','PREDICTOR FUTURO Y SIMULADOR')}</span>
+            <span>GAIA E&amp;B · ${tx('REAL-TIME PREDICTOR & SIMULATOR','PREDICTOR EN TIEMPO REAL Y SIMULADOR')}</span>
             <strong>${distObj?`${siteObj.name} · ${distObj.name}`:siteObj.name}</strong>
           </div>
           <div class="sim-pickers">
+            <span class="sim-live-badge"><i class="sim-live-dot"></i>${liveTime?`${tx('Live','En vivo')} · ${liveTime}`:tx('Syncing live…','Sincronizando…')}</span>
             <div class="sim-picker"><label for="sim-prov">${tx('Province','Provincia')}</label><select id="sim-prov">${provs.map(p=>`<option value="${p.id}" ${p.id===siteObj.province?'selected':''}>${p.name}</option>`).join('')}</select></div>
             <div class="sim-picker"><label for="sim-canton">${tx('Canton','Cantón')}</label><select id="sim-canton"><option value="${siteObj.province}" ${siteObj.id===siteObj.province?'selected':''}>${tx('Province overview','Vista provincial')}</option>${cantons.map(c=>`<option value="${c.id}" ${c.id===siteObj.id?'selected':''}>${c.name}</option>`).join('')}</select></div>
             ${dists.length?`<div class="sim-picker"><label for="sim-dist">${tx('District','Distrito')}</label><select id="sim-dist"><option value="">${tx('All districts','Todos')} (${dists.length})</option>${dists.map(d=>`<option value="${d.id}" ${d.id===state.district?'selected':''}>${d.name}</option>`).join('')}</select></div>`:''}
@@ -137,27 +274,21 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
 
         <section class="sim-panel">
           <div class="sim-panel-head">
-            <h3>${tx('Future Prediction Based on 25 Years of NASA POWER Data','Predicción Futura basada en 25 Años de Datos NASA POWER')}</h3>
+            <div class="sim-horizon-tabs">
+              <button type="button" class="sim-horizon-tab ${state.horizon==='hours'?'is-on':''}" data-hz="hours">${tx('Next 48h','Próximas 48 h')}</button>
+              <button type="button" class="sim-horizon-tab ${state.horizon==='days'?'is-on':''}" data-hz="days">${tx('Next 7 days','Próximos 7 días')}</button>
+              <button type="button" class="sim-horizon-tab ${state.horizon==='months'?'is-on':''}" data-hz="months">${tx('Next 12 months','Próximos 12 meses')}</button>
+              <button type="button" class="sim-horizon-tab ${state.horizon==='years'?'is-on':''}" data-hz="years">${tx('Next years (2026–2050)','Próximos años')}</button>
+            </div>
             <div class="sim-pickers">
               <select id="sim-var" style="background:#081322;color:#e8f3fb;border:1px solid rgba(56,189,248,.3);border-radius:7px;padding:6px 10px;font-size:12.5px">${VARS.map(v=>`<option value="${v.key}" ${v.key===state.varKey?'selected':''}>${v.name()} (${v.unit})</option>`).join('')}</select>
             </div>
           </div>
           <div class="sim-predict-grid">
-            <div>
-              ${buildChartSvg(pts,mk,state.targetYear,vMeta.unit,vMeta.d)}
-              <label class="sim-slider-box" style="margin-top:8px">
-                <div class="sim-slider-top"><span>${tx('Target future year','Año futuro a predecir')}</span><strong>${state.targetYear}</strong></div>
-                <input id="sim-year" type="range" min="2026" max="2050" step="1" value="${state.targetYear}">
-              </label>
-            </div>
-            <div class="sim-kpis" style="grid-template-columns:1fr 1fr">
-              <article class="sim-kpi"><span>${tx('PREDICTED','PREDICCIÓN')} ${state.targetYear}</span><strong>${predVal!==null?`${fmt(predVal,vMeta.d)} ${vMeta.unit}`:'—'}</strong><small>${predLo!==null?`${tx('95% range','Rango 95%')}: [${fmt(predLo,vMeta.d)}, ${fmt(predHi,vMeta.d)}]`:''}</small></article>
-              <article class="sim-kpi"><span>${tx('CHANGE VS. 01–10 BASE','DIFERENCIA VS. BASE 01–10')}</span><strong>${predDiffBase!==null?`${signed(predDiffBase,vMeta.d)} ${vMeta.unit}`:'—'}</strong><small>${tx('Observed slope','Tasa observada')}: ${Number.isFinite(mk.slope)?`${signed(mk.slope*10,vMeta.d+1)}/${tx('dec','déc')}`:'—'}</small></article>
-              <article class="sim-kpi"><span>${tx('CURRENT + 7-DAY FORECAST','ACTUAL + PRONÓSTICO 7 DÍAS')}</span><strong>${activeCur?`${fmt(activeCur.temperature,1)} °C`:'—'}</strong><small>${fc7.length?`7d: ${fmt(fcTempAvg,1)} °C · ${fmt(fcRainSum,1)} mm`:tx('7-day series pending','Serie 7 días pendiente')}</small></article>
-              <article class="sim-kpi"><span>${tx('STRESS INDEX (IEA)','ÍNDICE DE ESTRÉS (IEA)')}</span><strong>${m&&Number.isFinite(m.iea)?fmt(m.iea,2):'—'}</strong><small>${m?m.ieaLevel:'—'}</small></article>
-            </div>
+            <div>${chartHtml}</div>
+            <div class="sim-kpis" style="grid-template-columns:1fr 1fr">${kpisHtml}</div>
           </div>
-          <p class="sim-footnote">${tx('Statistical projection extrapolates the observed Theil–Sen trend (2001–2025) with its 95% confidence band; short-term 7-day values come from Open-Meteo/GFS.','La proyección estadística extrapola la tendencia real Theil–Sen (2001–2025) con su banda IC 95%; los próximos 7 días provienen de Open-Meteo/GFS.')}</p>
+          <p class="sim-footnote">${footnote}</p>
         </section>
 
         <section class="sim-playground">
@@ -213,9 +344,10 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
     el.querySelector('#sim-canton').onchange=e=>{state.site=e.target.value;state.district=null;onSelectTerritory?.(state.site,null);render();};
     el.querySelector('#sim-dist')?.addEventListener('change',e=>{state.district=e.target.value||null;onSelectTerritory?.(state.site,state.district);render();});
     el.querySelector('#sim-var').onchange=e=>{state.varKey=e.target.value;render();};
-    el.querySelector('#sim-year').oninput=e=>{state.targetYear=+e.target.value;render();};
+    el.querySelector('#sim-year')?.addEventListener('input',e=>{state.targetYear=+e.target.value;render();});
     el.querySelector('#sim-dt').oninput=e=>{state.deltaT=+e.target.value;render();};
     el.querySelector('#sim-dp').oninput=e=>{state.deltaP=+e.target.value;render();};
+    el.querySelectorAll('[data-hz]').forEach(b=>b.onclick=()=>{state.horizon=b.dataset.hz;render();});
     el.querySelectorAll('.sim-preset').forEach(b=>b.onclick=()=>{state.deltaT=+b.dataset.dt;state.deltaP=+b.dataset.dp;render();});
     el.querySelectorAll('[data-pick-var]').forEach(r=>r.onclick=()=>{state.varKey=r.dataset.pickVar;render();});
   }

@@ -88,3 +88,16 @@
 .sim-table tbody tr{cursor:pointer}
 .sim-table tbody tr:hover{background:rgba(56,189,248,.08)}
 .sim-table tbody tr.is-row-on{background:rgba(24,216,107,.11)}
+.sim-horizon-tabs{display:flex;flex-wrap:wrap;gap:6px}
+.sim-horizon-tab{
+  background:#081322;border:1px solid rgba(56,189,248,.24);color:#cbe4f8;
+  border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;
+}
+.sim-horizon-tab:hover{border-color:#38bdf8;color:#f0f8ff}
+.sim-horizon-tab.is-on{background:rgba(56,189,248,.2);border-color:#38bdf8;color:#ffffff}
+.sim-live-badge{
+  display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;
+  background:rgba(24,216,107,.12);border:1px solid rgba(74,222,128,.35);
+  color:#86efac;font-size:11px;font-weight:600;
+}
+.sim-live-dot{width:6px;height:6px;border-radius:50%;background:#4ade80}
