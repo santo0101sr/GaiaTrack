@@ -494,6 +494,66 @@ function renderStats(){
       :`${tx('Mean','Media')} ${format(meanCI.mean,v().digits)} ± ${format(meanCI.margin,v().digits)}${slopeCIStr}`;
   }
 
+  const simStrip=$('#sim-projection-strip');
+  if(simStrip){
+    const validPts=points.filter(d=>Number.isFinite(d.value));
+    const lastPt=validPts[validPts.length-1];
+    const baseMean=baseVals.length?baseVals.reduce((a,b)=>a+b,0)/baseVals.length:null;
+    const validFull=fullSeries.filter(d=>Number.isFinite(d.value));
+    const fullMean=validFull.length?validFull.reduce((a,b)=>a+b,0)/validFull.length:null;
+    const fullStd=validFull.length>2?Math.sqrt(validFull.reduce((a,b)=>a+(b.value-fullMean)**2,0)/(validFull.length-1)):null;
+    const anomalies=fullStd>1e-9?validFull.map(d=>({...d,z:(d.value-fullMean)/fullStd,diff:d.value-fullMean})).filter(d=>Math.abs(d.z)>=1.4).sort((a,b)=>Math.abs(b.z)-Math.abs(a.z)).slice(0,3):[];
+    const canProj=lastPt&&Number.isFinite(t.slope)&&t.n>=10;
+    const p2030=canProj?lastPt.value+t.slope*(2030-lastPt.year):null;
+    const p2050=canProj?lastPt.value+t.slope*(2050-lastPt.year):null;
+    const diffBase=(lastPt&&baseMean!==null)?lastPt.value-baseMean:null;
+    const anomHtml=anomalies.length
+      ?anomalies.map(a=>`<span class="sim-chip ${a.z>0?'is-high':'is-low'}">${a.year}: ${signed(a.z,1)}σ (${signed(a.diff,v().digits)} ${deltaUnit()})</span>`).join('')
+      :`<small>${tx('No years beyond ±1.4σ in this series','Sin años fuera de ±1,4σ en esta serie')}</small>`;
+    const matrixRows=VARIABLES.map(vr=>{
+      const rawArr=(s.series?.[vr.key]||[]).map((val,idx)=>({year:YEARS[idx],value:val})).filter(d=>d.year>=state.start&&d.year<=state.end&&Number.isFinite(d.value));
+      if(!rawArr.length)return '';
+      const last=rawArr[rawArr.length-1];
+      const bArr=rawArr.filter(d=>d.year>=2001&&d.year<=2010).map(d=>d.value);
+      const bAvg=bArr.length?bArr.reduce((a,b)=>a+b,0)/bArr.length:null;
+      const dBase=bAvg!==null?last.value-bAvg:null;
+      const tr=mannKendall(rawArr.map(d=>d.year),rawArr.map(d=>d.value));
+      const dec=Number.isFinite(tr.slope)?tr.slope*10:null;
+      const pr30=Number.isFinite(tr.slope)&&tr.n>=10?last.value+tr.slope*(2030-last.year):null;
+      const pr50=Number.isFinite(tr.slope)&&tr.n>=10?last.value+tr.slope*(2050-last.year):null;
+      const mAll=rawArr.reduce((a,b)=>a+b.value,0)/rawArr.length;
+      const sdAll=rawArr.length>2?Math.sqrt(rawArr.reduce((a,b)=>a+(b.value-mAll)**2,0)/(rawArr.length-1)):0;
+      const ext=sdAll>1e-9?rawArr.reduce((best,d)=>{const z=(d.value-mAll)/sdAll;return Math.abs(z)>Math.abs(best.z)?{...d,z}:best;},{z:0}):null;
+      const rowActive=vr.key===state.variable?'is-active':'';
+      return `<tr class="${rowActive}" data-sim-var="${vr.key}"><td><strong>${vr.label()}</strong><small>${vr.unit}</small></td><td>${bAvg!==null?format(bAvg,vr.digits):'—'}</td><td><strong>${format(last.value,vr.digits)}</strong> <small>(${last.year})</small></td><td class="${dBase>0?'is-up':dBase<0?'is-down':''}">${dBase!==null?signed(dBase,vr.digits):'—'}</td><td>${dec!==null?signed(dec,vr.digits+1):'—'}</td><td>${pr30!==null?`${format(pr30,vr.digits)} → ${format(pr50,vr.digits)}`:'—'}</td><td>${ext&&Math.abs(ext.z)>=1?`${ext.year} (${signed(ext.z,1)}σ · ${format(ext.value,vr.digits)})`:'—'}</td></tr>`;
+    }).join('');
+    simStrip.innerHTML=`
+      <div class="sim-cards-row">
+      <article class="sim-insight-card">
+        <span class="section-label">${tx('FUTURE TREND PROJECTION · 2030 / 2050','PROYECCIÓN DE TENDENCIA · 2030 / 2050')}</span>
+        <strong>${canProj?`${format(p2030,v().digits)} → ${format(p2050,v().digits)} ${v().unit}`:'—'}</strong>
+        <small>${canProj?tx(`Linear Theil–Sen extrapolation from ${lastPt.year} (${format(lastPt.value,v().digits)} ${v().unit}). Exploratory, not a deterministic forecast.`,`Extrapolación lineal Theil–Sen desde ${lastPt.year} (${format(lastPt.value,v().digits)} ${v().unit}). Exploratoria, no es un pronóstico determinista.`):tx('Requires ≥10 complete years to project','Requiere ≥10 años completos para proyectar')}</small>
+      </article>
+      <article class="sim-insight-card">
+        <span class="section-label">${tx('DETECTED IRREGULARITIES (|Z| ≥ 1.4)','IRREGULARIDADES DETECTADAS (|Z| ≥ 1,4)')}</span>
+        <div class="sim-chips">${anomHtml}</div>
+        <small>${tx('Extreme years compared against this territory’s 2001–2025 mean','Años atípicos comparados contra la media 2001–2025 de este territorio')}</small>
+      </article>
+      <article class="sim-insight-card">
+        <span class="section-label">${tx('DIFFERENCE VS. 2001–2010 BASELINE','DIFERENCIA VS. BASE 2001–2010')}</span>
+        <strong>${diffBase!==null?`${signed(diffBase,v().digits)} ${deltaUnit()}`:'—'}</strong>
+        <small>${lastPt&&baseMean!==null?tx(`${lastPt.year}: ${format(lastPt.value,v().digits)} vs. base ${format(baseMean,v().digits)} ${v().unit}`,`${lastPt.year}: ${format(lastPt.value,v().digits)} vs. base ${format(baseMean,v().digits)} ${v().unit}`):tx('Baseline comparison unavailable','Comparación base no disponible')}</small>
+        <button type="button" id="jump-whatif" class="sim-jump-btn">${tx('Open "What if…?" Simulator ↓','Abrir Simulador "¿Qué pasa si…?" ↓')}</button>
+      </article>
+      </div>
+      <div class="sim-matrix-wrap">
+        <div class="sim-matrix-head"><span>${tx('SPECIFIC DATA BY VARIABLE','DATOS ESPECÍFICOS POR VARIABLE')} · <strong>${s.name}</strong></span><small>${tx('Click any row to inspect its chart','Clic en cualquier fila para ver su gráfica')}</small></div>
+        <div class="sim-matrix-scroll"><table class="sim-matrix"><thead><tr><th>${tx('Variable','Variable')}</th><th>${tx('Base 01–10','Base 01–10')}</th><th>${tx('Latest','Último')}</th><th>${tx('Diff (Δ)','Diferencia')}</th><th>${tx('Rate / dec','Tasa / déc')}</th><th>${tx('Proj. 2030 → 2050','Proy. 2030 → 2050')}</th><th>${tx('Peak anomaly','Año más atípico')}</th></tr></thead><tbody>${matrixRows}</tbody></table></div>
+      </div>`;
+    simStrip.querySelectorAll('[data-sim-var]').forEach(row=>row.addEventListener('click',()=>{state.variable=row.dataset.simVar;$('#quick-variable-select').value=state.variable;render();}));
+    simStrip.querySelector('#jump-whatif')?.addEventListener('click',()=>{document.querySelector('#recomendaciones')?.scrollIntoView({behavior:'smooth'});});
+  }
+
   const zSummary=Array.isArray(s.monthly)&&s.monthly.length?siteZSummary(s.monthly,state.start,state.end,2001,2010):null;
   if($('#calc-z-iea')){
     const ieaVal=zSummary?.periodIEA?.iea;

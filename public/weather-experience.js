@@ -112,11 +112,13 @@ function syncProv(id,raw,territory,normalized){
     sys={g,sky,field,raw:null,sectors:null,thunder:false,flash:0,nextFlash:0};provSystems.set(id,sys);
   }
   const sec=readSectors(id);
-  if(sys.raw!==raw||sys.sectors!==sec){
-    sys.raw=raw;sys.sectors=sec;
+  if(sys.raw!==raw||sys.sectors!==sec||sys.prov!==provinceView){
+    sys.raw=raw;sys.sectors=sec;sys.prov=provinceView;
     const secList=resolveSectors(id,'current'),rainSrc=effectiveRainData(normalized,secList);
+    const domain=domainFor(id),hasWet=Number.isFinite(rainSrc.precipitation)&&rainSrc.precipitation>0;
+    const suppressTinyOverview=provinceView===null&&domain.area<.045&&!hasWet&&(normalized.clouds??0)<45&&!(secList?.some(s=>(s.clouds??0)>=45||(s.precipitation??0)>0));
     sys.thunder=isThunderstorm(normalized)||Boolean(secList?.some(isThunderstorm));
-    sys.sky.setWeather(normalized,secList);
+    sys.sky.setWeather(suppressTinyOverview?{...normalized,clouds:0}:normalized,suppressTinyOverview?null:secList);
     sys.field.setCells(sys.sky.cloudFootprints);
     sys.field.setWeather(rainSrc);
   }

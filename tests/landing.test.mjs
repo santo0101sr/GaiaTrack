@@ -1,18 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-test('Pre-app landing portal renders paper authors, media assets, pitch slot, and enters/reopens 3D app', async () => {
+test('Simplified start screen renders centered logo, 4-slide carousel, quantified benefits, NASA Space Apps banner, hidden dormant pitch slot, and one-way 3D app entry', async () => {
   const originalDocument = globalThis.document;
   const originalWindow = globalThis.window;
   const originalLocalStorage = globalThis.localStorage;
   const originalLocation = globalThis.location;
 
   const elements = new Map();
+  const collections = new Map();
   const storage = new Map();
-  const openedUrls = [];
 
   class ClassList {
-    constructor() { this.set = new Set(); }
+    constructor(initial = []) { this.set = new Set(initial); }
     add(...names) { names.forEach(n => this.set.add(n)); }
     remove(...names) { names.forEach(n => this.set.delete(n)); }
     toggle(name, force) {
@@ -24,60 +24,61 @@ test('Pre-app landing portal renders paper authors, media assets, pitch slot, an
   }
 
   class MockElement extends EventTarget {
-    constructor(tag = 'div') {
+    constructor(tag = 'div', attrs = {}, classNames = []) {
       super();
       this.tag = tag;
-      this.id = '';
+      this.id = attrs.id || '';
       this.value = '';
       this.textContent = '';
       this.hidden = false;
-      this.open = false;
+      this.disabled = false;
       this.scrollTop = 0;
       this.paused = false;
-      this.attrs = {};
+      this.attrs = { ...attrs };
       this.children = [];
-      this.classList = new ClassList();
+      this.classList = new ClassList(classNames);
     }
     set innerHTML(html) {
       this._innerHTML = html;
-      for (const [, id] of html.matchAll(/id="([^"]+)"/g)) {
-        const fresh = new MockElement();
-        fresh.id = id;
-        elements.set('#' + id, fresh);
+      collections.clear();
+      collections.set('.lp-slide', []);
+      collections.set('.lp-dot', []);
+      collections.set('[data-slide]', []);
+      collections.set('[data-enter-app]', []);
+      collections.set('[data-lp-lang]', []);
+      collections.set('.lp-chap', []);
+
+      for (const match of html.matchAll(/<([a-z0-9-]+)\s+([^>]*?)>/gi)) {
+        const [, tag, attrStr] = match;
+        const attrs = {};
+        for (const [, k, v] of attrStr.matchAll(/([a-z0-9-]+)(?:="([^"]*)")?/gi)) {
+          attrs[k] = v ?? '';
+        }
+        const classNames = (attrs.class || '').split(/\s+/).filter(Boolean);
+        const el = new MockElement(tag, attrs, classNames);
+        if (attrs.id) elements.set('#' + attrs.id, el);
+        if (classNames.includes('lp-slide')) collections.get('.lp-slide').push(el);
+        if (classNames.includes('lp-dot')) collections.get('.lp-dot').push(el);
+        if ('data-slide' in attrs) collections.get('[data-slide]').push(el);
+        if ('data-enter-app' in attrs) collections.get('[data-enter-app]').push(el);
+        if ('data-lp-lang' in attrs) collections.get('[data-lp-lang]').push(el);
+        if (classNames.includes('lp-chap')) collections.get('.lp-chap').push(el);
+        if ('data-go-next' in attrs) elements.set('[data-go-next]', el);
       }
     }
     get innerHTML() { return this._innerHTML || ''; }
     setAttribute(k, v) { this.attrs[k] = String(v); }
     getAttribute(k) { return this.attrs[k] ?? null; }
-    removeAttribute(k) { delete this.attrs[k]; }
+    pause() { this.paused = true; }
     append(...nodes) {
       for (const n of nodes) {
         this.children.push(n);
         if (n?.id) elements.set('#' + n.id, n);
       }
     }
-    prepend(...nodes) {
-      for (const n of [...nodes].reverse()) {
-        this.children.unshift(n);
-        if (n?.id) elements.set('#' + n.id, n);
-      }
-    }
-    pause() { this.paused = true; }
-    showModal() { this.open = true; this.setAttribute('open', ''); }
-    close() { this.open = false; this.removeAttribute('open'); }
-    scrollTo() {}
-    scrollIntoView() {}
-    querySelector(sel) { return get(sel); }
-    querySelectorAll(sel) {
-      if (sel === '[data-launch]') return [];
-      if (sel === '[data-lp-lang]') return [];
-      if (sel === '.lp-chap') return [];
-      return [];
-    }
-    click() {
-      this.onclick?.();
-      this.dispatchEvent(new Event('click', { cancelable: true }));
-    }
+    querySelector(sel) { return collections.get(sel)?.[0] || elements.get(sel) || null; }
+    querySelectorAll(sel) { return collections.get(sel) || []; }
+    click() { this.dispatchEvent(new Event('click', { cancelable: true })); }
   }
 
   function get(sel) {
@@ -91,17 +92,17 @@ test('Pre-app landing portal renders paper authors, media assets, pitch slot, an
   doc.documentElement = new MockElement('html');
   doc.createElement = tag => new MockElement(tag);
   doc.getElementById = id => elements.get('#' + id) || null;
-  doc.querySelector = sel => get(sel);
+  doc.querySelector = sel => elements.get(sel) || null;
   doc.querySelectorAll = () => [];
 
+  let resizeEvents = 0;
   globalThis.document = doc;
   globalThis.window = {
-    open(url) { openedUrls.push(url); return {}; }
+    dispatchEvent(evt) { if (evt?.type === 'resize') resizeEvents++; }
   };
   globalThis.localStorage = {
     getItem(k) { return storage.has(k) ? storage.get(k) : null; },
-    setItem(k, v) { storage.set(k, String(v)); },
-    removeItem(k) { storage.delete(k); }
+    setItem(k, v) { storage.set(k, String(v)); }
   };
   globalThis.location = { href: 'http://127.0.0.1:4173/', search: '', hash: '' };
 
@@ -109,17 +110,29 @@ test('Pre-app landing portal renders paper authors, media assets, pitch slot, an
   get('#region-mode').addEventListener('click', () => { regionClicks++; });
 
   try {
-    await import('../public/landing.js?landing-test=' + Date.now());
-
+    const landingMod = await import('../public/landing.js?landing-test=' + Date.now());
     const portal = get('#landing-portal');
+
     assert.equal(doc.body.classList.contains('landing-open'), true);
     assert.equal(portal.getAttribute('aria-hidden'), 'false');
 
-    // Verify branding, media links, and all 6 authors from the research paper
+    // Dormant pitch link stays configured in code (empty) and completely hidden from DOM
+    assert.equal(landingMod.PITCH_VIDEO_URL, '');
+    assert.equal(landingMod.getPitchUrl(), '');
+    assert.doesNotMatch(portal.innerHTML, /landing-pitch-btn|landing-pitch-modal|lp-pitch-status/);
+    assert.equal(doc.getElementById('landing-pitch-modal'), null);
+    assert.equal(doc.getElementById('open-landing-btn'), null);
+
+    // No top section navbar should exist inside landing portal
+    assert.doesNotMatch(portal.innerHTML, /class="lp-nav"/);
+
+    // Verify centered brand logo, research paper PDF, demo video, quantified benefits, 6 authors, and NASA Space Apps Challenge banner
     assert.match(portal.innerHTML, /assets\/gaia-eb-final\.png/);
     assert.match(portal.innerHTML, /assets\/gaia-eb-research-paper\.pdf/);
     assert.match(portal.innerHTML, /assets\/gaiatrack-demo\.mp4/);
-    assert.match(portal.innerHTML, /landing-pitch-btn/);
+    for (const token of ['−44.8%', '−32.6%', '89%', '17.5M', 'NASA Space Apps Challenge']) {
+      assert.ok(portal.innerHTML.includes(token), `Missing quantified metric/banner: ${token}`);
+    }
     for (const author of [
       'Francinny Saldaña Abarca',
       'Darren Araya Monge',
@@ -131,34 +144,37 @@ test('Pre-app landing portal renders paper authors, media assets, pitch slot, an
       assert.ok(portal.innerHTML.includes(author), `Missing author ${author}`);
     }
 
-    // Verify #open-landing-btn was added to .topbar nav
-    assert.ok(get('.topbar nav').children.some(el => el.id === 'open-landing-btn'));
+    // Verify slider transitions across slides
+    const slides = portal.querySelectorAll('.lp-slide');
+    assert.equal(slides.length, 4);
+    assert.equal(slides[0].classList.contains('is-active'), true);
+    assert.equal(get('#lp-prev').disabled, true);
 
-    // Opening pitch button when empty opens config dialog; unsafe URLs are rejected; valid https URL opens & saves
-    get('#landing-pitch-btn').click();
-    assert.equal(get('#landing-pitch-modal').open, true);
+    get('#lp-next').click();
+    assert.equal(slides[0].classList.contains('is-active'), false);
+    assert.equal(slides[1].classList.contains('is-active'), true);
+    assert.equal(get('#lp-prev').disabled, false);
 
-    get('#lp-pitch-url-input').value = 'javascript:alert(1)';
-    get('#lp-pitch-save').click();
-    assert.equal(openedUrls.length, 0);
-    assert.equal(get('#landing-pitch-modal').open, true);
+    portal.querySelectorAll('[data-slide]')[3].click();
+    assert.equal(slides[3].classList.contains('is-active'), true);
+    assert.equal(get('#lp-next').disabled, true);
 
-    get('#lp-pitch-url-input').value = 'https://www.youtube.com/watch?v=gaiatrack-pitch';
-    get('#lp-pitch-save').click();
-    assert.deepEqual(openedUrls, ['https://www.youtube.com/watch?v=gaiatrack-pitch']);
-    assert.equal(get('#landing-pitch-modal').open, false);
+    get('#lp-prev').click();
+    assert.equal(slides[2].classList.contains('is-active'), true);
 
-    // Entering main app closes landing portal, pauses video, and invokes #region-mode while intro is active
+    // Entering main app is one-way: closes portal, pauses demo video, resizes, clears intro, and refuses reopening
     get('#landing-enter-app').click();
     assert.equal(doc.body.classList.contains('landing-open'), false);
+    assert.equal(portal.hidden, true);
     assert.equal(portal.getAttribute('aria-hidden'), 'true');
     assert.equal(get('#landing-demo-video').paused, true);
     assert.equal(regionClicks, 1);
+    assert.ok(resizeEvents >= 1);
+    assert.equal(get('.topbar nav').children.some(el => el.id === 'open-landing-btn'), false);
 
-    // Reopening from topbar restores landing view
-    get('#open-landing-btn').click();
-    assert.equal(doc.body.classList.contains('landing-open'), true);
-    assert.equal(portal.getAttribute('aria-hidden'), 'false');
+    landingMod.openLanding();
+    assert.equal(doc.body.classList.contains('landing-open'), false);
+    assert.equal(portal.hidden, true);
   } finally {
     globalThis.document = originalDocument;
     globalThis.window = originalWindow;
