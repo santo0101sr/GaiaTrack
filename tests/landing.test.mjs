@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-test('Simplified start screen renders centered logo, 4-slide carousel, quantified benefits, NASA Space Apps banner, hidden dormant pitch slot, and one-way 3D app entry', async () => {
+test('Unified single giant slide renders centered logo, Trend Detective quantified benefits, video without chapters, NASA challenge banner, hidden pitch slot, and one-way 3D entry', async () => {
   const originalDocument = globalThis.document;
   const originalWindow = globalThis.window;
   const originalLocalStorage = globalThis.localStorage;
@@ -31,7 +31,6 @@ test('Simplified start screen renders centered logo, 4-slide carousel, quantifie
       this.value = '';
       this.textContent = '';
       this.hidden = false;
-      this.disabled = false;
       this.scrollTop = 0;
       this.paused = false;
       this.attrs = { ...attrs };
@@ -41,12 +40,9 @@ test('Simplified start screen renders centered logo, 4-slide carousel, quantifie
     set innerHTML(html) {
       this._innerHTML = html;
       collections.clear();
-      collections.set('.lp-slide', []);
-      collections.set('.lp-dot', []);
-      collections.set('[data-slide]', []);
+      collections.set('.lp-giant-slide', []);
       collections.set('[data-enter-app]', []);
       collections.set('[data-lp-lang]', []);
-      collections.set('.lp-chap', []);
 
       for (const match of html.matchAll(/<([a-z0-9-]+)\s+([^>]*?)>/gi)) {
         const [, tag, attrStr] = match;
@@ -57,13 +53,9 @@ test('Simplified start screen renders centered logo, 4-slide carousel, quantifie
         const classNames = (attrs.class || '').split(/\s+/).filter(Boolean);
         const el = new MockElement(tag, attrs, classNames);
         if (attrs.id) elements.set('#' + attrs.id, el);
-        if (classNames.includes('lp-slide')) collections.get('.lp-slide').push(el);
-        if (classNames.includes('lp-dot')) collections.get('.lp-dot').push(el);
-        if ('data-slide' in attrs) collections.get('[data-slide]').push(el);
+        if (classNames.includes('lp-giant-slide')) collections.get('.lp-giant-slide').push(el);
         if ('data-enter-app' in attrs) collections.get('[data-enter-app]').push(el);
         if ('data-lp-lang' in attrs) collections.get('[data-lp-lang]').push(el);
-        if (classNames.includes('lp-chap')) collections.get('.lp-chap').push(el);
-        if ('data-go-next' in attrs) elements.set('[data-go-next]', el);
       }
     }
     get innerHTML() { return this._innerHTML || ''; }
@@ -116,6 +108,10 @@ test('Simplified start screen renders centered logo, 4-slide carousel, quantifie
     assert.equal(doc.body.classList.contains('landing-open'), true);
     assert.equal(portal.getAttribute('aria-hidden'), 'false');
 
+    // Unified single giant slide without bottom section bar or video chapter buttons
+    assert.equal(portal.querySelectorAll('.lp-giant-slide').length, 1);
+    assert.doesNotMatch(portal.innerHTML, /class="lp-nav"|lp-slider-bar|lp-chapters|lp-chap|data-slide=|lp-prev|lp-next|data-go-next/);
+
     // Dormant pitch link stays configured in code (empty) and completely hidden from DOM
     assert.equal(landingMod.PITCH_VIDEO_URL, '');
     assert.equal(landingMod.getPitchUrl(), '');
@@ -123,15 +119,22 @@ test('Simplified start screen renders centered logo, 4-slide carousel, quantifie
     assert.equal(doc.getElementById('landing-pitch-modal'), null);
     assert.equal(doc.getElementById('open-landing-btn'), null);
 
-    // No top section navbar should exist inside landing portal
-    assert.doesNotMatch(portal.innerHTML, /class="lp-nav"/);
-
-    // Verify centered brand logo, research paper PDF, demo video, quantified benefits, 6 authors, and NASA Space Apps Challenge banner
+    // Verify centered brand logo, PDF, demo video, Trend Detective + quantified SbN metrics, 6 authors, and NASA Space Apps banner
     assert.match(portal.innerHTML, /assets\/gaia-eb-final\.png/);
     assert.match(portal.innerHTML, /assets\/gaia-eb-research-paper\.pdf/);
     assert.match(portal.innerHTML, /assets\/gaiatrack-demo\.mp4/);
-    for (const token of ['−44.8%', '−32.6%', '89%', '17.5M', 'NASA Space Apps Challenge']) {
-      assert.ok(portal.innerHTML.includes(token), `Missing quantified metric/banner: ${token}`);
+    for (const token of [
+      '2001–2025',
+      '84',
+      '95%',
+      '89%',
+      '−44.8%',
+      '−32.6%',
+      '17.5M',
+      'NASA Space Apps Challenge',
+      'Earth System Trend Detective'
+    ]) {
+      assert.ok(portal.innerHTML.includes(token), `Missing quantified metric/challenge token: ${token}`);
     }
     for (const author of [
       'Francinny Saldaña Abarca',
@@ -143,24 +146,6 @@ test('Simplified start screen renders centered logo, 4-slide carousel, quantifie
     ]) {
       assert.ok(portal.innerHTML.includes(author), `Missing author ${author}`);
     }
-
-    // Verify slider transitions across slides
-    const slides = portal.querySelectorAll('.lp-slide');
-    assert.equal(slides.length, 4);
-    assert.equal(slides[0].classList.contains('is-active'), true);
-    assert.equal(get('#lp-prev').disabled, true);
-
-    get('#lp-next').click();
-    assert.equal(slides[0].classList.contains('is-active'), false);
-    assert.equal(slides[1].classList.contains('is-active'), true);
-    assert.equal(get('#lp-prev').disabled, false);
-
-    portal.querySelectorAll('[data-slide]')[3].click();
-    assert.equal(slides[3].classList.contains('is-active'), true);
-    assert.equal(get('#lp-next').disabled, true);
-
-    get('#lp-prev').click();
-    assert.equal(slides[2].classList.contains('is-active'), true);
 
     // Entering main app is one-way: closes portal, pauses demo video, resizes, clears intro, and refuses reopening
     get('#landing-enter-app').click();
