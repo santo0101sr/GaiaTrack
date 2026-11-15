@@ -82,3 +82,15 @@
   .province-explorer .flight-bottom{bottom:30px!important;left:50%!important;right:auto!important;width:max-content!important;gap:12px!important}
   .province-explorer .flight-controls{width:310px!important;max-width:calc(100vw - 28px)!important}
 }
+
+#immersive .panel-moved{position:fixed!important;left:var(--panel-x)!important;top:var(--panel-y)!important;right:auto!important;bottom:auto!important;transform:none}
+#immersive .user-minimized{display:none!important}
+.panel-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:-3px 0 12px;padding-bottom:8px;border-bottom:1px solid #a9eddb2b}
+#immersive .panel-toolbar button{border:1px solid #8bb9b347;border-radius:7px;background:#102d3dcc;color:#c2e9df;padding:5px 9px;font-size:10px;line-height:1.2;cursor:pointer;transform:none}
+#immersive .panel-toolbar .panel-move{cursor:grab;touch-action:none;user-select:none}
+#immersive .panel-toolbar .panel-move:active{cursor:grabbing}
+#immersive .panel-toolbar .panel-minimize{font-size:16px;line-height:1;min-width:28px}
+#immersive .panel-dock{position:fixed;z-index:8;left:0;border:1px solid #71cdbb77;border-left:0;border-radius:0 8px 8px 0;background:#102d3df2;color:#d8f8ec;padding:10px 12px;cursor:pointer;font-size:11px}
+#immersive .panel-dock[data-side="right"]{left:auto;right:0;border-left:1px solid #71cdbb77;border-right:0;border-radius:8px 0 0 8px}
+#immersive .panel-dock[hidden],.lab-open #immersive .panel-dock,.intro-playing #immersive .panel-dock,.clean-cockpit #immersive .panel-dock{display:none}
+@media(max-width:700px){#weather-rain-status{top:125px;left:auto;right:12px;width:190px;max-width:48vw;transform:none}}

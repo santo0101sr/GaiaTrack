@@ -30,6 +30,7 @@ function explorerDom() {
       this.className = '';
       this.classList = new ClassList();
     }
+    addEventListener() {}
     setAttribute(k, v) { this.attrs[k] = String(v); }
     append(...nodes) { this.children.push(...nodes); }
     prepend(...nodes) { this.children.unshift(...nodes); }

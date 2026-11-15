@@ -1,6 +1,7 @@
 import * as THREE from './vendor/three.module.js';
 import {cantonsOf,provinceOptionsHtml,territoryOptionsHtml,territoryBounds} from './territories.js';
 import {getLang,tx} from './i18n.js';
+import {attachMovablePanel} from './movable-panels.js';
 
 export function createProvinceExplorer({host,manifest,geo,meshes,beacons,borders,root,camera,coords,onSelect,onFocus,initial=null}) {
   let province=null,selected=null,labels=[];
@@ -9,6 +10,7 @@ export function createProvinceExplorer({host,manifest,geo,meshes,beacons,borders
   const labelLayer=document.createElement('div');
   labelLayer.className='territory-map-labels';
   host.append(navigation,labelLayer);
+  const toolbar=attachMovablePanel(navigation,{id:'territories',english:'Territories',spanish:'Territorios',parent:host});
   document.body.classList.add('province-explorer');
   const provinceSelect=host.querySelector('#hud-province-select');
   const cantonSelect=host.querySelector('#hud-site-select');
@@ -69,7 +71,7 @@ export function createProvinceExplorer({host,manifest,geo,meshes,beacons,borders
       'NASA POWER + Open-Meteo · Reference-point model estimates. Rain and clouds follow the reported data and update time.',
       'NASA POWER + Open-Meteo · Estimaciones por punto de referencia. Lluvia y nubes responden a los datos reportados y su hora de actualización.');
     navigation.setAttribute('aria-label',tx('Territory navigation','Navegación territorial'));
-    navigation.replaceChildren();
+    navigation.replaceChildren(toolbar);
     const breadcrumb=document.createElement('div');breadcrumb.className='territory-breadcrumb';
     const back=document.createElement('button');back.type='button';back.textContent=province?'← Costa Rica':'COSTA RICA';back.onclick=()=>country(true);
     breadcrumb.append(back);

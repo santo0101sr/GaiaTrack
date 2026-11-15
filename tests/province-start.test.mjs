@@ -11,6 +11,7 @@ test('Explorer opens unselected, selects only after input, and returning to coun
     append(...children){this.children.push(...children);}
     prepend(child){this.children.unshift(child);}
     replaceChildren(...children){this.children=children;}
+    addEventListener() {}
     setAttribute(name,value){this.attributes.set(name,value);}
     querySelector(selector){if(!elements.has(selector))elements.set(selector,new Element());return elements.get(selector);}
   }
