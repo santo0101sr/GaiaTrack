@@ -192,3 +192,14 @@
   .brand-logo{width:136px;max-height:56px}
 }
 @media(prefers-reduced-motion:reduce){.lab-disclosure-plus{transition:none}}
+
+.sim-insights-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:14px 0 18px}
+.sim-insight-card{background:rgba(10,28,54,.68);border:1px solid rgba(56,189,248,.22);border-radius:12px;padding:13px 15px;display:flex;flex-direction:column;gap:6px}
+.sim-insight-card strong{font-size:1.08rem;color:#e8f6ff}
+.sim-insight-card small{color:#9ab6d4;line-height:1.4}
+.sim-chips{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0}
+.sim-chip{font-size:.78rem;padding:3px 8px;border-radius:999px;background:rgba(56,189,248,.14);border:1px solid rgba(56,189,248,.32);color:#d7efff}
+.sim-chip.is-high{background:rgba(245,179,22,.15);border-color:rgba(245,179,22,.4);color:#fde68a}
+.sim-chip.is-low{background:rgba(20,184,230,.15);border-color:rgba(20,184,230,.4);color:#bae6fd}
+.sim-jump-btn{margin-top:auto;align-self:flex-start;background:rgba(24,216,107,.14);border:1px solid rgba(24,216,107,.38);color:#86efac;border-radius:8px;padding:5px 10px;font-size:.8rem;cursor:pointer}
+.sim-jump-btn:hover{background:rgba(24,216,107,.24)}
