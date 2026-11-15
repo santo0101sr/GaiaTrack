@@ -247,44 +247,44 @@ export function buildRecommendations(siteId, weather = {}, forecastDays = [], op
   // 1. Live storm / rain + wind risk
   if (rainRate !== null && rainRate >= 3.5) {
     tips.push(en ? {
-      tag: 'Heavy rain & lightning',
+      tag: '⚡ Heavy rain & lightning',
       tone: 'alert',
       title: mountainOrRural ? 'Caution near rivers, roads & open terrain' : 'Heavy downpour & lightning risk',
       body: mountainOrRural
         ? 'Avoid crossing swollen rivers or streams, take shelter indoors during thunder (away from isolated trees or fences), and watch steep rural embankments.'
         : 'Check downspouts and storm drains to prevent flash ponding, avoid open areas during lightning, and keep extra braking distance.'
     } : {
-      tag: 'Lluvia fuerte y rayería',
+      tag: '⚡ Lluvia fuerte y rayería',
       tone: 'alert',
       title: mountainOrRural ? 'Precaución en cauces, caminos y zonas abiertas' : 'Aguacero intenso y riesgo de rayería',
       body: mountainOrRural
-        ? 'Evita cruzar ríos o quebradas crecidas, resguárdate bajo techo ante truenos (lejos de árboles aislados o cercas) y vigila taludes en caminos rurales.'
-        : 'Revisa bajantes y alcantarillas para evitar anegamientos rápidos, evita zonas abiertas durante actividad eléctrica y conduce con distancia extra.'
+        ? 'Evitá cruzar ríos o quebradas crecidas, resguardate bajo techo ante truenos (lejos de árboles aislados o cercas) y vigilá taludes en caminos rurales.'
+        : 'Revisá bajantes y alcantarillas para evitar anegamientos rápidos, evitá zonas abiertas durante actividad eléctrica y conducí con distancia extra.'
     });
   } else if (rainRate !== null && rainRate > 0) {
     tips.push(en ? {
-      tag: 'Light rain',
+      tag: '🌧 Light rain',
       tone: 'rain',
       title: 'Active rainfall in your area',
       body: profile.kind === 'mountain'
         ? 'Expect mist-reduced visibility and wet slopes. Good window for rainwater harvesting in gardens.'
         : 'Gentle rain cooling the air and recharging soil; bring a raincoat or umbrella if heading out.'
     } : {
-      tag: 'Lluvia ligera',
+      tag: '🌧 Lluvia ligera',
       tone: 'rain',
       title: 'Lluvia activa en tu zona',
       body: profile.kind === 'mountain'
-        ? 'Espera visibilidad reducida por neblina y calzada húmeda en pendientes. Buen momento para captar agua de lluvia para huertas.'
-        : 'Lluvia suave que refresca el ambiente y recarga jardines; ten a mano capa o paraguas si sales.'
+        ? 'Esperá visibilidad reducida por neblina y calzada húmeda en pendientes. Buen momento para captar agua de lluvia para huertas.'
+        : 'Lluvia suave que refresca el ambiente y recarga jardines; tené a mano capa o paraguas si salís.'
     });
   } else if (clouds !== null && clouds >= 80 && temp !== null && temp <= 20) {
     tips.push(en ? {
-      tag: 'Overcast sky',
+      tag: '☁ Overcast sky',
       tone: 'calm',
       title: 'Cloudy & cool conditions',
       body: 'Dense cloud cover with possible light mountain drizzle; comfortable for light walks with a warm layer.'
     } : {
-      tag: 'Cielo cubierto',
+      tag: '☁ Cielo cubierto',
       tone: 'calm',
       title: 'Ambiente nublado y fresco',
       body: 'Alta nubosidad con posible llovizna intermitente en zonas altas; ideal para caminatas suaves cuidando el abrigo ligero.'
@@ -298,48 +298,48 @@ export function buildRecommendations(siteId, weather = {}, forecastDays = [], op
     if (zT !== null && zT >= 1.2) {
       const signT = metrics.anomalies.tempC >= 0 ? '+' : '';
       tips.push(en ? {
-        tag: `Thermal anomaly (${signT}${metrics.anomalies.tempC.toFixed(1)} °C)`,
+        tag: `🌡 Thermal anomaly (${signT}${metrics.anomalies.tempC.toFixed(1)} °C)`,
         tone: 'sun',
         title: `Temperature above monthly baseline (Z = +${zT.toFixed(1)})`,
         body: profile.kind === 'dry-coast'
           ? 'Unusually warm for this month: prioritize hydration, livestock/crop shade, and off-peak irrigation.'
           : 'Exceeds the historical average for this calendar month; ventilate rooms and limit midday sun exposure.'
       } : {
-        tag: `Anomalía térmica (+${metrics.anomalies.tempC.toFixed(1)} °C)`,
+        tag: `🌡 Anomalía térmica (+${metrics.anomalies.tempC.toFixed(1)} °C)`,
         tone: 'sun',
         title: `Temperatura por encima de lo habitual para el mes (Z = +${zT.toFixed(1)})`,
         body: profile.kind === 'dry-coast'
-          ? 'Calor anómalo para la época: prioriza hidratación, sombra en ganado/cultivos y riego fuera de horas pico.'
-          : 'Supera la referencia histórica de este mismo mes; ventila espacios y evita exposición solar intensa al mediodía.'
+          ? 'Calor anómalo para la época: priorizá hidratación, sombra en ganado/cultivos y riego fuera de horas pico.'
+          : 'Supera la referencia histórica de este mismo mes; ventilá espacios y evitá exposición solar intensa al mediodía.'
       });
     }
     if (zP !== null && zP <= -1.0) {
       tips.push(en ? {
-        tag: 'Seasonal water deficit',
+        tag: '🌵 Seasonal water deficit',
         tone: 'alert',
         title: `Rainfall below monthly mean (Iₚ = +${metrics.indicators.I_P.toFixed(1)})`,
         body: `Deficit in NASA ${metrics.historyYear} closure vs. 2001–2025 baseline for this month: avoid agricultural burning and retain soil moisture with mulch.`
       } : {
-        tag: 'Déficit hídrico estacional',
+        tag: '🌵 Déficit hídrico estacional',
         tone: 'alert',
         title: `Lluvia por debajo del promedio del mes (Iₚ = +${metrics.indicators.I_P.toFixed(1)})`,
-        body: `Déficit en cierre NASA ${metrics.historyYear} respecto a 2001–2025 para este mes: evita quemas agrícolas y protege la humedad del suelo con cobertura orgánica.`
+        body: `Déficit en cierre NASA ${metrics.historyYear} respecto a 2001–2025 para este mes: evitá quemas agrícolas y protegé la humedad del suelo con cobertura orgánica.`
       });
     } else if (zP !== null && zP >= 1.2 && !(rainRate !== null && rainRate >= 3.5)) {
       tips.push(en ? {
-        tag: 'Monthly rainfall surplus',
+        tag: '🌊 Monthly rainfall surplus',
         tone: 'rain',
         title: `Monthly accumulation above historical baseline (${metrics.historyYear})`,
         body: mountainOrRural
           ? 'Exceeds the monthly historical baseline: keep runoff channels clear and monitor hillside soils.'
           : 'Higher moisture load than the monthly norm; check storm drains and roofs ahead of afternoon showers.'
       } : {
-        tag: 'Exceso de lluvia mensual',
+        tag: '🌊 Exceso de lluvia mensual',
         tone: 'rain',
         title: `Acumulación mensual superior a la referencia histórica (${metrics.historyYear})`,
         body: mountainOrRural
-          ? 'Supera su referencia histórica de precipitación: mantén limpios canales de escorrentía y vigila suelos en pendiente.'
-          : 'Mayor carga hídrica que el promedio del mes; revisa drenajes pluviales y techos antes de aguaceros vespertinos.'
+          ? 'Supera su referencia histórica de precipitación: mantené limpios canales de escorrentía y vigilá suelos en pendiente.'
+          : 'Mayor carga hídrica que el promedio del mes; revisá drenajes pluviales y techos antes de aguaceros vespertinos.'
       });
     }
   }
@@ -347,77 +347,77 @@ export function buildRecommendations(siteId, weather = {}, forecastDays = [], op
   // 3. Soil & UV / radiation & wind rules
   if (soil !== null && soil >= 0.36) {
     tips.push(en ? {
-      tag: 'Saturated soil',
+      tag: '🌱 Saturated soil',
       tone: mountainOrRural ? 'alert' : 'eco',
       title: 'High surface soil moisture',
       body: mountainOrRural
         ? 'Ground is heavily saturated: skip irrigation and watch rural slopes or drainage channels before extra rain.'
         : 'Pause watering in gardens and green areas to prevent waterlogging and nutrient runoff.'
     } : {
-      tag: 'Suelo saturado',
+      tag: '🌱 Suelo saturado',
       tone: mountainOrRural ? 'alert' : 'eco',
       title: 'Alta humedad en el suelo superficial',
       body: mountainOrRural
         ? 'El terreno está muy húmedo: no requiere riego y conviene vigilar laderas o drenajes rurales ante lluvias adicionales.'
-        : 'Suspende el riego en jardines y áreas verdes para evitar encharcamientos y pérdida de nutrientes.'
+        : 'Suspendé el riego en jardines y áreas verdes para evitar encharcamientos y pérdida de nutrientes.'
     });
   } else if (soil !== null && soil < 0.22) {
     tips.push(en ? {
-      tag: 'Dry soil',
+      tag: '💧 Dry soil',
       tone: 'sun',
       title: 'Low surface moisture',
       body: 'If tending gardens or young trees, water early morning or dusk and add leaf litter mulch to slow evaporation.'
     } : {
-      tag: 'Suelo seco',
+      tag: '💧 Suelo seco',
       tone: 'sun',
       title: 'Baja humedad superficial',
-      body: 'Si tienes huerta o árboles jóvenes, riega al atardecer o muy temprano y usa hojarasca como acolchado para retener humedad.'
+      body: 'Si tenés huerta o árboles jóvenes, regá al atardecer o muy temprano y usá hojarasca como acolchado para retener humedad.'
     });
   }
 
   if ((solar !== null && solar >= 650) || (temp !== null && temp >= 29)) {
     tips.push(en ? {
-      tag: 'Solar & heat load',
+      tag: '☼ Solar & heat load',
       tone: 'sun',
       title: 'High solar exposure',
       body: 'Wear sunscreen, a hat, and hydrate frequently between 10:00 AM and 3:00 PM; shield sun-sensitive crops in rural plots.'
     } : {
-      tag: 'Radiación y calor',
+      tag: '☼ Radiación y calor',
       tone: 'sun',
       title: 'Exposición solar elevada',
-      body: 'Usa bloqueador, gorra e hidratación frecuente entre 10:00 a. m. y 3:00 p. m.; en zonas rurales, protege cultivos sensibles al sol directo.'
+      body: 'Usá bloqueador, gorra e hidratación frecuente entre 10:00 a. m. y 3:00 p. m.; en zonas rurales, protegé cultivos sensibles al sol directo.'
     });
   } else if (wind !== null && wind >= 7) {
     tips.push(en ? {
-      tag: 'Brisk wind',
+      tag: '🌬 Brisk wind',
       tone: 'calm',
       title: 'Noticeable gusts',
       body: 'Secure lightweight items on patios or roofs and watch for dry branches along tree-lined trails.'
     } : {
-      tag: 'Viento acelerado',
+      tag: '🌬 Viento acelerado',
       tone: 'calm',
       title: 'Ráfagas perceptibles',
-      body: 'Asegura objetos livianos en patios o techos y cuida ramas secas cerca de senderos arbolados.'
+      body: 'Asegurá objetos livianos en patios o techos y cuidá ramas secas cerca de senderos arbolados.'
     });
   }
 
   const rainyTomorrow = forecastDays?.[0]?.PRECTOTCORR >= 8;
   if (rainyTomorrow && tips.length < 3) {
     tips.push(en ? {
-      tag: 'Next 24 hours',
+      tag: '📅 Next 24 hours',
       tone: 'rain',
       title: 'Significant rain expected tomorrow',
       body: 'Plan outdoor activities or fieldwork during morning hours before afternoon downpours build.'
     } : {
-      tag: 'Próximas 24 h',
+      tag: '📅 Próximas 24 h',
       tone: 'rain',
       title: 'Se prevén lluvias importantes mañana',
-      body: 'Planifica actividades al aire libre o labores agrícolas para las horas de la mañana antes de los aguaceros de la tarde.'
+      body: 'Planificá actividades al aire libre o labores agrícolas para las horas de la mañana antes de los aguaceros de la tarde.'
     });
   }
 
   tips.push({
-    tag: en ? 'Local ecology' : 'Ecología local',
+    tag: en ? '🌿 Local ecology' : '🌿 Ecología local',
     tone: 'eco',
     title: profile.zone,
     body: profile.eco

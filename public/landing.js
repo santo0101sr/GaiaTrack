@@ -1,13 +1,4 @@
-import {getLang,getTheme,setLang,toggleTheme,tx,locale} from './i18n.js';
-import {icon} from './icons.js';
-import {
-  DATA_VARIABLES_COUNT,
-  MERRA2_RES,
-  CERES_RES,
-  REAL_DATA_SOURCES,
-  deriveManifestFacts,
-  computeSiteTrendHighlight
-} from './site-facts.js';
+import {getLang,getTheme,setLang,toggleTheme,tx} from './i18n.js';
 
 // Paste the final Pitch Video URL here when ready; UI stays hidden while empty.
 export const PITCH_VIDEO_URL='';
@@ -39,43 +30,6 @@ export function renderAuthorAvatar(author){
 let portal=null;
 let hasEnteredApp=false;
 let authorIndex=0;
-let landingFacts=null;
-let trendCompare=null;
-
-function fmtNum(n,d=1){
-  return Number.isFinite(n)?new Intl.NumberFormat(locale(),{minimumFractionDigits:d,maximumFractionDigits:d}).format(n):'—';
-}
-function fmtSigned(n,d=2){
-  return Number.isFinite(n)?((n>0?'+':'')+fmtNum(n,d)):'—';
-}
-
-export function setLandingFacts({manifest=null,annual=null,sectorsCount=null,districtsCount=null}={}){
-  if(manifest){
-    landingFacts=deriveManifestFacts(manifest,{sectorsCount,districtsCount});
-  }
-  if(annual){
-    const heredia=computeSiteTrendHighlight(annual,'heredia','T2M');
-    const guanacaste=computeSiteTrendHighlight(annual,'guanacaste','T2M');
-    if(heredia||guanacaste)trendCompare={heredia,guanacaste};
-  }
-  if(portal&&!hasEnteredApp)render();
-}
-
-async function hydrateLandingFacts(){
-  if(typeof fetch!=='function')return;
-  try{
-    const fetchJson=url=>fetch(url).then(r=>r.ok?r.json():null).catch(()=>null);
-    const [manifest,annual,sectors,districtBorders]=await Promise.all([
-      fetchJson('data/manifest.json?v=18'),
-      fetchJson('data/annual.json?v=18'),
-      fetchJson('data/sectors.json?v=2'),
-      fetchJson('data/district-borders.json?v=1')
-    ]);
-    const sectorsCount=sectors?Object.values(sectors).reduce((sum,list)=>sum+(Array.isArray(list)?list.length:0),0):null;
-    const districtsCount=districtBorders?Object.values(districtBorders).reduce((sum,list)=>sum+(Array.isArray(list)?list.length:0),0):null;
-    if(manifest||annual)setLandingFacts({manifest,annual,sectorsCount,districtsCount});
-  }catch{}
-}
 
 function sanitizeExternalUrl(raw){
   if(!raw||typeof raw!=='string')return '';
@@ -152,151 +106,77 @@ export function closeLanding(target='app'){
   }
 }
 
-function formatP(p){
-  if(!Number.isFinite(p))return '—';
-  return p<0.001?'< 0.001':`= ${fmtNum(p,3)}`;
-}
-
-function buildHeroTrendPreview(){
-  const h=trendCompare?.heredia;
-  const g=trendCompare?.guanacaste;
-  const startY=h?.points?.[0]?.year??2001;
-  const endY=h?.latestPoint?.year??2025;
-  const hZ=h?.zPoints||[];
-  const gZ=g?.zPoints||[];
-
-  if(!hZ.length&&!gZ.length){
-    return `<div class="lp-preview-card" aria-label="${tx('Live NASA POWER trend preview','Vista previa de tendencia NASA POWER')}">
-      <div class="lp-preview-head">
-        <div>
-          <span class="lp-badge is-observed">${tx('OBSERVED NASA POWER · 2001–2025','DATO OBSERVADO NASA POWER · 2001–2025')}</span>
-          <strong>${tx('Mean temperature Z-score · Heredia vs. Guanacaste','Z-score de temperatura media · Heredia vs. Guanacaste')}</strong>
-        </div>
-        <span class="lp-preview-meta">${tx('Loading series…','Cargando serie…')}</span>
-      </div>
-      <svg class="lp-preview-svg" viewBox="0 0 640 210" role="img" aria-label="${tx('NASA POWER time series preview','Vista previa de serie NASA POWER')}">
-        <rect x="44" y="16" width="218" height="162" fill="var(--surface-subtle)" opacity="0.5"/>
-        <line x1="44" y1="97" x2="620" y2="97" stroke="var(--border)" stroke-dasharray="4 4"/>
-        <text x="332" y="101" text-anchor="middle" fill="var(--muted)" font-size="12">${tx('Fetching NASA POWER annual telemetry…','Cargando telemetría anual NASA POWER…')}</text>
-      </svg>
-    </div>`;
-  }
-
-  const allPts=[...hZ,...gZ];
-  const vals=allPts.map(p=>p.value);
-  let min=Math.min(-2.1,...vals),max=Math.max(2.3,...vals);
-  const pad=(max-min||1)*0.12;min-=pad;max+=pad;
-  const W=640,H=210,L=44,R=16,T=18,B=30;
-  const x=yr=>L+((yr-startY)/(Math.max(1,endY-startY)))*(W-L-R);
-  const y=v=>T+((max-v)/(max-min||1))*(H-T-B);
-  const lineD=pts=>pts.map((p,i)=>`${i?'L':'M'}${x(p.year).toFixed(1)},${y(p.value).toFixed(1)}`).join(' ');
-
-  // 2001-2010 reference baseline window
-  const baseX1=x(Math.max(startY,2001)),baseX2=x(Math.min(endY,2010));
-  const baseBand=baseX2>baseX1?`<rect x="${baseX1.toFixed(1)}" y="${T}" width="${(baseX2-baseX1).toFixed(1)}" height="${H-T-B}" fill="var(--accent)" opacity="0.06"/><text x="${(baseX1+6).toFixed(1)}" y="${T+12}" fill="var(--muted)" font-size="9">${tx('2001–2010 baseline','Base 2001–2010')}</text>`:'';
-
-  // Theil-Sen fitted slope & 95% CI cone (in Z units centered at mid-series)
-  let senHtml='';
-  if(hZ.length>=2&&Number.isFinite(h.zSlopePerDecade)){
-    const slopeZ=h.zSlopePerDecade/10;
-    const midIdx=Math.floor(hZ.length/2);
-    const midYr=hZ[midIdx].year;
-    const midVal=h?.zTrend?h.zTrend.intercept+h.zTrend.slope*midYr:hZ[midIdx].value;
-    const yStart=midVal+slopeZ*(startY-midYr);
-    const yEnd=midVal+slopeZ*(endY-midYr);
-    if(h.slopeCIDecade&&Number.isFinite(h.baseStd)&&h.baseStd>0){
-      const lowZ=(h.slopeCIDecade.lower/10)/h.baseStd;
-      const highZ=(h.slopeCIDecade.upper/10)/h.baseStd;
-      const y1L=midVal+lowZ*(startY-midYr),y1H=midVal+highZ*(startY-midYr);
-      const y2L=midVal+lowZ*(endY-midYr),y2H=midVal+highZ*(endY-midYr);
-      senHtml+=`<polygon points="${x(startY).toFixed(1)},${y(y1L).toFixed(1)} ${x(endY).toFixed(1)},${y(y2L).toFixed(1)} ${x(endY).toFixed(1)},${y(y2H).toFixed(1)} ${x(startY).toFixed(1)},${y(y1H).toFixed(1)}" fill="var(--accent)" opacity="0.13"/>`;
-    }
-    senHtml+=`<line x1="${x(startY).toFixed(1)}" y1="${y(yStart).toFixed(1)}" x2="${x(endY).toFixed(1)}" y2="${y(yEnd).toFixed(1)}" stroke="var(--accent)" stroke-width="1.75" stroke-dasharray="5 4"/>`;
-  }
-
-  const hSlope=h&&Number.isFinite(h.slopePerDecade)?`${fmtSigned(h.slopePerDecade,2)} °C/${tx('dec','déc')}`:'—';
-  const gSlope=g&&Number.isFinite(g.slopePerDecade)?`${fmtSigned(g.slopePerDecade,2)} °C/${tx('dec','déc')}`:'—';
-  const hCi=h?.slopeCIDecade?`[${fmtSigned(h.slopeCIDecade.lower,2)}, ${fmtSigned(h.slopeCIDecade.upper,2)}]`:'';
-
-  return `<div class="lp-preview-card" aria-label="${tx('Live NASA POWER trend preview','Vista previa de tendencia NASA POWER')}">
-    <div class="lp-preview-head">
-      <div>
-        <span class="lp-badge is-observed">${tx('OBSERVED TELEMETRY · NASA POWER 2001–2025','TELEMETRÍA OBSERVADA · NASA POWER 2001–2025')}</span>
-        <strong>${tx('Annual Mean Temperature (Z-Score vs. 2001–2010)','Temperatura media anual (Z-score vs. 2001–2010)')}</strong>
-      </div>
-      <div class="lp-preview-legend">
-        <span><i class="is-h"></i> Heredia ${hSlope} ${hCi} (p ${formatP(h?.mkP)})</span>
-        <span><i class="is-g"></i> Guanacaste ${gSlope} (p ${formatP(g?.mkP)})</span>
-      </div>
-    </div>
-    <svg class="lp-preview-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${tx('Heredia and Guanacaste annual temperature Z-score 2001–2025','Serie anual de temperatura en Heredia y Guanacaste 2001–2025')}">
-      ${baseBand}
-      ${[-2,0,2].map(zTick=>`<line x1="${L}" x2="${W-R}" y1="${y(zTick).toFixed(1)}" y2="${y(zTick).toFixed(1)}" stroke="${zTick===0?'var(--z-zero)':'var(--border)'}" stroke-dasharray="${zTick===0?'4 3':'2 5'}" opacity="${zTick===0?0.75:0.5}"/><text x="${L-8}" y="${(y(zTick)+3.5).toFixed(1)}" text-anchor="end" fill="var(--muted)" font-size="10">${zTick>0?'+2Z':zTick<0?'−2Z':'0'}</text>`).join('')}
-      ${senHtml}
-      ${gZ.length?`<path d="${lineD(gZ)}" fill="none" stroke="var(--blue)" stroke-width="1.8" opacity="0.9"/>`:''}
-      ${hZ.length?`<path d="${lineD(hZ)}" fill="none" stroke="var(--accent)" stroke-width="2.2"/>`:''}
-      ${hZ.map(p=>`<circle cx="${x(p.year).toFixed(1)}" cy="${y(p.value).toFixed(1)}" r="2.5" fill="var(--accent)"/>`).join('')}
-      ${[2001,2007,2013,2019,2025].map(yr=>`<text x="${x(yr).toFixed(1)}" y="${H-8}" text-anchor="middle" fill="var(--muted)" font-size="10">${yr}</text>`).join('')}
-    </svg>
-    <p class="lp-preview-foot">${tx('Dashed line & band: Theil–Sen decadal slope and non-parametric 95% confidence interval for Heredia. Data stays strictly observed; no synthetic gap-filling.','Línea y banda punteadas: pendiente decadal Theil–Sen e intervalo de confianza no paramétrico al 95 % para Heredia. Datos exclusivamente observados.')}</p>
-  </div>`;
-}
-
 function buildBenefitsBlock(){
-  const f=landingFacts;
-  const provN=f?.provincesCount??7;
-  const cantonN=f?.cantonsCount??83;
-  const metCells=f?.uniqueCantonMetCells??20;
-  const radCells=f?.uniqueCantonRadCells??10;
-  const refPts=f?.sectorsCount??f?.districtsCount??479;
-  const startY=f?.startYear??2001;
-  const endY=f?.endYear??2025;
-  const yearsN=f?.yearsCount??25;
-  const monthsN=f?.monthsCount??300;
-  const varsN=f?.variablesCount??DATA_VARIABLES_COUNT;
+  const benefits=[
+    {
+      num:tx('25 Years · 2001–2025','25 Años · 2001–2025'),
+      title:tx('Longitudinal NASA Detection','Detección Longitudinal NASA'),
+      desc:tx('300 months of real NASA POWER, MERRA-2, MODIS, GPM, and SMAP records to uncover what is changing, where, and by how much.','300 meses de datos reales (NASA POWER, MERRA-2, MODIS, GPM y SMAP) para descubrir qué cambia, dónde y cuánto.')
+    },
+    {
+      num:tx('7 Variables · 84 Cantons','7 Variables · 84 Cantones'),
+      title:tx('Multi-Scale Regional Contrast','Contraste Regional Multiescala'),
+      desc:tx('Detects diverging trends across 7 provinces, 84 cantons, and 479 districts (Pacific vs. Caribbean, rainforest vs. dry forest).','Detecta tendencias opuestas entre 7 provincias, 84 cantones y 479 distritos (Pacífico vs. Caribe, bosque húmedo vs. seco).')
+    },
+    {
+      num:tx('α = 0.05 · 95% CI','α = 0.05 · IC 95%'),
+      title:tx('Statistical Significance (Trend Detective)','Significancia Estadística (Trend Detective)'),
+      desc:tx('Theil–Sen rate of change, Mann–Kendall trend test, Welch t-test vs. 2001–2010 baseline, and deseasonalized Z-scores.','Tasa de cambio Theil–Sen, prueba Mann–Kendall, t-test de Welch vs. base 2001–2010 y anomalías Z-score sin estacionalidad.')
+    },
+    {
+      num:tx('89% · 1–2 Months','89% · 1–2 Meses'),
+      title:tx('Early Trend Warning Lead','Alerta Temprana de Tendencias'),
+      desc:tx('Soil moisture deficit (−zSM) and surface heat (+zLST) warn 1 to 2 months before negative vegetation change (r = −0.76, p < 0.0001).','Humedad del suelo (−zSM) y calor superficial (+zLST) anticipan 1–2 meses antes la caída vegetal (r = −0.76, p < 0.0001).')
+    },
+    {
+      num:'−44.8% · −32.6%',
+      title:tx('Mitigation & Prioritization (IEA & NbS)','Mitigación y Priorización (IEA y SbN)'),
+      desc:tx('Projected 44.8% reduction in composite environmental stress and 32.6% cost savings via multicriteria NbS prioritization.','Reducción proyectada de −44.8% en estrés ambiental compuesto y −32.6% de ahorro en costos mediante priorización multicriterio.')
+    },
+    {
+      num:tx('−2.15 °C · 17.5M m³/yr','−2.15 °C · 17.5M m³/año'),
+      title:tx('Quantified Environmental Benefit','Beneficio Ambiental Cuantificado'),
+      desc:tx('Modeled surface cooling of −1.75 to −2.15 °C, −74% fire risk, and 17.5M m³/yr water retained across urban, agroforestry, and wetlands.','Enfriamiento superficial de −1.75 a −2.15 °C, −74% riesgo de fuego y 17.5M m³/año retenidos entre urbano, agroforestal y humedales.')
+    }
+  ];
 
-  const h=trendCompare?.heredia;
-  const g=trendCompare?.guanacaste;
-  const sourceListHtml=REAL_DATA_SOURCES.map(src=>`<li><strong>${src.name}</strong> — ${tx(src.scopeEn,src.scopeEs)}</li>`).join('');
+  const scenarios=[
+    {
+      title:tx('Urban Green Corridors · 450 ha','Corredores Urbanos GAM · 450 ha'),
+      metrics:tx('IEA 2.25 → 1.18 · −2.15 °C · 3.2M m³/yr','IEA 2.25 → 1.18 · −2.15 °C · 3.2M m³/año')
+    },
+    {
+      title:tx('Agroforestry Systems · 1,800 ha','Sistemas Agroforestales · 1,800 ha'),
+      metrics:tx('IEA 2.34 → 1.29 · −1.75 °C · 6.8M m³/yr','IEA 2.34 → 1.29 · −1.75 °C · 6.8M m³/año')
+    },
+    {
+      title:tx('Wetlands & Coast · 1,200 ha','Humedales y Costas · 1,200 ha'),
+      metrics:tx('−1.90 °C · −74% fire risk · 7.5M m³/yr','−1.90 °C · −74% riesgo de fuego · 7.5M m³/año')
+    }
+  ];
 
   return `
     <div class="lp-block">
-      <div class="lp-evidence-grid">
-        <div class="lp-evidence-col">
-          <span class="lp-badge is-observed">${tx('OBSERVED COVERAGE · VERIFIED SOURCES','COBERTURA OBSERVADA · FUENTES VERIFICADAS')}</span>
-          <h2 class="lp-slide-heading">${tx('What is changing, where, how much — and is it significant?','¿Qué está cambiando, dónde, cuánto y con qué significancia?')}</h2>
-          <p class="lp-body">${tx(
-            `${yearsN} complete years (${monthsN} months, ${startY}–${endY}) across ${varsN} NASA POWER variables (MERRA-2 ${MERRA2_RES.latDeg}°×${MERRA2_RES.lonDeg}° and CERES SYN1DEG ${CERES_RES.latDeg}°×${CERES_RES.lonDeg}°), combined with Open-Meteo GFS ensemble forecasts, GBIF IUCN occurrence records, and Copernicus DEM elevation.`,
-            `${yearsN} años completos (${monthsN} meses, ${startY}–${endY}) en ${varsN} variables NASA POWER (MERRA-2 ${MERRA2_RES.latDeg}°×${MERRA2_RES.lonDeg}° y CERES SYN1DEG ${CERES_RES.latDeg}°×${CERES_RES.lonDeg}°), junto con pronósticos Open-Meteo GFS, registros UICN vía GBIF y elevación Copernicus DEM.`
-          )}</p>
-        </div>
-        <dl class="lp-facts-list">
-          <div>
-            <dt>${tx('Territorial footprint','Cobertura territorial')}</dt>
-            <dd>${tx(`${provN} provinces · ${cantonN} cantons · ${refPts} district microclimates`,`${provN} provincias · ${cantonN} cantones · ${refPts} microclimas distritales`)}</dd>
-          </div>
-          <div>
-            <dt>${tx('True satellite resolution','Resolución real satelital')}</dt>
-            <dd>${tx(`${cantonN} cantons share ${metCells} unique MERRA-2 grid cells and ${radCells} CERES cells; grid deduplication prevents pseudo-replication.`,`Los ${cantonN} cantones comparten ${metCells} celdas únicas MERRA-2 y ${radCells} celdas CERES; el agrupamiento evita pseudorreplicación.`)}</dd>
-          </div>
-          <div>
-            <dt>${tx('Statistical suite','Métodos estadísticos')}</dt>
-            <dd>${tx(
-              `Theil–Sen slope + 95% CI, Mann–Kendall p-value (lag-1 guarded), Welch t-test vs. 2001–2010, and Benjamini–Hochberg FDR q.${h&&Number.isFinite(h.slopePerDecade)?` Heredia T2M Z = ${fmtSigned(h.latestZ,2)}; Guanacaste ${fmtSigned(g?.slopePerDecade,2)} °C/dec.`:''}`,
-              `Pendiente Theil–Sen + IC 95 %, prueba Mann–Kendall (con alerta lag-1), t de Welch vs. 2001–2010 y control FDR q.${h&&Number.isFinite(h.slopePerDecade)?` Z en Heredia = ${fmtSigned(h.latestZ,2)}; Guanacaste ${fmtSigned(g?.slopePerDecade,2)} °C/déc.`:''}`
-            )}</dd>
-          </div>
-          <div>
-            <dt>${tx('Auditable indices','Índices auditables')}</dt>
-            <dd>${tx('Deseasonalized Z-scores, thermo-hydro IEA stress index (threshold 0.89), and exploratory 0–100 Ecological Risk with explicit weights.','Z-scores sin estacionalidad, índice compuesto IEA (umbral 0,89) y Riesgo Ecológico exploratorio 0–100 con pesos publicados.')}</dd>
-          </div>
-        </dl>
+      <span class="lp-slide-kicker">${tx('EARTH SYSTEM TREND DETECTIVE · QUANTIFIED BENEFITS','EARTH SYSTEM TREND DETECTIVE · BENEFICIOS CUANTIFICADOS')}</span>
+      <h2 class="lp-slide-heading">${tx('What is changing, where, how much — and is it significant?','¿Qué está cambiando, dónde, cuánto y con qué significancia?')}</h2>
+      <div class="lp-benefits-grid">
+        ${benefits.map(b=>`
+          <article class="lp-benefit-card">
+            <span class="lp-benefit-num">${b.num}</span>
+            <strong class="lp-benefit-title">${b.title}</strong>
+            <p class="lp-benefit-desc">${b.desc}</p>
+          </article>
+        `).join('')}
       </div>
-
-      <details class="lp-sources-details">
-        <summary>${tx('Inspect verified data sources and physical units','Ver fuentes reales verificadas y unidades físicas')}</summary>
-        <ul>${sourceListHtml}</ul>
-      </details>
+      <div class="lp-scenario-strip">
+        ${scenarios.map(s=>`
+          <div class="lp-scenario-pill">
+            <strong>${s.title}</strong>
+            <span>${s.metrics}</span>
+          </div>
+        `).join('')}
+      </div>
+      <p class="lp-note-lg">${tx('Empirical NASA POWER trends (2001–2025) paired with preliminary modeled Nature-Based Solution impact scenarios from the research study (Appendix A).','Tendencias empíricas NASA POWER (2001–2025) junto con escenarios preliminares modelados de Soluciones Basadas en la Naturaleza del estudio (Apéndice A).')}</p>
     </div>
   `;
 }
@@ -339,13 +219,13 @@ function buildContent(){
   const lang=getLang();
   const light=getTheme()==='light';
   const maxIdx=clampAuthorIndex();
-  const pitchHtml=renderPitchButton(`${icon('video')} ${tx('Watch Pitch Video','Ver Video Pitch')}`);
-  const enterLabel=`${tx('Explore Costa Rica','Explorar Costa Rica')} ${icon('arrow-right')}`;
-  const paperLabel=`${icon('file-text')} ${tx('Research Paper (PDF)','Paper Científico (PDF)')}`;
+  const pitchHtml=renderPitchButton(tx('🎬 Watch Pitch Video ↗','🎬 Ver Video Pitch ↗'));
+  const enterLabel=tx('⌖ Enter 3D Application →','⌖ Entrar a la Aplicación 3D →');
+  const paperLabel=tx('📄 Research Paper (PDF) ↗','📄 Paper Científico (PDF) ↗');
 
   return `
     <div class="lp-corner-lang" role="group" aria-label="${tx('Language & Theme','Idioma y Tema')}">
-      <button type="button" id="lp-theme-toggle" class="lp-theme-btn" data-theme-toggle data-lp-theme aria-pressed="${light}" aria-label="${light?tx('Switch to dark mode','Cambiar a modo oscuro'):tx('Switch to light mode','Cambiar a modo claro')}">${icon(light?'moon':'sun')} ${light?tx('Dark','Oscuro'):tx('Light','Claro')}</button>
+      <button type="button" id="lp-theme-toggle" class="lp-theme-btn" data-theme-toggle data-lp-theme aria-pressed="${light}" aria-label="${light?tx('Switch to dark mode','Cambiar a modo oscuro'):tx('Switch to light mode','Cambiar a modo claro')}">${light?tx('🌙 Dark','🌙 Oscuro'):tx('☀️ Light','☀️ Claro')}</button>
       <span class="lp-corner-sep" aria-hidden="true"></span>
       <button type="button" data-lp-lang="en" class="${lang==='en'?'active':''}" aria-pressed="${lang==='en'}">EN</button>
       <button type="button" data-lp-lang="es" class="${lang==='es'?'active':''}" aria-pressed="${lang==='es'}">ES</button>
@@ -357,26 +237,25 @@ function buildContent(){
           <img src="${BRAND_LOGO_SRC}" alt="Gaia E&amp;B — Environment &amp; Benefits">
         </div>
         <h1 class="lp-title-xl">${tx(
-          'Detect environmental trends and quantify nature-based solutions across Costa Rica.',
-          'Detecta tendencias ambientales y cuantifica soluciones basadas en la naturaleza en Costa Rica.'
+          'Detect <em>environmental trends</em> and quantify <em>nature-based solutions</em> across Costa Rica.',
+          'Detectá <em>tendencias ambientales</em> y cuantificá <em>soluciones basadas en la naturaleza</em> en Costa Rica.'
         )}</h1>
         <p class="lp-lead-xl">${tx(
-          'GaiaTrack turns 25 years of NASA Earth science observations into interactive 3D exploration, statistical significance testing (Mann–Kendall, Theil–Sen, Welch t-test), and territorial analysis.',
-          'GaiaTrack transforma 25 años de observaciones de NASA Earth Science en exploración 3D interactiva, pruebas de significancia estadística (Mann–Kendall, Theil–Sen, prueba t de Welch) y análisis territorial.'
+          'GaiaTrack turns 25 years of NASA Earth science observations into interactive 3D exploration, rigorous statistical significance testing (Mann–Kendall, Theil–Sen, Welch t-test), and measurable cantonal decisions.',
+          'GaiaTrack transforma 25 años de observaciones de la NASA en exploración 3D interactiva, pruebas rigurosas de significancia estadística (Mann–Kendall, Theil–Sen, t-test) y decisiones cantonales medibles.'
         )}</p>
         <div class="lp-cta-row">
           <button type="button" class="lp-btn lp-btn-primary lp-btn-xl" id="landing-enter-app" data-enter-app>${enterLabel}</button>
-          <a class="lp-btn lp-btn-secondary lp-btn-lg" id="landing-paper-link" href="${PAPER_PDF_SRC}" target="_blank" rel="noopener">${paperLabel}</a>
-          <a class="lp-btn lp-btn-ghost lp-btn-lg" href="#lp-demo-section">${icon('play')} ${tx('Watch demo','Ver demo')}</a>
+          <a class="lp-btn lp-btn-secondary lp-btn-xl" id="landing-paper-link" href="${PAPER_PDF_SRC}" target="_blank" rel="noopener">${paperLabel}</a>
           ${pitchHtml}
         </div>
-        ${buildHeroTrendPreview()}
       </section>
 
       ${buildBenefitsBlock()}
 
-      <section class="lp-block" id="lp-demo-section">
-        <h2 class="lp-slide-heading">${tx('Explore 3D cantons, Ecological Risk & 25-year NASA trends','Explora cantones 3D, Riesgo Ecológico y tendencias NASA')}</h2>
+      <section class="lp-block">
+        <span class="lp-slide-kicker">${tx('LIVE WALKTHROUGH DEMO','DEMOSTRACIÓN DE USO EN VIVO')}</span>
+        <h2 class="lp-slide-heading">${tx('Explore 3D cantons, Ecological Risk & 25-year NASA trends.','Explorá cantones 3D, Riesgo Ecológico y tendencias NASA.')}</h2>
         <div class="lp-video-stage">
           <div class="lp-video-frame">
             <video id="landing-demo-video" src="${DEMO_VIDEO_SRC}" controls preload="metadata" playsinline muted loop></video>
@@ -385,9 +264,10 @@ function buildContent(){
       </section>
 
       <section class="lp-block">
-        <h2 class="lp-slide-heading">${tx('Gaia E&B Research Team · Costa Rica','Equipo investigador Gaia E&B · Costa Rica')}</h2>
+        <span class="lp-slide-kicker">${tx('CREATORS & RESEARCH TEAM','CREADORES Y EQUIPO INVESTIGADOR')}</span>
+        <h2 class="lp-slide-heading">${tx('Built in Costa Rica by the Gaia E&B Research Team.','Creado en Costa Rica por el equipo Gaia E&B.')}</h2>
         <div class="lp-authors-carousel" role="region" aria-label="${tx('Creators carousel','Carrusel de creadores')}">
-          <button type="button" class="lp-carousel-btn" id="lp-authors-prev" aria-label="${tx('Previous creators','Creadores anteriores')}">${icon('chevron-left')}</button>
+          <button type="button" class="lp-carousel-btn" id="lp-authors-prev" aria-label="${tx('Previous creators','Creadores anteriores')}">‹</button>
           <div class="lp-authors-viewport">
             <div class="lp-authors-track" style="--lp-idx:${authorIndex}" data-author-index="${authorIndex}">
               ${AUTHORS.map(a=>`
@@ -401,14 +281,14 @@ function buildContent(){
               `).join('')}
             </div>
           </div>
-          <button type="button" class="lp-carousel-btn" id="lp-authors-next" aria-label="${tx('Next creators','Siguientes creadores')}">${icon('chevron-right')}</button>
+          <button type="button" class="lp-carousel-btn" id="lp-authors-next" aria-label="${tx('Next creators','Siguientes creadores')}">›</button>
         </div>
         <div class="lp-authors-dots" role="tablist" aria-label="${tx('Carousel pages','Páginas del carrusel')}">
           ${AUTHORS.map((_,idx)=>`<button type="button" class="lp-author-dot ${idx===authorIndex?'active':''}" data-author-dot="${idx}" aria-label="${tx(`Slide ${idx+1}`,`Posición ${idx+1}`)}" aria-selected="${idx===authorIndex}"${idx>maxIdx?' hidden':''}></button>`).join('')}
         </div>
         <div class="lp-cta-row">
           <button type="button" class="lp-btn lp-btn-primary lp-btn-xl" data-enter-app>${enterLabel}</button>
-          <a class="lp-btn lp-btn-secondary lp-btn-lg" href="${PAPER_PDF_SRC}" target="_blank" rel="noopener">${paperLabel}</a>
+          <a class="lp-btn lp-btn-secondary lp-btn-xl" href="${PAPER_PDF_SRC}" target="_blank" rel="noopener">${paperLabel}</a>
           ${pitchHtml}
         </div>
       </section>
@@ -465,7 +345,6 @@ export function initLanding(){
   render();
   if(shouldAutoOpenLanding()&&!hasEnteredApp){
     openLanding();
-    hydrateLandingFacts();
   }else{
     portal.hidden=true;
     document.body.classList.remove('landing-open');

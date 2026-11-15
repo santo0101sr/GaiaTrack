@@ -115,11 +115,6 @@ test('Province explorer starts on Choose a province showing all seven provinces 
     assert.equal(elements.get('#hud-site-select').hidden, false);
     assert.ok(meshes.filter(m => m.userData.province === 'guanacaste').every(m => m.visible === true));
     assert.ok(meshes.filter(m => m.userData.province !== 'guanacaste').every(m => m.visible === false));
-    const navEl = host.children.find(el => el.className === 'territory-browser');
-    const overviewBtn = navEl?.children.find(el => el.className === 'territory-overview');
-    assert.ok(overviewBtn, 'Expected territory overview button in province mode');
-    assert.match(overviewBtn.innerHTML, /<svg class="ui-icon"/);
-    assert.equal(overviewBtn.textContent, '');
 
     explorer.country(true);
     assert.equal(doc.body.classList.contains('national-view'), true);

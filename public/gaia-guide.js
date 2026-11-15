@@ -8,9 +8,9 @@ export const normalizeQuestion=text=>text.normalize('NFD').replace(/[\u0300-\u03
 // Conservative, deterministic shortcuts. Complex questions still go to the model.
 export function resolveLocalRequest(question, selection, manifest) {
   const text=normalizeQuestion(question);
-  if (/^(hola|buenas|que puedo investigar|que podes hacer|que puedes hacer|ayuda)$/.test(text)) return {reply:'Puedo comparar dos territorios, mostrar tendencias de temperatura o lluvia, abrir el pronóstico y explicar los datos. Prueba: “Compara la lluvia entre las provincias de Limón y Guanacaste desde 2010”.'};
+  if (/^(hola|buenas|que puedo investigar|que podes hacer|que puedes hacer|ayuda)$/.test(text)) return {reply:'Puedo comparar dos territorios, mostrar tendencias de temperatura o lluvia, abrir el pronóstico y explicar los datos. Probá: “Compará la lluvia entre las provincias de Limón y Guanacaste desde 2010”.'};
   if (/^(que (es|significa) (la )?(significancia|significancia estadistica|una tendencia)|como interpreto (el )?valor p)$/.test(text)) return {reply:'La pendiente indica cuánto cambia una variable por década. Mann–Kendall evalúa evidencia de una tendencia; p < 0,05 es una señal exploratoria si no se detecta dependencia temporal. No encontrar evidencia suficiente no demuestra ausencia de cambio. Una tendencia tampoco demuestra su causa.'};
-  if (/^(de donde (son|vienen) (los )?datos|que datos (usas|usan)|cuales son (las )?fuentes)$/.test(text)) return {reply:'El histórico 2001–2025 usa NASA POWER (MERRA-2 y CERES). Son estimaciones para puntos de referencia, no promedios provinciales o cantonales. Las condiciones actuales y el pronóstico usan modelos meteorológicos de Open-Meteo. Consulta “Datos y método” para las unidades y limitaciones.'};
+  if (/^(de donde (son|vienen) (los )?datos|que datos (usas|usan)|cuales son (las )?fuentes)$/.test(text)) return {reply:'El histórico 2001–2025 usa NASA POWER. Son estimaciones para puntos de referencia, no promedios provinciales o cantonales. Las condiciones actuales y el pronóstico usan modelos meteorológicos de Open-Meteo. Consultá “Datos y método” para las unidades y limitaciones.'};
   if (!/^(mostra|muestra|abri|abre|compara|selecciona|llevame|quiero ver|ver |cambia|volve|volver)/.test(text)) return null;
   // Negation and causal/conditional requests need language understanding.
   if (/\b(no|excepto|sin|porque|por que|si|causa|explica\w*)\b/.test(text)) return null;
@@ -36,7 +36,7 @@ export function resolveLocalRequest(question, selection, manifest) {
   for(const [name,group] of groups){
     const filtered=/\bprovincias?\b/.test(text)?group.filter(site=>site.type==='province'):/\bcanton(es)?\b/.test(text)?group.filter(site=>site.type==='canton'):group;
     const candidates=filtered.length?filtered:group;
-    if(candidates.length!==1)return {reply:`¿Te refieres a la provincia o al cantón de ${group[0].name}? Indica “provincia” o “cantón” en la pregunta.`};
+    if(candidates.length!==1)return {reply:`¿Te referís a la provincia o al cantón de ${group[0].name}? Indicá “provincia” o “cantón” en la pregunta.`};
     resolved.push({site:candidates[0],position:text.indexOf(name)});
   }
   resolved.sort((a,b)=>a.position-b.position);
@@ -45,11 +45,11 @@ export function resolveLocalRequest(question, selection, manifest) {
   const years=text.match(/\b(?:19|20)\d{2}\b/g)?.map(Number)??[];
   if(years.length&&['forecast','current'].includes(action.view))return null;
   if(years.length>2)return null;
-  if(years.some(year=>year<manifest.start||year>manifest.end))return {reply:`El histórico disponible va de ${manifest.start} a ${manifest.end}. Elige un período dentro de ese rango.`};
+  if(years.some(year=>year<manifest.start||year>manifest.end))return {reply:`El histórico disponible va de ${manifest.start} a ${manifest.end}. Elegí un período dentro de ese rango.`};
   if(years.length===2){action.start=years[0];action.end=years[1];}
   else if(years.length===1){if(/\b(desde|a partir)\b/.test(text)){action.start=years[0];action.end=manifest.end;}else if(/\b(hasta)\b/.test(text)){action.end=years[0];}else if(action.view==='explorer'){action.year=years[0];}else return null;}
   if(/\banomalias?\b/.test(text))action.anomaly=true;
-  if(!action.site&&!selection.site&&!['method','3d','explorer'].includes(action.view))return {reply:'¿Qué provincia o cantón quieres investigar? Por ejemplo: “Muestra la temperatura de la provincia de Heredia”.'};
+  if(!action.site&&!selection.site&&!['method','3d','explorer'].includes(action.view))return {reply:'¿Qué provincia o cantón querés investigar? Por ejemplo: “Mostrá la temperatura de la provincia de Heredia”.'};
   if(!resolved.length&&!specific.length&&!/\b(mapa|explorador|3d|tridimensional|metodo|fuentes|pronostico|actual|ahora|hoy|tendencias|anomalias)\b/.test(text))return null;
   const next={...selection,...action};
   try{validateGaiaAction(next,manifest.sites,manifest.start,manifest.end);if(next.start>next.end)throw Error();}catch{return {reply:'El período inicial debe ser menor o igual al final y estar dentro del histórico disponible.'};}
@@ -71,8 +71,8 @@ export function historicalEvidence(selection,manifest,annual){
 
 export function summarizeEvidence(selection,evidence,weather=null){
   const views={trends:'tendencias',explorer:'el mapa',forecast:'el pronóstico',current:'las condiciones actuales',method:'datos y método','3d':'la escena 3D'};
-  const intro=`Se abrió ${views[selection.view]??'tendencias'}${evidence.length?' para '+evidence.map(item=>item.name).join(' y '):''}.`;
-  if(['forecast','current'].includes(selection.view))return `${intro} ${weather?.error?'El servicio meteorológico no está disponible en este momento.':weather?'Consulta los valores y la fecha de actualización en el panel meteorológico. Son estimaciones de modelos, no mediciones de una estación.':'El panel consultará los modelos meteorológicos disponibles.'}`;
+  const intro=`Abrí ${views[selection.view]??'tendencias'}${evidence.length?' para '+evidence.map(item=>item.name).join(' y '):''}.`;
+  if(['forecast','current'].includes(selection.view))return `${intro} ${weather?.error?'El servicio meteorológico no está disponible en este momento.':weather?'Consultá los valores y la fecha de actualización en el panel meteorológico. Son estimaciones de modelos, no mediciones de una estación.':'El panel consultará los modelos meteorológicos disponibles.'}`;
   if(['method','3d'].includes(selection.view))return intro;
   const number=n=>new Intl.NumberFormat('es-CR',{maximumFractionDigits:3}).format(n);
   const lines=evidence.map(item=>{
