@@ -1,8 +1,9 @@
+import {fetchJSON} from './data-client.js';
 import {publishWeather} from './weather-state.js';
-import {costaRicaDay} from './forecast-science.js';
+import {costaRicaDay,hasCompleteForecast} from './forecast-science.js';
 import {locale,tx} from './i18n.js';
 
-const $=s=>document.querySelector(s),cache=new Map();
+const $=s=>document.querySelector(s),cache=new Map(),pending=new Map();
 const variableMeta={
   T2M:{en:'Mean temperature',es:'Temperatura media',unit:'°C',digits:1},
   T2M_MIN:{en:'Minimum temperature',es:'Temperatura mínima',unit:'°C',digits:1},
@@ -48,17 +49,21 @@ export async function updateForecast(site,variable,refresh=false){
   $('#forecast-location').textContent=`${site.name} · ${tx('reference point','punto de referencia')}`;
   if(changed)selectedDay=0;
   const stored=cache.get(site.id);
-  if(stored&&stored.days[0].date>costaRicaDay()&&Date.now()-Date.parse(stored.retrievedAt)<60*60*1000){forecast=stored;request++;render();return;}
-  if(!changed&&!refresh&&$('#forecast-refresh').disabled)return;
+  if(stored&&hasCompleteForecast(stored.days)&&Date.now()-Date.parse(stored.retrievedAt)<60*60*1000){forecast=stored;request++;render();return;}
+  if(!changed&&pending.has(site.id))return;
   forecast=null;const token=++request;
   $('#forecast-status').textContent=tx('Querying Open-Meteo and GFS ensemble…','Consultando Open-Meteo y el conjunto GFS…');
   $('#forecast-status').hidden=false;$('#forecast-days').innerHTML='';$('#forecast-detail').innerHTML='';$('#forecast-period').textContent='';$('#forecast-update').textContent='';$('#forecast-refresh').disabled=true;$('#forecast-download').disabled=true;
   try{
-    const response=await fetch(`/api/forecast?site=${encodeURIComponent(site.id)}`);
-    const result=await response.json();if(!response.ok)throw Error(result.error);
-    if(token!==request)return;
-    if(!result.days?.length||result.days[0].date<=costaRicaDay())throw Error(tx('The source has no valid forecast for upcoming days.','La fuente no contiene un pronóstico vigente para los próximos días.'));
-    cache.set(site.id,result);forecast=result;render();
+    if(!pending.has(site.id)){
+      const work=fetchJSON(`/api/forecast?site=${encodeURIComponent(site.id)}`).then(result=>{
+        if(result.site!==site.id||!hasCompleteForecast(result.days))throw Error(tx('The source has no complete forecast for the next seven days.','La fuente no contiene un pronóstico completo para los próximos siete días.'));
+        cache.set(site.id,result);return result;
+      }).finally(()=>pending.delete(site.id));
+      pending.set(site.id,work);
+    }
+    const result=await pending.get(site.id);if(token!==request)return;
+    forecast=result;render();
   }catch(e){
     if(token!==request)return;
     $('#forecast-status').textContent=e.message||tx('Forecast unavailable. Click Refresh to retry.','El pronóstico no está disponible. Usá Actualizar para reintentar.');

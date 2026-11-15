@@ -160,3 +160,19 @@
 @media(prefers-reduced-motion:reduce){
   .stat-popover.is-open,.method-section{animation:none!important}
 }
+
+/* Thermal Radar Mode (2D & 3D) */
+.map-toolbar-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.radar-toggle{display:inline-flex;background:#08131a;border:1px solid #486b72;border-radius:5px;padding:2px;gap:2px}
+.radar-toggle button{border:0;border-radius:3px;padding:4px 9px;font-size:10px;color:#9eb8bf;background:transparent;cursor:pointer;transition:.2s}
+.radar-toggle button.selected{background:#c3f77a22;color:#d9ff9b;box-shadow:inset 0 0 0 1px #c3f77a66}
+.gradient-key.is-thermal{height:8px;border-radius:4px;border:1px solid #ffffff26}
+#hud-radar-legend{position:absolute;left:4%;bottom:24%;z-index:20;width:230px;padding:10px 12px;background:#081620d9;backdrop-filter:blur(12px);border:1px solid #53887666;border-radius:6px;pointer-events:none}
+.radar-legend-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
+.radar-legend-head strong{font-size:9px;letter-spacing:.9px;color:#d9ff9b}
+.radar-legend-head span{font:500 10px monospace;color:#e7f9eb;white-space:nowrap}
+.radar-legend-bar{height:8px;border-radius:4px;border:1px solid #ffffff29;margin-bottom:5px}
+#hud-radar-legend small{display:block;font-size:8.5px;color:#93adb5;line-height:1.35}
+@media(max-width:768px){
+  #hud-radar-legend{left:12px;bottom:146px;width:190px;padding:7px 9px}
+}

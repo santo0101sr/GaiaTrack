@@ -1,7 +1,9 @@
-import {siteOptionsHtml,provinceOptionsHtml,territoryOptionsHtml} from './territories.js';
-import {annualSeries,trend,baseline,mean,historyCoverage,detrendedCorrelation,benjaminiHochberg} from './science.js';
+import {loadStaticJSON,loadHistory} from './data-client.js';
+import {siteOptionsHtml,provinceOptionsHtml,territoryOptionsHtml,annualPoints,annualValue} from './territories.js';
+import {trend,baseline,mean,historyCoverage,detrendedCorrelation,benjaminiHochberg} from './science.js';
 import {initForecast,updateForecast} from './forecast.js';
 import {getLang,locale,tx,applyStaticI18n} from './i18n.js';
+import {thermalColor,thermalRange,fetchLiveTemperatures,THERMAL_GRADIENT_CSS} from './thermal-radar.js';
 
 const $=s=>document.querySelector(s);
 const rawVariables=[
@@ -28,16 +30,32 @@ const rawVariables=[
     es:{name:'Humedad relativa del aire',short:'Humedad del aire',unit:'%',definition:'Promedio anual de la humedad relativa del aire a 2 m sobre la superficie.',resolution:'Meteorología: celdas de 0,5° × 0,625° (aprox. 55 × 68 km).'}}
 ];
 
-const state={variable:'T2M',site:null,year:2025,start:2001,end:2025,anomaly:false,compare:false,compareSite:'sarapiqui'};
-let lastMapSite=null,mapOverview=true;
-let manifest,geo,data={},map,boundaryLayer,markers={},seaMarkers=[],timer=null;
+const state={variable:'T2M',site:null,year:2025,start:2001,end:2025,anomaly:false,compare:false,compareSite:'sarapiqui',radarMode:false};
+let lastMapSite=null,mapOverview=true,liveTemps=null,liveStatus='idle';
+const annualCache=new Map(),historyFailures=new Set(),historyLoading=new Map();
+let annual,manifest,geo,data={},map,boundaryLayer,markers={},seaMarkers=[],timer=null;
 const v=()=>{const r=rawVariables.find(x=>x.id===state.variable);const l=r[getLang()];return {id:r.id,icon:r.icon,digits:r.digits,...l};};
 const format=(n,d=v().digits)=>Number.isFinite(n)?new Intl.NumberFormat(locale(),{minimumFractionDigits:d,maximumFractionDigits:d}).format(n):tx('No data','Sin datos');
 const signed=(n,d=v().digits)=>(n>0?'+':'')+format(n,d);
-const series=(id=state.site)=>annualSeries(data[id].monthly,state.variable);
-const valueAt=(id,year)=>series(id).find(d=>d.year===year)?.value;
+const series=(id=state.site)=>{if(!id)return [];const key=id+':'+state.variable;if(!annualCache.has(key))annualCache.set(key,annualPoints(annual,id,state.variable));return annualCache.get(key);};
+const valueAt=(id,year)=>annualValue(annual,id,state.variable,year);
 const deltaUnit=()=>state.variable==='RH2M'?tx('pp','p.p.'):v().unit;
 const currentColor='#c3f77a';
+
+function ensureHistory(id){
+  if(!data[id])return Promise.reject(Error('Territorio inválido.'));
+  if(data[id].monthly)return Promise.resolve(data[id]);
+  if(historyLoading.has(id))return historyLoading.get(id);
+  const refresh=()=>{
+    if(state.site!==id)return;
+    renderInspector();
+    if($('#method-dialog').open)renderMethodContent();
+  };
+  const work=loadHistory(id).then(record=>{
+    Object.assign(data[id],record);historyFailures.delete(id);refresh();return data[id];
+  }).catch(error=>{historyFailures.add(id);refresh();throw error;}).finally(()=>historyLoading.delete(id));
+  historyLoading.set(id,work);return work;
+}
 
 function showError(message){$('#status').textContent=message;}
 const PROVINCE_IDS=['san-jose','alajuela','cartago','heredia','guanacaste','puntarenas','limon'];
@@ -68,6 +86,33 @@ function buildLayerButtons(){
 }
 
 function setVariable(id){state.variable=id;render();}
+function updateRadarButtons(){
+  const normalBtn=$('#mode-normal'),radarBtn=$('#mode-radar');
+  if(normalBtn){normalBtn.textContent=tx('Normal','Normal');normalBtn.classList.toggle('selected',!state.radarMode);normalBtn.setAttribute('aria-pressed',String(!state.radarMode));}
+  if(radarBtn){radarBtn.textContent=tx('🌡 Thermal Radar','🌡 Radar térmico');radarBtn.classList.toggle('selected',state.radarMode);radarBtn.setAttribute('aria-pressed',String(state.radarMode));}
+}
+async function ensureLiveTemps2d(){
+  if(liveStatus==='loading')return;
+  liveStatus='loading';
+  renderMap();
+  try{
+    const res=await fetchLiveTemperatures();
+    liveTemps=res.temps;liveStatus='ready';
+  }catch{
+    liveStatus='error';
+  }
+  renderMap();
+}
+function setRadarMode(enabled,{broadcast=true}={}){
+  const next=Boolean(enabled);
+  if(state.radarMode===next){updateRadarButtons();return;}
+  state.radarMode=next;
+  updateRadarButtons();
+  if(state.radarMode)ensureLiveTemps2d();
+  else renderMap();
+  if(broadcast)document.dispatchEvent(new CustomEvent('gaiatrack:radar-mode',{detail:{enabled:state.radarMode}}));
+}
+document.addEventListener('gaiatrack:radar-mode',e=>setRadarMode(e.detail?.enabled,{broadcast:false}));
 function stop(){if(timer){clearInterval(timer);timer=null;}$('#play').textContent='▶';$('#play').setAttribute('aria-label',tx('Play time series','Reproducir evolución temporal'));}
 function setYear(year){state.year=Number(year);document.dispatchEvent(new CustomEvent('gaiatrack:selection',{detail:{site:state.site,variable:state.variable,year:state.year}}));renderMap();renderInspector();renderChart();$('#year-slider').value=state.year;$('#selected-year').textContent=state.year;}
 
@@ -85,6 +130,7 @@ function render(){
   if($('#fit-province'))$('#fit-province').disabled=!selectedSite;
   $('#metric-name').textContent=v().name;$('#metric-unit').textContent=v().unit;$('#metric-definition').textContent=v().definition;
   $('#resolution-note').textContent=v().resolution+tx(' One point does not represent the entire territory.',' Un punto no representa todo el territorio.');
+  if(state.site&&!data[state.site].monthly&&!historyFailures.has(state.site))ensureHistory(state.site).catch(()=>{});
   renderMap();renderInspector();renderChart();renderStats();
   document.dispatchEvent(new CustomEvent('gaiatrack:selection',{detail:{site:state.site,variable:state.variable,year:state.year}}));
   updateForecast(selectedSite?data[state.site]:null,state.variable);
@@ -92,6 +138,7 @@ function render(){
 
 function renderInspector(){
   if(!state.site){
+    $('#history-retry').hidden=true;
     $('#point-coordinates').textContent=tx('COSTA RICA · 7 PROVINCES · 83 CANTONS','COSTA RICA · 7 PROVINCIAS · 83 CANTONES');
     $('#metric-year').textContent=state.year;$('#metric-value').textContent='—';
     $('#history-quality').textContent=tx(
@@ -109,11 +156,13 @@ function renderInspector(){
   const s=data[state.site],points=series(),current=valueAt(state.site,state.year),base=baseline(points),diff=Number.isFinite(current)&&Number.isFinite(base)?current-base:null;
   $('#point-coordinates').textContent=`${s.latitude.toFixed(4)}° N / ${Math.abs(s.longitude).toFixed(4)}° ${tx('W','O')} · ${tx('REFERENCE POINT','PUNTO DE REFERENCIA')}`;
   $('#metric-year').textContent=state.year;$('#metric-value').textContent=format(current);
-  const coverage=historyCoverage(s.monthly,state.variable,state.year);
+  const coverage=historyCoverage(s.monthly??[],state.variable,state.year);
   $('#history-quality').textContent=tx(
     `${coverage.validDays}/${coverage.expectedDays} valid days (${format(coverage.percent,1)}%) · ${coverage.validMonths}/12 valid months · ${state.year}${coverage.estimated?' · Accumulated rain estimated due to missing days':''}.`,
     `${coverage.validDays}/${coverage.expectedDays} días válidos (${format(coverage.percent,1)} %) · ${coverage.validMonths}/12 meses válidos · ${state.year}${coverage.estimated?' · Lluvia acumulada estimada por días faltantes':''}.`
   );
+  if(!s.monthly)$('#history-quality').textContent=historyFailures.has(s.id)?tx('Historical detail unavailable. Retry below.','No se pudo cargar el detalle histórico. Reintentá abajo.'):tx('Loading historical coverage…','Cargando cobertura histórica…');
+  $('#history-retry').hidden=!historyFailures.has(s.id);
   $('#baseline-difference').textContent=Number.isFinite(diff)?`${signed(diff)} ${deltaUnit()}`:tx('No baseline','Sin referencia');
   const t=trend(points.filter(p=>p.year>=state.start&&p.year<=state.end));
   const direction=tx(t.slope>0?'an increase':t.slope<0?'a decrease':'stability',t.slope>0?'aumento':t.slope<0?'descenso':'estabilidad');
@@ -130,8 +179,25 @@ function renderInspector(){
 function color(value,min,max){if(!Number.isFinite(value))return '#7c8791';const t=(value-min)/(max-min||1);return `rgb(${Math.round(55+140*t)},${Math.round(101+146*t)},${Math.round(140-18*t)})`;}
 
 function renderMap(){
-  const values=manifest.sites.map(s=>valueAt(s.id,state.year)).filter(Number.isFinite),min=Math.min(...values),max=Math.max(...values);
-  $('#map-variable').textContent=v().name;$('#map-year').textContent=state.year;$('#map-range').textContent=`${format(min)} — ${format(max)} ${v().unit}`;
+  const radarActive=state.radarMode;
+  const activeMeta=radarActive?{name:tx('Current temperature','Temperatura actual'),unit:'°C'}:v();
+  const activeDigits=radarActive?1:v().digits;
+  const readVal=id=>radarActive?(liveTemps?.get(id)??null):valueAt(id,state.year);
+  const values=manifest.sites.map(s=>readVal(s.id)).filter(Number.isFinite);
+  const hasLive=radarActive&&values.length>0;
+  const {min,max}=radarActive?thermalRange(values):{min:Math.min(...values),max:Math.max(...values)};
+  $('#map-variable').textContent=radarActive?`${activeMeta.name} · ${tx('Thermal Radar','Radar térmico')}`:v().name;
+  const noteEl=$('#map-caption-note');
+  if(noteEl)noteEl.textContent=radarActive
+    ?tx('Open-Meteo current model by canton · not local stations','Modelo actual Open-Meteo por cantón · no es estación local')
+    :tx('Reference points · not provincial or canton averages','Puntos de referencia · no son promedios provinciales ni cantonales');
+  $('#map-year').textContent=radarActive?tx('LIVE','ACTUAL'):state.year;
+  $('#map-range').textContent=radarActive&&!hasLive
+    ?(liveStatus==='loading'?tx('Loading…','Cargando…'):tx('Unavailable','No disponible'))
+    :`${format(min,activeDigits)} — ${format(max,activeDigits)} ${activeMeta.unit}`;
+  const gradEl=$('.gradient-key');
+  if(gradEl){gradEl.classList.toggle('is-thermal',radarActive);gradEl.style.background=radarActive?THERMAL_GRADIENT_CSS:'';}
+
   if(!map)return;
   const selectedSite=state.site?manifest.sites.find(s=>s.id===state.site):null;
   const province=selectedSite?.province??null;
@@ -144,12 +210,21 @@ function renderMap(){
     const visible=mapOverview||!province||s.province===province;
     if(visible&&!map.hasLayer(markers[s.id]))markers[s.id].addTo(map);
     if(!visible&&map.hasLayer(markers[s.id]))map.removeLayer(markers[s.id]);
-    const value=valueAt(s.id,state.year),selected=s.id===state.site;
-    markers[s.id].setStyle({fillColor:color(value,min,max),color:selected?'#f1ffda':'#10232c',weight:selected?3:1.5,fillOpacity:.95}).setRadius(selected?9:6);
-    markers[s.id].setTooltipContent(`${s.name} · ${format(value)} ${v().unit}`);
+    const value=readVal(s.id),selected=s.id===state.site;
+    const fill=radarActive?thermalColor(value,min,max).css:color(value,min,max);
+    markers[s.id].setStyle({fillColor:fill,color:selected?'#f1ffda':'#10232c',weight:selected?3:1.5,fillOpacity:.95}).setRadius(selected?9:6);
+    markers[s.id].setTooltipContent(`${s.name} · ${format(value,activeDigits)} ${activeMeta.unit}`);
     if(selected)markers[s.id].bringToFront();
   }
-  boundaryLayer.setStyle(f=>{const selected=Boolean(selectedSite)&&(f.properties.id===state.site||(selectedSite.type==='province'&&f.properties.province===selectedSite.province));const shown=mapOverview||!province||f.properties.province===province;return {opacity:shown?1:0,color:selected?'#c3f77a':'#617f85',weight:selected?2:1,fillColor:'#344b48',fillOpacity:shown?(selected?.18:.04):0};});
+  boundaryLayer.setStyle(f=>{
+    const selected=Boolean(selectedSite)&&(f.properties.id===state.site||(selectedSite.type==='province'&&f.properties.province===selectedSite.province));
+    const shown=mapOverview||!province||f.properties.province===province;
+    if(radarActive){
+      const cVal=readVal(f.properties.id);
+      return {opacity:shown?1:0,color:selected?'#f1ffda':'#0d1c24',weight:selected?2.5:1,fillColor:thermalColor(cVal,min,max).css,fillOpacity:shown?(selected?.84:.64):0};
+    }
+    return {opacity:shown?1:0,color:selected?'#c3f77a':'#617f85',weight:selected?2:1,fillColor:'#344b48',fillOpacity:shown?(selected?.18:.04):0};
+  });
 }
 
 function paintSeaLabels(){
@@ -387,7 +462,7 @@ function setPeriod(){
 
 let methodTab='all';
 function renderMethodContent(){
-  const s=state.site?data[state.site]:data['san-jose'];
+  const s=state.site?{...data[state.site],url:data[state.site].url??'https://power.larc.nasa.gov/docs/'}:{name:'Costa Rica',url:'https://power.larc.nasa.gov/docs/'};
   const loc=locale();
   const rows=rawVariables.map(p=>`<tr><td>${p[getLang()].name}<br><small>${p.id}</small></td><td>${p[getLang()].definition}</td></tr>`).join('');
   const es=getLang()==='es';
@@ -410,29 +485,29 @@ function renderMethodContent(){
 
 function showMethod(){methodTab='all';renderMethodContent();$('#method-dialog').showModal();}
 
-function download(){
-  if(!state.site)return;
-  const rows=['# GaiaTrack | NASA POWER | Reference point, not territorial average',`# Variable: ${v().id}; ${v().definition}`,`# Anomaly baseline: 2001-2010; source retrieved: ${data[state.site].sourceRetrievedAt??'not recorded'}`,`# Source query: ${data[state.site].url}`,'territory,latitude,longitude,year,variable,unit,value,anomaly_2001_2010,valid_days,expected_days,coverage_pct,valid_months,estimated_accumulation'];
-  const ids=state.compare?[state.site,state.compareSite]:[state.site];
+function download(snapshot=state){
+  if(!snapshot.site)return;
+  const rows=['# GaiaTrack | NASA POWER | Reference point, not territorial average',`# Variable: ${v().id}; ${v().definition}`,`# Anomaly baseline: 2001-2010; source retrieved: ${data[snapshot.site].sourceRetrievedAt??'not recorded'}`,`# Source query: ${data[snapshot.site].url}`,'territory,latitude,longitude,year,variable,unit,value,anomaly_2001_2010,valid_days,expected_days,coverage_pct,valid_months,estimated_accumulation'];
+  const ids=snapshot.compare?[snapshot.site,snapshot.compareSite]:[snapshot.site];
   for(const id of [...new Set(ids)]){
     const all=series(id),b=baseline(all);
-    for(const p of all.filter(p=>p.year>=state.start&&p.year<=state.end)){
-      const quality=historyCoverage(data[id].monthly,state.variable,p.year);
+    for(const p of all.filter(p=>p.year>=snapshot.start&&p.year<=snapshot.end)){
+      const quality=historyCoverage(data[id].monthly,snapshot.variable,p.year);
       rows.push([data[id].name,data[id].latitude,data[id].longitude,p.year,v().id,v().unit,Number.isFinite(p.value)?p.value.toFixed(5):'',Number.isFinite(p.value)&&Number.isFinite(b)?(p.value-b).toFixed(5):'',quality.validDays,quality.expectedDays,quality.percent.toFixed(2),quality.validMonths,quality.estimated].join(','));
     }
   }
   const url=URL.createObjectURL(new Blob(['\uFEFF'+rows.join('\r\n')],{type:'text/csv;charset=utf-8;'}));
-  const a=document.createElement('a');a.href=url;a.download=`GaiaTrack_${state.site}_${state.variable}_${state.start}-${state.end}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  const a=document.createElement('a');a.href=url;a.download=`GaiaTrack_${snapshot.site}_${snapshot.variable}_${snapshot.start}-${snapshot.end}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
 async function boot(){
   applyStaticI18n();
+  const retry=document.createElement('button');retry.id='history-retry';retry.type='button';retry.className='text-button';retry.hidden=true;retry.textContent=tx('Retry historical detail','Reintentar detalle histórico');retry.onclick=()=>{historyFailures.delete(state.site);ensureHistory(state.site).catch(()=>{});};$('#metric-definition').after(retry);
   const quality=document.createElement('p');quality.id='history-quality';quality.className='forecast-unit-note';quality.setAttribute('role','status');$('#metric-definition').after(quality);
   initForecast();
   try{
-    const r=await fetch('data/manifest.json?v=18');if(!r.ok)throw Error('manifest');manifest=await r.json();
-    await Promise.all(manifest.sites.map(async s=>{const r=await fetch(`data/${s.id}.json`);if(!r.ok)throw Error(s.id);data[s.id]=await r.json();}));
-    const boundaryResponse=await fetch('data/cantons.geojson?v=18');if(!boundaryResponse.ok)throw Error('cantons');geo=await boundaryResponse.json();
+    [manifest,annual,geo]=await Promise.all(['data/manifest.json?v=18','data/annual.json?v=18','data/cantons.geojson?v=18'].map(loadStaticJSON));
+    data=Object.fromEntries(manifest.sites.map(site=>[site.id,{...site}]));
     buildLayerButtons();
     options($('#site-select'),state.site);options($('#compare-site'),state.compareSite);
     for(const id of ['#start-year','#end-year']){$(id).innerHTML=Array.from({length:25},(_,i)=>`<option>${2001+i}</option>`).join('');$(id).onchange=setPeriod;}
@@ -443,6 +518,9 @@ async function boot(){
     $('#compare-site').onchange=e=>{state.compareSite=e.target.value;state.compare=true;$('#compare').checked=true;renderChart();};
     $('#annual-view').onclick=()=>{state.anomaly=false;updateView();};
     $('#anomaly-view').onclick=()=>{state.anomaly=true;updateView();};
+    if($('#mode-normal'))$('#mode-normal').onclick=()=>setRadarMode(false);
+    if($('#mode-radar'))$('#mode-radar').onclick=()=>setRadarMode(true);
+    updateRadarButtons();
     function updateView(){for(const [id,active] of [['#annual-view',!state.anomaly],['#anomaly-view',state.anomaly]]){$(id).classList.toggle('selected',active);$(id).setAttribute('aria-pressed',String(active));}renderChart();}
     $('#play').onclick=()=>{
       if(timer){stop();return;}if(state.start===state.end)return;if(state.year>=state.end)setYear(state.start);
@@ -452,7 +530,7 @@ async function boot(){
     for(const id of ['#method-open','#sources-open','#help-open'])$(id).onclick=showMethod;
     $('#method-close').onclick=$('#method-done').onclick=()=>$('#method-dialog').close();
     $('#method-dialog').addEventListener('click',e=>{if(e.target===$('#method-dialog')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();}});
-    $('#download').onclick=download;
+    $('#download').onclick=async()=>{const snapshot={...state};if(!snapshot.site)return;$('#download').disabled=true;try{await Promise.all([snapshot.site,...(snapshot.compare?[snapshot.compareSite]:[])].map(ensureHistory));download(snapshot);}catch{showError(tx('Could not load export data. Please retry.','No se pudieron cargar los datos de exportación. Reintentá.'));}finally{$('#download').disabled=!state.site;}};
     document.querySelectorAll('.period-presets .preset-btn').forEach(btn=>btn.onclick=()=>{
       const p=btn.dataset.preset;
       $('#end-year').value='2025';
@@ -476,7 +554,7 @@ async function boot(){
     });
     initMap();render();$('#status').textContent='';
     document.addEventListener('gaiatrack:lang',()=>{
-      buildLayerButtons();
+      buildLayerButtons();updateRadarButtons();
       options($('#site-select'),state.site);
       options($('#compare-site'),state.compareSite);
       paintSeaLabels();

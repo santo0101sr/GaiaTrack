@@ -1,3 +1,4 @@
+import {loadHistory} from './data-client.js';
 import {publishWeather,readWeather} from './weather-state.js';
 import {buildRecommendations,nearestSite} from './recommendations.js';
 import {getLang,locale,tx} from './i18n.js';
@@ -98,12 +99,13 @@ function mountExtras(){
 mountExtras();
 
 const monthlyCache=new Map(),scenario={deltaT:0,deltaPPercent:0};
-async function loadMonthly(id){if(monthlyCache.has(id))return monthlyCache.get(id);try{const r=await fetch(`data/${id}.json`);if(!r.ok)return null;const d=await r.json();monthlyCache.set(id,d.monthly);return d.monthly;}catch{return null;}}
+async function loadMonthly(id){try{return (await loadHistory(id)).monthly;}catch{return null;}}
 const fmtNum=(n,d=2)=>Number.isFinite(n)?new Intl.NumberFormat(locale(),{maximumFractionDigits:d,signDisplay:'exceptZero'}).format(n):'—';
 
 async function renderRecs(result){
   if(!result)return;
   const monthly=await loadMonthly(result.site);
+  if(site!==result.site)return;
   const forecastDays=readWeather('forecast',result.site)?.days||[];
   const {profile,metrics,tips}=buildRecommendations(result.site,result,forecastDays,{monthly,scenario:(scenario.deltaT||scenario.deltaPPercent)?scenario:null,lang:getLang()});
   const scaleTag=metrics?(metrics.tempScale==='daily-24h'

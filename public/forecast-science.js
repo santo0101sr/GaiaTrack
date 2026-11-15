@@ -1,4 +1,12 @@
 export function costaRicaDay(now=new Date()){const parts=new Intl.DateTimeFormat('en-US',{timeZone:'America/Costa_Rica',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now);const part=t=>parts.find(p=>p.type===t).value;return `${part('year')}-${part('month')}-${part('day')}`;}
+export function forecastDates(today=costaRicaDay()){
+  const date=new Date(today+'T12:00:00Z');
+  return Array.from({length:7},()=>{date.setUTCDate(date.getUTCDate()+1);return date.toISOString().slice(0,10);});
+}
+export function hasCompleteForecast(days,today=costaRicaDay()){
+  if(!Array.isArray(days)||days.length!==7)return false;
+  return forecastDates(today).every((date,i)=>days[i]?.date===date);
+}
 export function quantile(values,q){const sorted=values.filter(Number.isFinite).sort((a,b)=>a-b);if(!sorted.length)return null;const x=(sorted.length-1)*q,i=Math.floor(x);return sorted[i]+(sorted[Math.min(i+1,sorted.length-1)]-sorted[i])*(x-i);}
 export function normalizeForecast(raw,ensemble,today=costaRicaDay()){
 if(!raw.daily?.time?.length)throw Error('La fuente no devolvió fechas de pronóstico.');

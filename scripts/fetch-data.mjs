@@ -2,7 +2,7 @@ import {mkdir,writeFile,readFile,rename,rm} from 'node:fs/promises';
 import {aggregateHistory,parameters as params} from './history-science.mjs';
 import {annualSeries} from '../public/science.js';
 // Resumen anual compacto: el mapa y la escena 3D lo usan sin descargar los 90 históricos mensuales.
-const annualSummary=monthly=>Object.fromEntries(params.map(p=>[p,annualSeries(monthly,p).map(d=>Number.isFinite(d.value)?+d.value.toFixed(5):null)]));
+const annualSummary=monthly=>Object.fromEntries(params.map(p=>[p,annualSeries(monthly,p).map(d=>Number.isFinite(d.value)?d.value:null)]));
 // Genera el catálogo territorial completo: 7 provincias + 83 cantones (geoBoundaries ADM2) con historia NASA POWER.
 const refresh=process.argv.includes('--refresh');
 const dir=new URL('../public/data/',import.meta.url);await mkdir(dir,{recursive:true});
