@@ -3,7 +3,7 @@ import {siteOptionsHtml,provinceOptionsHtml,territoryOptionsHtml,annualPoints,an
 import {trend,baseline,mean,historyCoverage,detrendedCorrelation,benjaminiHochberg} from './science.js';
 import {initForecast,updateForecast} from './forecast.js';
 import {getLang,locale,tx,applyStaticI18n} from './i18n.js';
-import {computeAllRisks,driverLabel,riskColor,riskLevel,RISK_GRADIENT_CSS} from './ecological-risk.js';
+import {computeAllRisks,driverLabel,fetchLiveRadarTemps,riskColor,riskLevel,RISK_GRADIENT_CSS} from './ecological-risk.js';
 
 const $=s=>document.querySelector(s);
 const rawVariables=[
@@ -97,6 +97,11 @@ function setRadarMode(enabled,{broadcast=true}={}){
   state.radarMode=next;
   updateRadarButtons();
   renderMap();
+  if(state.radarMode){
+    fetchLiveRadarTemps().then(data=>{
+      if(manifest?.sites&&annual){riskSummary=computeAllRisks({sites:manifest.sites,annual,ecological,liveTemps:data.temps});renderMap();}
+    }).catch(()=>{});
+  }
   if(broadcast)document.dispatchEvent(new CustomEvent('gaiatrack:radar-mode',{detail:{enabled:state.radarMode}}));
 }
 document.addEventListener('gaiatrack:radar-mode',e=>setRadarMode(e.detail?.enabled,{broadcast:false}));

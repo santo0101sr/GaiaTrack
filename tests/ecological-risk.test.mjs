@@ -6,7 +6,8 @@ import {
   computeSiteRisk,
   driverLabel,
   riskColor,
-  riskLevel
+  riskLevel,
+  topRiskCantons
 } from '../public/ecological-risk.js';
 
 test('riskColor and riskLevel map ecological risk scores consistently', () => {
@@ -41,4 +42,15 @@ test('computeAllRisks produces real scores for all 90 territories from NASA POWE
 
   const missing = computeSiteRisk({ site: { id: 'missing-site' }, annual, ecologicalSite: null });
   assert.equal(missing.score, null);
+
+  const top5 = topRiskCantons(summary, manifest.sites, 5);
+  assert.equal(top5.length, 5);
+  assert.ok(top5.every(item => item.site.type === 'canton'));
+  assert.ok(top5[0].risk.score >= top5[4].risk.score);
+
+  const sj = manifest.sites.find(s => s.id === 'san-jose-centro');
+  const baseSj = computeSiteRisk({ site: sj, annual, ecologicalSite: ecological.sites[sj.id] });
+  const hotSj = computeSiteRisk({ site: sj, annual, ecologicalSite: ecological.sites[sj.id], liveTemp: 32 });
+  assert.equal(hotSj.hasLive, true);
+  assert.ok(hotSj.thermalRisk >= baseSj.thermalRisk);
 });

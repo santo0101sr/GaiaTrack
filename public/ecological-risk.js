@@ -54,22 +54,25 @@ export function driverLabel(driver, lang = 'es') {
   return labels[driver]?.[lang] ?? labels.thermal[lang];
 }
 
-export function computeSiteRisk({ site, annual, ecologicalSite = null }) {
+export function computeSiteRisk({ site, annual, ecologicalSite = null, liveTemp = null }) {
   if (!site?.id || !annual?.sites?.[site.id]) {
-    return { score: null, climateRisk: null, bioRisk: null, driver: 'thermal' };
+    return { score: null, climateRisk: null, bioRisk: null, driver: 'thermal', hasLive: false };
   }
 
-  // 1. Thermal pressure (NASA POWER T2M: recent 2021-2025 vs 2001-2010 + Theil-Sen slope)
+  // 1. Thermal pressure (NASA POWER T2M: recent 2021-2025 vs 2001-2010 + Theil-Sen slope + optional live temp)
   const t2m = annualPoints(annual, site.id, 'T2M');
   const baseT = baseline(t2m, 2001, 2010);
   const recentT = mean(t2m.filter(p => p.year >= 2021 && Number.isFinite(p.value)).map(p => p.value));
   const deltaT = Number.isFinite(baseT) && Number.isFinite(recentT) ? recentT - baseT : 0;
   const slopeDecade = (trend(t2m).slope ?? 0) * 10;
-  const thermalRisk = clamp(
+  const baseThermal = clamp(
     clamp((deltaT / 1.0) * 65, 0, 70) + clamp((slopeDecade / 0.5) * 30, 0, 30),
     0,
     100
   );
+  const hasLive = Number.isFinite(liveTemp) && Number.isFinite(baseT);
+  const liveAnomalyRisk = hasLive ? clamp(((liveTemp - baseT) / 4.0) * 100, 0, 100) : null;
+  const thermalRisk = hasLive ? clamp(0.65 * baseThermal + 0.35 * liveAnomalyRisk, 0, 100) : baseThermal;
 
   // 2. Hydrological stress (NASA POWER PRECTOTCORR + GWETTOP + elevation)
   const prec = annualPoints(annual, site.id, 'PRECTOTCORR');
@@ -126,11 +129,13 @@ export function computeSiteRisk({ site, annual, ecologicalSite = null }) {
     driver: candidates[0][0],
     threatenedOccurrences: Number.isFinite(threat) ? threat : null,
     occurrences: Number.isFinite(occ) ? occ : null,
-    elevationM: Number.isFinite(ecologicalSite?.elevationM) ? ecologicalSite.elevationM : null
+    elevationM: Number.isFinite(ecologicalSite?.elevationM) ? ecologicalSite.elevationM : null,
+    liveTemp: Number.isFinite(liveTemp) ? liveTemp : null,
+    hasLive
   };
 }
 
-export function computeAllRisks({ sites = [], annual, ecological = null }) {
+export function computeAllRisks({ sites = [], annual, ecological = null, liveTemps = null }) {
   const byId = new Map();
   let min = Infinity;
   let max = -Infinity;
@@ -138,7 +143,8 @@ export function computeAllRisks({ sites = [], annual, ecological = null }) {
     const res = computeSiteRisk({
       site,
       annual,
-      ecologicalSite: ecological?.sites?.[site.id] ?? null
+      ecologicalSite: ecological?.sites?.[site.id] ?? null,
+      liveTemp: liveTemps?.get?.(site.id) ?? null
     });
     byId.set(site.id, res);
     if (Number.isFinite(res.score)) {
@@ -151,4 +157,41 @@ export function computeAllRisks({ sites = [], annual, ecological = null }) {
     min: Number.isFinite(min) ? min : 0,
     max: Number.isFinite(max) ? max : 100
   };
+}
+
+export function topRiskCantons(riskSummary, sites = [], limit = 5) {
+  if (!riskSummary?.byId) return [];
+  return sites
+    .filter(s => s.type === 'canton')
+    .map(s => ({ site: s, risk: riskSummary.byId.get(s.id) }))
+    .filter(item => Number.isFinite(item.risk?.score))
+    .sort((a, b) => b.risk.score - a.risk.score)
+    .slice(0, limit);
+}
+
+const LIVE_CACHE_TTL_MS = 15 * 60 * 1000;
+let liveCache = null;
+let liveInflight = null;
+
+export async function fetchLiveRadarTemps({ force = false, fetchImpl = globalThis.fetch } = {}) {
+  const now = Date.now();
+  if (!force && liveCache && now - liveCache.fetchedAt < LIVE_CACHE_TTL_MS) {
+    return liveCache.data;
+  }
+  if (!force && liveInflight) return liveInflight;
+  liveInflight = (async () => {
+    const res = await fetchImpl('/api/current?site=all');
+    if (!res.ok) throw Error(`HTTP ${res.status}`);
+    const payload = await res.json();
+    const temps = new Map();
+    for (const row of payload?.sites ?? []) {
+      if (row?.site && Number.isFinite(row.temperature)) temps.set(row.site, row.temperature);
+    }
+    const data = { temps, retrievedAt: payload?.retrievedAt ?? null };
+    liveCache = { fetchedAt: Date.now(), data };
+    return data;
+  })().finally(() => {
+    liveInflight = null;
+  });
+  return liveInflight;
 }
