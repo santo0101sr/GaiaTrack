@@ -180,7 +180,7 @@ export function temporalPersistenceGate(ieaSeries = [], threshold = 0.89, minCon
 }
 
 export function siteZSummary(monthlyRows = [], startYear = 2001, endYear = 2025, refStart = 2001, refEnd = 2010) {
-  const vars = ['T2M', 'PRECTOTCORR', 'GWETTOP'];
+  const vars = ['T2M', 'T2M_MIN', 'T2M_MAX', 'ALLSKY_SFC_SW_DWN', 'PRECTOTCORR', 'GWETTOP', 'RH2M'];
   const seriesByVar = {};
   const ciByVar = {};
   const mkByVar = {};

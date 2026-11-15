@@ -27,6 +27,7 @@ download.onclick=()=>{
 
 window.addEventListener('online',()=>load());
 const fmt=(n,unit)=>Number.isFinite(n)?new Intl.NumberFormat(locale(),{maximumFractionDigits:unit==='m³/m³'?3:1}).format(n)+' '+unit:tx('Not reported','No reportado');
+const hasFullTelemetry=v=>Boolean(v&&[v.feelsLike,v.humidity,v.pressure,v.windSpeed,v.clouds].some(Number.isFinite));
 function hud(text){let el=$('.flight-live');if(!el&&$('.flight-panel')){el=document.createElement('div');el.className='flight-live';$('.flight-panel').insertBefore(el,$('.flight-panel h2'));}if(el)el.textContent=text;}
 
 function paint(result){
@@ -64,7 +65,7 @@ async function load(){
     return;
   }
   const requested=site,token=++sequence,stored=cache.get(requested);
-  if(stored&&Date.now()-stored.time<900000){
+  if(stored&&Date.now()-stored.time<900000&&(stored.error||hasFullTelemetry(stored.value))){
     if(stored.error){$('#current-status').textContent=stored.error;hud(tx('TELEMETRY · UNAVAILABLE','TELEMETRÍA · NO DISPONIBLE'));}
     else paint(stored.value);
     $('#current-refresh').disabled=false;return;
@@ -154,11 +155,15 @@ function paintCountrySummary(){
 
 async function loadCountry(){
   try{
-    const fresh=provinces.every(id=>{const s=cache.get(id);return s&&Date.now()-s.time<900000&&!s.error;});
+    const fresh=provinces.every(id=>{const s=cache.get(id);return s&&Date.now()-s.time<900000&&!s.error&&hasFullTelemetry(s.value);});
     if(!fresh){
       countryPending??=fetch('/api/current?site=all').then(async r=>{if(!r.ok)throw Error('HTTP '+r.status);return r.json();}).finally(()=>{countryPending=null;});
       const batch=await countryPending;
-      for(const d of batch.sites||[]){cache.set(d.site,{time:Date.parse(d.retrievedAt),value:d});publishWeather('current',d);if(d.site===site)paint(d);}
+      for(const d of batch.sites||[]){
+        const prev=cache.get(d.site);
+        if(!hasFullTelemetry(d)&&prev&&Date.now()-prev.time<900000&&hasFullTelemetry(prev.value))continue;
+        cache.set(d.site,{time:Date.parse(d.retrievedAt),value:d});publishWeather('current',d);if(d.site===site)paint(d);
+      }
     }
   }catch{}
   paintCountrySummary();

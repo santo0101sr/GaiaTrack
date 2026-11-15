@@ -50,6 +50,7 @@ function ensureHistory(id){
   const refresh=()=>{
     if(state.site!==id)return;
     renderInspector();
+    renderStats();
     if($('#method-dialog').open)renderMethodContent();
   };
   const work=loadHistory(id).then(record=>{

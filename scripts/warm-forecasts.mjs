@@ -1,4 +1,5 @@
 import {readFile} from 'node:fs/promises';
+process.env.WRITE_FORECAST_SNAPSHOTS='1';
 import {getForecast} from './forecast-service.mjs';
 // Precarga el pronóstico de respaldo (public/data/forecast) para cada provincia y cantón del manifiesto.
 const manifest=JSON.parse(await readFile(new URL('../public/data/manifest.json',import.meta.url),'utf8'));
