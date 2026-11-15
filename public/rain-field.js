@@ -92,13 +92,20 @@ export function createRainDomain(meshes){
 export function rainAppearance(data,count=1200){
   const intensity=weatherScales(data).rain??0;
   return {intensity,count:intensity>0?Math.max(1,Math.round(intensity*count)):0,
-    speed:.75+Math.sqrt(intensity)*2.5,length:.025+intensity*.16,opacity:intensity>0?.18+intensity*.6:0};
+    speed:.8+Math.sqrt(intensity)*2.8,length:.04+intensity*.19,opacity:intensity>0?.3+intensity*.48:0};
 }
 
 export function createRainField(initialDomain,{count=1200,random=Math.random}={}){
   const geometry=new THREE.BufferGeometry(),positions=new Float32Array(count*6),origin=new THREE.Vector3();
   geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));geometry.setDrawRange(0,0);
-  const mesh=new THREE.LineSegments(geometry,new THREE.LineBasicMaterial({color:0x8be0ff,transparent:true,opacity:0,depthWrite:false}));
+  const fades=new Float32Array(count*2);
+  for(let i=0;i<count;i++){fades[i*2]=.7+(i%5)*.075;fades[i*2+1]=.02;}
+  geometry.setAttribute('dropFade',new THREE.BufferAttribute(fades,1));
+  const material=new THREE.ShaderMaterial({transparent:true,depthWrite:false,toneMapped:false,
+    uniforms:{opacity:{value:0},tint:{value:new THREE.Color(0xb4d9eb)}},
+    vertexShader:`attribute float dropFade;varying float fade;void main(){fade=dropFade;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`uniform float opacity;uniform vec3 tint;varying float fade;void main(){gl_FragColor=vec4(tint,opacity*fade);}`});
+  const mesh=new THREE.LineSegments(geometry,material);
   // Buffers change as drops respawn; avoid a stale bounding sphere culling a different territory.
   mesh.frustumCulled=false;
   let domain=null,drops=[],appearance=rainAppearance({},count);
@@ -108,10 +115,11 @@ export function createRainField(initialDomain,{count=1200,random=Math.random}={}
     let tail=Math.min(.02,domain.shortSpan*.03);
     for(let i=0;i<8&&!domain.containsSegment(point,{x:point.x+tail,z:point.z});i++)tail/=2;
     if(!domain.containsSegment(point,{x:point.x+tail,z:point.z}))tail=0;
-    return {...point,tail,ground:point.y,y:point.y+.3+random()*1.4};
+    return {...point,tail,ground:point.y,y:point.y+.12+random()*.88};
   }
   function write(i,d){
-    positions.set([d.x-origin.x,d.y-origin.y,d.z-origin.z,d.x+d.tail-origin.x,d.y+appearance.length-origin.y,d.z-origin.z],i*6);
+    const length=appearance.length*(.7+(i%7)*.1);
+    positions.set([d.x-origin.x,d.y-origin.y,d.z-origin.z,d.x+d.tail-origin.x,d.y+length-origin.y,d.z-origin.z],i*6);
   }
   function setDomain(next){
     if(domain===next)return;
@@ -122,7 +130,7 @@ export function createRainField(initialDomain,{count=1200,random=Math.random}={}
   }
   function setOrigin(next){origin.copy(next);drops.forEach((d,i)=>write(i,d));geometry.attributes.position.needsUpdate=true;}
   function setWeather(data){
-    appearance=rainAppearance(data,count);mesh.material.opacity=appearance.opacity;
+    appearance=rainAppearance(data,count);mesh.material.opacity=appearance.opacity;material.uniforms.opacity.value=appearance.opacity;
     mesh.userData.precipitationMmPerHour=data.precipitation??null;
     mesh.userData.rainIntensity=appearance.intensity;
     geometry.setDrawRange(0,Math.min(drops.length,appearance.count)*2);

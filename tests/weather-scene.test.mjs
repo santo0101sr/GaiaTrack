@@ -46,6 +46,15 @@ test('Rain stops immediately when selecting a dry province, and province effects
     assert.equal(selectedSky.userData.cloudCover,1);assert.equal(selectedSky.userData.sunStrength,0);
     for(let t=0;t<1000;t+=33)scene.animate(t,true);
     assert.ok(rain.geometry.drawRange.count>0);
+    // Decorative motion/reduced-motion no longer disables data-driven precipitation.
+    const dropPositions=rain.geometry.attributes.position.array;
+    const positionBefore=dropPositions[1];scene.animate(1020,false);
+    assert.notEqual(dropPositions[1],positionBefore);
+    document.querySelector('#weather-motion').onclick();
+    const paused=dropPositions.slice();scene.animate(1050,false);
+    assert.deepEqual(dropPositions,paused);
+    document.querySelector('#weather-motion').onclick();scene.animate(1080,false);
+    assert.notDeepEqual(dropPositions,paused);
 
     document.dispatchEvent(new CustomEvent('gaiatrack:selection',{detail:{site:'limon'}}));
     assert.equal(rain.geometry.drawRange.count,0);

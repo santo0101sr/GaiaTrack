@@ -44,6 +44,15 @@ La escena 3D detiene su ciclo de renderizado mientras está oculta, se abre el
 laboratorio o se oculta la pestaña. En pantallas pequeñas/equipos modestos usa
 menos resolución y desactiva sombras; respeta movimiento reducido. Los datos
 meteorológicos compartidos no vuelven a emitir eventos si son el mismo registro.
+
+La animación del clima tiene un control independiente y activo por defecto:
+pausar la ambientación decorativa no congela la lluvia. Las gotas usan trazos
+con desvanecimiento; su densidad, velocidad y longitud aumentan con los mm/h
+del proveedor, y su geometría permanece dentro del territorio seleccionado.
+Las nubes usan densidad volumétrica procedural con bordes suaves, respetando
+los límites del territorio. Son ilustraciones de las estimaciones del punto de
+referencia; no representan un radar ni una distribución espacial observada.
+El PNG de marca conserva su transparencia, sin un fondo aplicado por CSS.
 Las pruebas usan respuestas controladas y no consumen créditos; la validación real
 del modelo elegido requiere completar las dos variables.
 

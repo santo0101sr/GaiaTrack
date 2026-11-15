@@ -163,7 +163,7 @@
 .lab-open #tendencias,.lab-open #explorador,.lab-open #pronostico,.lab-open #tiempo-actual{scroll-margin-top:12px}
 .lab-open .section-label{color:#a9c2d1}
 .lab-open select:focus-visible,.lab-open button:focus-visible,.lab-open summary:focus-visible{outline:2px solid #81e8bf;outline-offset:4px}
-.brand-logo{width:190px;max-height:76px;padding:5px 9px}
+.brand-logo{width:190px;max-height:76px;padding:0;background:transparent;border-radius:0}
 @media(min-width:1600px){.lab-open>main{left:max(28px,calc((100vw - 1510px)/2));right:max(28px,calc((100vw - 1510px)/2))}}
 @media(max-width:1200px){.lab-open>main{inset:108px 18px 18px;padding:0 20px 26px}.trend-workbench{grid-template-columns:minmax(0,1fr) 210px}.lab-open .forecast-days-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.lab-open .province-scan{grid-template-columns:repeat(4,minmax(0,1fr))}.lab-open .research-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.lab-open .research-title{padding:18px}}
 @media(max-width:900px){.trend-workbench{grid-template-columns:1fr}.lab-open .trend-summary .stat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));height:auto}.lab-open .trend-summary .stat-grid>div{border-bottom:0;border-right:1px solid var(--lab-line);padding:17px}.lab-open .trend-summary .stat-grid>div:last-child{border-right:0}.lab-open .stat-grid strong{font-size:25px}.lab-open .forecast-analysis-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.lab-open .history-controls{justify-content:flex-start}.lab-open .calc-grid{grid-template-columns:1fr}}

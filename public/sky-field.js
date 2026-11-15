@@ -10,12 +10,32 @@ export function skyAppearance(data){
   return {cover,sun,night:data.isDay===false,storm:weatherScales(data).rain??0};
 }
 
-// Each cloud is a group of ellipsoids inscribed in a disk wholly inside the territory.
+// Density is ray-marched inside bounded ellipsoids, with feathered noise instead of hard sphere surfaces.
+// Geometry and all visible density remain inside a disk wholly inside the territory.
 export function createSkyField(initialDomain){
   const group=new THREE.Group(),origin=new THREE.Vector3(),layers=[];
   group.name='territory-sky';
-  const maxClusters=48,puffs=[[-.25,0,0],[.2,.08,.02],[0,.16,-.12],[.06,0,.23]];
-  const cloud=new THREE.InstancedMesh(new THREE.SphereGeometry(1,12,10),new THREE.MeshStandardMaterial({color:0xdce9ed,roughness:1,transparent:true,opacity:0,depthWrite:false}),maxClusters*puffs.length);
+  const maxClusters=32,puffs=[[-.25,0,0],[.2,.08,.02],[0,.16,-.12],[.06,0,.23]];
+  const material=new THREE.ShaderMaterial({transparent:true,depthWrite:false,toneMapped:false,
+    uniforms:{time:{value:0},opacity:{value:0},cloudTop:{value:new THREE.Color(0xe8f2f7)},cloudBase:{value:new THREE.Color(0x7792aa)}},
+    vertexShader:`varying vec3 localSurface;varying vec3 localEye;varying float seed;
+      void main(){mat4 world=modelMatrix*instanceMatrix;vec3 delta=cameraPosition-world[3].xyz;
+        localEye=vec3(dot(delta,world[0].xyz)/dot(world[0].xyz,world[0].xyz),dot(delta,world[1].xyz)/dot(world[1].xyz,world[1].xyz),dot(delta,world[2].xyz)/dot(world[2].xyz,world[2].xyz));
+        localSurface=position;seed=fract(dot(instanceMatrix[3].xyz,vec3(13.17,47.23,7.91)));
+        gl_Position=projectionMatrix*viewMatrix*world*vec4(position,1.);}`,
+    fragmentShader:`uniform float time;uniform float opacity;uniform vec3 cloudTop;uniform vec3 cloudBase;
+      varying vec3 localSurface;varying vec3 localEye;varying float seed;
+      float hash(vec3 p){p=fract(p*.3183099+vec3(.13,.27,.41));p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
+      float noise3(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);}
+      void main(){vec3 ray=normalize(localSurface-localEye);float b=dot(localEye,ray),c=dot(localEye,localEye)-1.,h=b*b-c;if(h<=0.)discard;
+        float near=max(0.,-b-sqrt(h)),far=-b+sqrt(h),stepSize=(far-near)/12.,transmission=1.;vec3 light=vec3(0.);
+        for(int j=0;j<12;j++){vec3 p=localEye+ray*(near+(float(j)+.5)*stepSize);
+          vec3 q=p*2.6+vec3(seed*19.,time*.15,seed*7.);float n=noise3(q)*.72+noise3(q*2.1+3.7)*.28;
+          float envelope=1.-smoothstep(.35,1.,length(p));float density=max(0.,n-.24)*envelope*4.;
+          float a=1.-exp(-density*stepSize*2.8);vec3 shade=mix(cloudBase,cloudTop,smoothstep(-.65,.7,p.y));
+          light+=transmission*a*shade;transmission*=1.-a;}
+        float alpha=(1.-transmission)*opacity;if(alpha<.008)discard;gl_FragColor=vec4(light/max(.001,1.-transmission),alpha);}`});
+  const cloud=new THREE.InstancedMesh(new THREE.SphereGeometry(1,14,10),material,maxClusters*puffs.length);
   cloud.name='bounded-cloud-layer';cloud.frustumCulled=false;cloud.count=0;group.add(cloud);layers.push(cloud);
   const dummy=new THREE.Object3D();let clusters=[],lastTime=0;
   const sun=new THREE.Mesh(new THREE.SphereGeometry(1,20,14),new THREE.MeshBasicMaterial({color:0xffedb0,transparent:true,opacity:0,depthWrite:false,toneMapped:false}));
@@ -51,11 +71,12 @@ export function createSkyField(initialDomain){
   }
   function animate(time){
     lastTime=time;
+    material.uniforms.time.value=time*.00012;
     for(let i=0;i<cloud.count/puffs.length;i++){
-      const c=clusters[i],r=c.radius,y=c.y+.24+r*.4+Math.sin(time*.00035+i*2.1)*r*.08;
+      const c=clusters[i],r=c.radius,y=c.y+.88+r*.25+Math.sin(time*.00035+i*2.1)*r*.08;
       for(const [j,p] of puffs.entries()){
         dummy.position.set(c.x+p[0]*r-origin.x,y+p[1]*r-origin.y,c.z+p[2]*r-origin.z);
-        dummy.scale.set(r*.6,r*.32,r*.58);dummy.updateMatrix();cloud.setMatrixAt(i*puffs.length+j,dummy.matrix);
+        dummy.scale.set(r*.6,r*.4,r*.58);dummy.updateMatrix();cloud.setMatrixAt(i*puffs.length+j,dummy.matrix);
       }
     }
     cloud.instanceMatrix.needsUpdate=true;
@@ -72,8 +93,10 @@ export function createSkyField(initialDomain){
     appearance=skyAppearance(data);
     applyCloudCount();
     const dark=Math.min(1,appearance.storm*.55+(appearance.night ? .55 : 0));
-    cloud.material.color.setRGB(.86-dark*.42,.92-dark*.4,.95-dark*.36);
-    cloud.material.opacity=appearance.cover===null?0:.2+appearance.cover*.3;
+    material.uniforms.cloudTop.value.setRGB(.92-dark*.3,.96-dark*.28,1.-dark*.23);
+    material.uniforms.cloudBase.value.setRGB(.5-dark*.25,.62-dark*.22,.73-dark*.18);
+    cloud.material.opacity=appearance.cover===null?0:.28+appearance.cover*.48;
+    material.uniforms.opacity.value=cloud.material.opacity;
     sun.visible=!!anchor&&appearance.sun>0;halo.visible=sun.visible;
     sun.material.opacity=Math.min(1,appearance.sun*1.8);
     halo.material.uniforms.strength.value=appearance.sun*.7;
