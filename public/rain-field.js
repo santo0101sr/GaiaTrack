@@ -154,6 +154,7 @@ export function createRainField(initialDomain,{count=1200,random=Math.random}={}
     drops.forEach((d,i)=>write(i,d));geometry.attributes.position.needsUpdate=true;dropBuffer.needsUpdate=true;
     geometry.setDrawRange(0,Math.min(drops.length,appearance.count)*2);
     ribbons.instanceCount=Math.min(drops.length,appearance.count);
+    mesh.visible=ribbons.instanceCount>0;
   }
   function setOrigin(next){origin.copy(next);drops.forEach((d,i)=>write(i,d));geometry.attributes.position.needsUpdate=true;dropBuffer.needsUpdate=true;}
   function setWeather(data){
@@ -163,6 +164,7 @@ export function createRainField(initialDomain,{count=1200,random=Math.random}={}
     mesh.userData.rainIntensity=appearance.intensity;
     geometry.setDrawRange(0,Math.min(drops.length,appearance.count)*2);
     ribbons.instanceCount=Math.min(drops.length,appearance.count);
+    mesh.visible=ribbons.instanceCount>0;
     // A paused scene also reflects new intensity and drop length immediately.
     drops.forEach((d,i)=>write(i,d));geometry.attributes.position.needsUpdate=true;dropBuffer.needsUpdate=true;
   }

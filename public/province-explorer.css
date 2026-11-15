@@ -4,7 +4,7 @@
 .province-explorer .flight-intro{top:105px;left:3.8%;max-width:300px;pointer-events:none}
 .province-explorer .flight-intro h1{font-size:clamp(28px,3.1vw,42px);margin:10px 0;color:#eaf6fc}
 .province-explorer .flight-intro p{letter-spacing:0;font-size:11px;line-height:1.6;display:block}
-.territory-browser{position:absolute;top:225px;left:3.8%;width:258px;padding:17px;background:linear-gradient(145deg,#0d2442eb,#071426ea);border:1px solid #14b8e638;border-radius:12px;backdrop-filter:blur(18px);max-height:calc(100dvh - 365px);overflow:auto;scrollbar-width:thin;scrollbar-color:#265480 transparent;z-index:4}
+.territory-browser{position:absolute;top:225px;left:3.8%;width:258px;padding:17px;background:linear-gradient(145deg,#0d2442f2,#071426f4);border:1px solid #14b8e638;border-radius:12px;max-height:calc(100dvh - 365px);overflow:auto;scrollbar-width:thin;scrollbar-color:#265480 transparent;z-index:4}
 .territory-breadcrumb{display:flex;gap:10px;align-items:center;font-size:10px;color:#8eb2cf;padding-bottom:15px;border-bottom:1px solid #14b8e624}
 .territory-breadcrumb button{color:#8ef8bc;font-size:10px;padding:3px 0}
 .territory-list-heading{display:flex;align-items:center;justify-content:space-between;margin:16px 0 12px}
@@ -18,7 +18,7 @@
 .territory-overview{width:100%;text-align:left;font-size:10px;color:#8ef8bc;border:1px solid #14b8e638;border-radius:6px;padding:10px;margin-bottom:8px;background:#14b8e60c}
 .territory-overview[aria-pressed=true]{border-color:#18d86b88}
 .territory-map-labels{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2}
-.territory-map-label{position:absolute;left:0;top:0;pointer-events:auto;width:112px;padding:6px 4px;text-align:center;font-size:9px;color:#dcebf7;text-shadow:0 1px 5px #000;background:#071426b8;border:1px solid #14b8e630;border-radius:4px;backdrop-filter:blur(6px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.territory-map-label{position:absolute;left:0;top:0;pointer-events:auto;width:112px;padding:6px 4px;text-align:center;font-size:9px;color:#dcebf7;text-shadow:0 1px 5px #000;background:#071426de;border:1px solid #14b8e630;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .territory-map-label:hover,.territory-map-label[aria-pressed=true]{color:#8ef8bc;border-color:#18d86b88;background:#0e2c52e8}
 .territory-map-label[hidden],.territory-map-labels[hidden],.province-explorer [hidden]{display:none!important}
 .province-explorer .flight-panel{top:115px;right:3.8%;width:278px;padding:18px 20px;max-height:calc(100dvh - 245px);overflow:auto}

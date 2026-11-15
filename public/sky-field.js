@@ -18,12 +18,12 @@ export function skyAppearance(data){
 export function createSkyField(initialDomain,{maxClusters=20,marchSteps=16,showSun=true}={}){
   const group=new THREE.Group(),origin=new THREE.Vector3(),layers=[];
   group.name='territory-sky';
-  // Five organic puffs per cluster; every puff stays inside radius 1.0 of the cluster center.
-  const puffs=[[-.26,0,.04,.60,.28,.50],[.22,.08,-.02,.58,.38,.48],[0,.20,-.10,.50,.40,.48],[.08,-.02,.22,.48,.24,.46],[-.14,.12,-.20,.48,.32,.44]];
+  // Four organic puffs per cluster; every puff stays inside radius 1.0 of the cluster center.
+  const puffs=[[-.26,0,.04,.60,.28,.50],[.22,.08,-.02,.58,.38,.48],[0,.20,-.10,.50,.40,.48],[.08,-.02,.22,.48,.24,.46]];
   const material=new THREE.ShaderMaterial({transparent:true,depthWrite:false,toneMapped:false,
     uniforms:{
       time:{value:0},opacity:{value:0},cover:{value:0},storm:{value:0},flash:{value:0},daylight:{value:1},wind:{value:.65},
-      steps:{value:Math.max(6,Math.min(20,marchSteps))},
+      steps:{value:Math.max(5,Math.min(12,marchSteps))},
       cloudTop:{value:new THREE.Color(0xeef6fb)},cloudBase:{value:new THREE.Color(0x6e8aa3)}
     },
     vertexShader:`varying vec3 localSurface;varying vec3 localEye;varying float seed;
@@ -35,18 +35,18 @@ export function createSkyField(initialDomain,{maxClusters=20,marchSteps=16,showS
       varying vec3 localSurface;varying vec3 localEye;varying float seed;
       float hash(vec3 p){p=fract(p*.3183099+vec3(.13,.27,.41));p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
       float noise3(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);}
-      float fbm(vec3 q){return noise3(q)*.54+noise3(q*2.07+3.7)*.28+noise3(q*4.19+1.3)*.13+noise3(q*8.11)*.05;}
-      void main(){vec3 ray=normalize(localSurface-localEye);float b=dot(localEye,ray),c=dot(localEye,localEye)-1.,h=b*b-c;if(h<=0.)discard;
+      float fbm(vec3 q){return noise3(q)*.58+noise3(q*2.07+3.7)*.28+noise3(q*4.19+1.3)*.14;}
+      void main(){if(opacity<.01)discard;vec3 ray=normalize(localSurface-localEye);float b=dot(localEye,ray),c=dot(localEye,localEye)-1.,h=b*b-c;if(h<=0.)discard;
         float near=max(0.,-b-sqrt(h)),far=-b+sqrt(h),stepSize=(far-near)/steps,transmission=1.;vec3 light=vec3(0.);
         float cut=mix(.36,.16,cover)-storm*.05;float densGain=mix(3.3,5.8,cover)*(1.+storm*.35);
         vec3 sunDir=vec3(.32,.88,.24);
-        for(int j=0;j<20;j++){if(float(j)>=steps)break;vec3 p=localEye+ray*(near+(float(j)+.5)*stepSize);
+        for(int j=0;j<12;j++){if(float(j)>=steps)break;vec3 p=localEye+ray*(near+(float(j)+.5)*stepSize);
           vec3 q=p*2.35+vec3(seed*19.+time*wind*.11,time*.08,seed*7.-time*wind*.04);float n=fbm(q);
           float envelope=1.-smoothstep(.26,1.,length(p));float flatBase=smoothstep(-.94,-.46,p.y);
           float density=max(0.,n-cut)*envelope*flatBase*densGain;
           if(density>.005){
             float a=1.-exp(-density*stepSize*2.65);
-            float nSun=fbm(q+sunDir*.38);float shadow=exp(-max(0.,nSun-cut)*2.1);
+            float nSun=noise3(q+sunDir*.38);float shadow=exp(-max(0.,nSun-cut)*1.9);
             float sunlight=clamp(smoothstep(-.52,.82,p.y)*(.55+.45*shadow)*(.74+n*.26),0.,1.);
             float rim=pow(sunlight,2.2)*(1.-storm*.75)*daylight*.24;
             vec3 boltGlow=vec3(.76,.91,1.)*flash*(.35+n*1.35);
@@ -56,7 +56,7 @@ export function createSkyField(initialDomain,{maxClusters=20,marchSteps=16,showS
           }
         }
         float alpha=(1.-transmission)*opacity;if(alpha<.008)discard;gl_FragColor=vec4(light/max(.001,1.-transmission),alpha);}`});
-  const cloud=new THREE.InstancedMesh(new THREE.SphereGeometry(1,14,10),material,maxClusters*puffs.length);
+  const cloud=new THREE.InstancedMesh(new THREE.SphereGeometry(1,8,6),material,maxClusters*puffs.length);
   cloud.name='bounded-cloud-layer';cloud.frustumCulled=false;cloud.renderOrder=3;cloud.count=0;group.add(cloud);layers.push(cloud);
 
   // Subtle low-altitude mist layer for fog (WMO 45/48), heavy rain, or saturated overcast air.
@@ -75,7 +75,7 @@ export function createSkyField(initialDomain,{maxClusters=20,marchSteps=16,showS
         float r=length(p);float soft=pow(max(0.,1.-r),1.6);
         float n=noise3(p*2.6+vec3(vSeed*13.+time*.05,time*.03,vSeed*5.));
         float a=soft*(.45+.55*n)*opacity;if(a<.006)discard;gl_FragColor=vec4(tint,a);}`});
-  const mist=new THREE.InstancedMesh(new THREE.SphereGeometry(1,12,8),mistMat,maxClusters);
+  const mist=new THREE.InstancedMesh(new THREE.SphereGeometry(1,8,6),mistMat,maxClusters);
   mist.name='bounded-mist-layer';mist.frustumCulled=false;mist.renderOrder=1;mist.count=0;mist.visible=false;group.add(mist);
 
   const dummy=new THREE.Object3D();let clusters=[],lastTime=0;
