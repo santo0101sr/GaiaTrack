@@ -2,6 +2,7 @@ import * as THREE from './vendor/three.module.js';
 import {cantonsOf,provinceOptionsHtml,territoryOptionsHtml,territoryBounds} from './territories.js';
 import {getLang,tx} from './i18n.js';
 import {attachMovablePanel} from './movable-panels.js';
+import {icon} from './icons.js';
 
 export function createProvinceExplorer({host,manifest,geo,meshes,beacons,borders,root,camera,coords,onSelect,onFocus,initial=null}) {
   let province=null,selected=null,labels=[];
@@ -52,37 +53,37 @@ export function createProvinceExplorer({host,manifest,geo,meshes,beacons,borders
 
   function render(){
     document.body.classList.toggle('national-view',!province);
-    provinceSelect.innerHTML=`<option value="">${tx('Choose a province','Elegí una provincia')}</option>`+provinceOptionsHtml(manifest);
+    provinceSelect.innerHTML=`<option value="">${tx('Choose a province','Elige una provincia')}</option>`+provinceOptionsHtml(manifest);
     provinceSelect.value=province??'';
     cantonSelect.innerHTML=territoryOptionsHtml(manifest,province,getLang());
     cantonSelect.value=selected??'';
     cantonSelect.hidden=!province;
     host.querySelector('label[for="hud-site-select"]').hidden=!province;
-    host.querySelector('label[for="hud-province-select"]').textContent=tx('01 / Province','01 / Provincia');
-    host.querySelector('label[for="hud-site-select"]').textContent=tx('02 / Canton','02 / Cantón');
+    host.querySelector('label[for="hud-province-select"]').textContent=tx('Province','Provincia');
+    host.querySelector('label[for="hud-site-select"]').textContent=tx('Canton','Cantón');
     provinceSelect.setAttribute('aria-label',tx('Select province','Seleccionar provincia'));
     cantonSelect.setAttribute('aria-label',tx('Select canton or province overview','Seleccionar cantón o vista provincial'));
     const count=province?cantonsOf(manifest,province).length:manifest.provinces.length;
     host.querySelector('.flight-intro .eyebrow').textContent=tx('GAIATRACK / TERRITORY EXPLORER','GAIATRACK / EXPLORADOR TERRITORIAL');
     host.querySelector('.flight-intro h1').textContent=province?name(province):'Costa Rica';
     host.querySelector('.flight-intro p').textContent=province
-      ?tx(`${count} cantons · Choose one to explore.`,`${count} cantones · Elegí uno para explorar.`)
-      :tx('Seven provinces. Choose where to start.','Siete provincias. Elegí dónde empezar.');
+      ?tx(`${count} cantons · Choose one to explore.`,`${count} cantones · Elige uno para explorar.`)
+      :tx('Seven provinces. Choose where to start.','Siete provincias. Elige dónde empezar.');
     host.querySelector('.source-integrity').textContent=tx(
       'NASA POWER + Open-Meteo · Reference-point model estimates. Rain and clouds follow the reported data and update time.',
       'NASA POWER + Open-Meteo · Estimaciones por punto de referencia. Lluvia y nubes responden a los datos reportados y su hora de actualización.');
     navigation.setAttribute('aria-label',tx('Territory navigation','Navegación territorial'));
     navigation.replaceChildren(toolbar);
     const breadcrumb=document.createElement('div');breadcrumb.className='territory-breadcrumb';
-    const back=document.createElement('button');back.type='button';back.textContent=province?'← Costa Rica':'COSTA RICA';back.onclick=()=>country(true);
+    const back=document.createElement('button');back.type='button';back.innerHTML=province?`${icon('arrow-left')} Costa Rica`:'COSTA RICA';back.onclick=()=>country(true);
     breadcrumb.append(back);
-    if(province){const text=document.createElement('span');text.textContent='/ '+name(province);breadcrumb.append(text);}
+    if(province){const text=document.createElement('span');text.textContent='› '+name(province);breadcrumb.append(text);}
     navigation.append(breadcrumb);
     const heading=document.createElement('div');heading.className='territory-list-heading';
-    const title=document.createElement('strong');title.textContent=province?tx('Explore its cantons','Explorá sus cantones'):tx('Choose a province','Elegí una provincia');
+    const title=document.createElement('strong');title.textContent=province?tx('Explore its cantons','Explora sus cantones'):tx('Choose a province','Elige una provincia');
     const total=document.createElement('span');total.textContent=String(count);heading.append(title,total);navigation.append(heading);
     if(province){
-      const overview=makeButton(tx('◎ Entire province','◎ Vista provincial'),province,'territory-overview');
+      const overview=makeButton(`${icon('compass')} ${tx('Entire province','Vista provincial')}`,province,'territory-overview');
       navigation.append(overview);
     }
     const list=document.createElement('div');list.className='territory-list';
@@ -101,7 +102,7 @@ export function createProvinceExplorer({host,manifest,geo,meshes,beacons,borders
       const p=coords(site.longitude,site.latitude);p.y=.65;
       return {button,point:p,selected:site.id===selected};
     }).sort((a,b)=>Number(b.selected)-Number(a.selected));
-    host.querySelector('#flight-label').textContent=province?`COSTA RICA / ${name(province).toLocaleUpperCase()}`:tx('COSTA RICA / CHOOSE A PROVINCE','COSTA RICA / ELEGÍ UNA PROVINCIA');
+    host.querySelector('#flight-label').textContent=province?`COSTA RICA / ${name(province).toLocaleUpperCase()}`:tx('COSTA RICA / CHOOSE A PROVINCE','COSTA RICA / ELIGE UNA PROVINCIA');
   }
 
   function sync(id){

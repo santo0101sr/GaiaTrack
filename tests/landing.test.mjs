@@ -128,7 +128,7 @@ test('Unified slide renders creators carousel with dormant photo support, outsid
 
     // Unified single giant slide without bottom section bar, video chapters, or inside NASA box
     assert.equal(portal.querySelectorAll('.lp-giant-slide').length, 1);
-    assert.doesNotMatch(portal.innerHTML, /class="lp-nav"|lp-slider-bar|lp-chapters|lp-chap|data-slide=|lp-prev|lp-next|data-go-next|lp-nasa-banner/);
+    assert.doesNotMatch(portal.innerHTML, /class="lp-nav"|lp-slider-bar|lp-chapters|lp-chap|data-slide=|\blp-prev\b|\blp-next\b|data-go-next|lp-nasa-banner/);
 
     // Simplified gray NASA footnote strictly outside .lp-giant-slide with zero emojis
     const fnMatch = portal.innerHTML.match(/<p class="lp-nasa-footnote">([^<]+)<\/p>/);
@@ -191,12 +191,21 @@ test('Unified slide renders creators carousel with dormant photo support, outsid
     const indexHtml = await fs.readFile(path.resolve('public/index.html'), 'utf8');
     assert.match(indexHtml, /id="topbar-theme-toggle"[^>]*data-theme-toggle/);
 
-    // Verify centered brand logo, PDF, demo video, and quantified Trend Detective metrics
+    // Verify centered brand logo, PDF, demo video, and dynamic observed vs. modeled separation (C1-C6)
     assert.match(portal.innerHTML, /assets\/gaia-eb-final\.png/);
     assert.match(portal.innerHTML, /assets\/gaia-eb-research-paper\.pdf/);
     assert.match(portal.innerHTML, /assets\/gaiatrack-demo\.mp4/);
-    for (const token of ['2001–2025', '84', '95%', '89%', '−44.8%', '−32.6%', '17.5M']) {
-      assert.ok(portal.innerHTML.includes(token), `Missing quantified metric token: ${token}`);
+    const manifest = JSON.parse(await fs.readFile(path.resolve('public/data/manifest.json'), 'utf8'));
+    const annual = JSON.parse(await fs.readFile(path.resolve('public/data/annual.json'), 'utf8'));
+    const sectors = JSON.parse(await fs.readFile(path.resolve('public/data/sectors.json'), 'utf8'));
+    const sectorsCount = Object.values(sectors).reduce((sum, arr) => sum + (Array.isArray(arr) ? arr.length : 0), 0);
+    landingMod.setLandingFacts({ manifest, annual, sectorsCount });
+
+    for (const token of ['2001–2025', '83', '20', '10', '479', 'Z =', '95% CI', 'to be verified']) {
+      assert.ok(portal.innerHTML.includes(token), `Missing verified landing token: ${token}`);
+    }
+    for (const stale of ['MODIS', 'GPM', 'SMAP', '84 Cantons', '84 cantons', '89%', '−44.8%', '−32.6%']) {
+      assert.equal(portal.innerHTML.includes(stale), false, `Found prohibited unverified token: ${stale}`);
     }
 
     // Entering main app is one-way: closes portal, pauses demo video, resizes, clears intro, and refuses reopening

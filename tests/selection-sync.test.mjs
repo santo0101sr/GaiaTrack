@@ -82,7 +82,7 @@ test('forecast.js detects province and canton transitions, refreshes explicitly,
       name: siteName,
       requested: { latitude: 10.63, longitude: -85.44 },
       modelPoint: { latitude: 10.65, longitude: -85.47, elevation: 98 },
-      retrievedAt: '2026-11-15T17:00:00.000Z',
+      retrievedAt: new Date().toISOString(),
       source: 'Open-Meteo Forecast API',
       sourceUrl: 'https://api.open-meteo.com/v1/forecast',
       ensembleSource: 'GFS ensemble',
@@ -123,7 +123,7 @@ test('forecast.js detects province and canton transitions, refreshes explicitly,
     assert.match(requestedUrls[0], /site=guanacaste/);
     assert.equal(getEl('#forecast-status').textContent, '');
     assert.equal(getEl('#forecast-location').textContent, 'Guanacaste · reference point');
-    assert.equal((getEl('#forecast-days').innerHTML.match(/forecast-day-card/g) || []).length, 7);
+    assert.equal((getEl('#forecast-days').innerHTML.match(/forecast-day-row/g) || []).length, 7);
     assert.match(getEl('#forecast-days').innerHTML, /<svg id="forecast-chart"/);
     assert.equal(getEl('#forecast-download').disabled, false);
 
@@ -132,7 +132,7 @@ test('forecast.js detects province and canton transitions, refreshes explicitly,
     assert.equal(requestedUrls.length, 2);
     assert.match(requestedUrls[1], /site=liberia/);
     assert.equal(getEl('#forecast-location').textContent, 'Liberia · reference point');
-    assert.equal((getEl('#forecast-days').innerHTML.match(/forecast-day-card/g) || []).length, 7);
+    assert.equal((getEl('#forecast-days').innerHTML.match(/forecast-day-row/g) || []).length, 7);
 
     // Cached repeat without refresh=true reuses memory cache; explicit refresh bypasses cache
     await updateForecast({ id: 'liberia', name: 'Liberia', type: 'canton' }, 'T2M');

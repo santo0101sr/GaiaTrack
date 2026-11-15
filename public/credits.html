@@ -1,1 +1,60 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GaiaTrack · Fuentes y licencias</title><link rel="stylesheet" href="styles.css"><style>body{padding:30px}article{max-width:850px;margin:auto}p,li{line-height:1.9;color:#b8cbd3}h2{margin-top:30px}a{color:#c3f77a;text-decoration:underline}table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:12px;border:1px solid #33434c;text-align:left}aside{border:1px solid #bba35f;padding:18px;margin:25px 0}small{color:#93a3b1}</style></head><body><article><a href="/">← GaiaTrack</a><h1>Fuentes, transformaciones y licencias</h1><small>Revisión documental: 14 de noviembre de 2026.</small><aside><strong>Estado: entorno de pruebas · Open-Meteo como proveedor meteorológico.</strong><p>Open-Meteo es el proveedor seleccionado por el responsable de GaiaTrack, quien informa haber consultado las condiciones de uso comercial aplicables a su proyecto. Los datos se atribuyen bajo CC BY 4.0 y se mantienen enlaces a los términos del servicio. Esta página no certifica una autorización particular del proveedor ni modifica sus condiciones generales. Vercel se mantiene como entorno de pruebas. No se han contratado planes ni activado cobros.</p></aside><h2>Datos ambientales</h2><ul><li><a href="https://open-meteo.com/">Open-Meteo</a>: condiciones actuales y pronósticos de modelos, datos bajo <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Se transforman las respuestas a unidades y series de GaiaTrack; se agregan medias mensuales/anuales para el histórico NASA y se calculan percentiles del conjunto GFS para el pronóstico. Consultar <a href="https://open-meteo.com/en/terms">condiciones de la API</a> y <a href="https://open-meteo.com/en/pricing">planes comerciales</a>.</li><li><a href="https://power.larc.nasa.gov/docs/">NASA POWER</a>: histórico meteorológico y solar, productos MERRA-2 y solares NASA. GaiaTrack calcula agregaciones, anomalías y tendencias. Se conserva la procedencia en los archivos. La política general de NASA no reemplaza la revisión de condiciones específicas de cada producto. No se usan logos de NASA ni se implica respaldo institucional.</li></ul><h2>Cómo se construye la escena</h2><p>El Sol cambia de brillo según la radiación, las nubes según la cobertura, la lluvia según la precipitación por intervalo y el color del cantón seleccionado según la humedad del suelo en el punto de referencia. El rango y número de partículas son escalas ilustrativas. Las texturas y curvas de las superficies son estilización gráfica, no vegetación ni curvas de nivel medidas. La escena no es una imagen satelital, una simulación física, una medición de cada punto del cantón ni una reconstrucción de relieve.</p><p>La línea de tiempo usa valores horarios previstos de Open-Meteo. La precipitación horaria corresponde al intervalo precedente y la radiación al promedio horario de la fuente. Los datos actuales usan su propio intervalo, normalmente de 15 minutos. Los campos faltantes se muestran como desconocidos; no se reemplazan por cero. El Sol es un símbolo de intensidad: su posición no representa una efeméride astronómica.</p><h2>Cartografía, software y tipografía</h2><table><tr><th>Componente</th><th>Licencia / condiciones</th></tr><tr><td>OpenStreetMap</td><td>© OpenStreetMap contributors, <a href="https://www.openstreetmap.org/copyright">ODbL</a>. Las teselas tienen una <a href="https://operations.osmfoundation.org/policies/tiles/">política de uso separada</a>; no son un servicio gratuito ilimitado.</td></tr><tr><td>geoBoundaries CRI ADM2</td><td>Metadatos del paquete declaran CC0 1.0, fuente Wikimedia Commons, representación de 2020. <a href="https://www.geoboundaries.org/api/current/gbOpen/CRI/ADM2/">Procedencia</a>.</td></tr><tr><td>Natural Earth</td><td><a href="https://www.naturalearthdata.com/about/terms-of-use/">Dominio público</a>, polígonos mundiales del mapa orbital.</td></tr><tr><td>Three.js 0.160.1</td><td>MIT. <a href="/vendor/THREE-LICENSE.txt">Aviso incluido</a>.</td></tr><tr><td>Leaflet 1.9.4</td><td>BSD-2-Clause. <a href="/vendor/LEAFLET-LICENSE.txt">Aviso incluido</a>.</td></tr><tr><td>DM Sans / Space Grotesk</td><td>Google Fonts; consultar las licencias de cada familia. <a href="https://developers.google.com/fonts/faq">Condiciones generales</a>.</td></tr></table><h2>Alojamiento de prueba</h2><p>Vercel Hobby: uso personal/no comercial, sujeto a cuotas. <a href="https://vercel.com/legal/terms">Términos</a>. Antes de un lanzamiento comercial deben migrarse o contratarse servicios compatibles, incluidos los mapas y las fuentes de pronóstico.</p><p>Este inventario documenta fuentes y restricciones identificadas; no constituye una garantía integral de ausencia de riesgos legales ni una autorización de los proveedores.</p></article></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Gaia E&amp;B · Fuentes, transformaciones y licencias</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { padding: 30px; background: var(--bg); color: var(--text); }
+    article { max-width: 860px; margin: auto; }
+    p, li { line-height: 1.75; color: var(--muted); }
+    h2 { margin-top: 30px; }
+    a { color: var(--accent); text-decoration: underline; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 12px; }
+    td, th { padding: 12px; border: 1px solid var(--border); text-align: left; }
+    aside { border: 1px solid var(--warn); background: var(--surface); padding: 18px; margin: 24px 0; border-radius: var(--radius-md); }
+    small { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <article>
+    <a href="/"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg> Gaia E&amp;B · Observatorio</a>
+    <h1>Fuentes, transformaciones y licencias</h1>
+    <small>Revisión documental: 15 de noviembre de 2026.</small>
+
+    <aside>
+      <strong>Estado: entorno de pruebas · sin sustitución de datos ni respaldo institucional oficial.</strong>
+      <p>Gaia E&amp;B (GaiaTrack) es un proyecto independiente para el desafío <em>Earth System Trend Detective</em> (2026 NASA Space Apps Challenge). Todos los datos históricos, actuales y ecológicos provienen de fuentes reales documentadas; nunca se sustituyen observaciones faltantes con valores simulados. Los escenarios NbS del Apéndice A del manuscrito permanecen explícitamente separados y marcados como <strong>por verificar</strong>.</p>
+    </aside>
+
+    <h2>Datos ambientales y ecológicos activos</h2>
+    <ul>
+      <li><strong><a href="https://power.larc.nasa.gov/docs/">NASA POWER · MERRA-2</a></strong>: temperatura a 2 m (media <code>T2M</code>, mínima <code>T2M_MIN</code>, máxima <code>T2M_MAX</code>), precipitación corregida (<code>PRECTOTCORR</code>), índice superficial de humedad del suelo (<code>GWETTOP</code>, escala adimensional <code>0–1</code>) y humedad relativa a 2 m (<code>RH2M</code>) para 2001–2025. Malla horizontal de <code>0,5° × 0,625°</code> (~55 × 68 km): los 83 cantones comparten <strong>20 celdas únicas</strong> y las 7 provincias comparten <strong>6 celdas únicas</strong>.</li>
+      <li><strong><a href="https://power.larc.nasa.gov/docs/">NASA POWER · CERES SYN1DEG</a></strong>: radiación solar de onda corta incidente en superficie (<code>ALLSKY_SFC_SW_DWN</code>, 2001–2025) en malla de <code>1,0° × 1,0°</code> (~111 × 109 km; <strong>10 celdas únicas</strong> sobre los 83 cantones).</li>
+      <li><strong><a href="https://open-meteo.com/">Open-Meteo Forecast &amp; GFS Ensemble</a></strong> (<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>): condiciones actuales (intervalo típico de 15 min) y pronóstico diario/horario a 7 días más percentiles <code>P10–P90</code> del conjunto GFS. La humedad del suelo del pronóstico es contenido volumétrico en 0–1 cm (<code>m³/m³</code>), distinta de <code>GWETTOP</code> (<code>0–1</code>) del histórico NASA. Consultar <a href="https://open-meteo.com/en/terms">términos</a>.</li>
+      <li><strong><a href="https://www.gbif.org/">GBIF Occurrence API · Lista Roja UICN</a></strong>: conteos biológicos georreferenciados en Costa Rica y registros en categorías amenazadas (<code>CR</code>, <code>EN</code>, <code>VU</code>, <code>NT</code>) combinados con <strong>Open-Meteo Elevation (Copernicus DEM GLO-90, ~90 m)</strong> para el índice exploratorio <em>Riesgo Ecológico</em> (<code>0–100</code>). Es una herramienta de priorización visual; no sustituye mapas oficiales de CNE, SINAC, SETENA o IMN.</li>
+      <li><strong><a href="https://openrouter.ai/">OpenRouter</a></strong>: enrutamiento opcional de consultas abiertas del asistente conversacional tras aplicar atajos locales deterministas.</li>
+    </ul>
+
+    <h2>Cálculos estadísticos y separación de escalas</h2>
+    <p>El laboratorio calcula pendientes robustas de Theil–Sen por década con su intervalo de confianza no paramétrico al 95 %, prueba bilateral de Mann–Kendall (con corrección por empates y advertencia por autocorrelación lag-1), control FDR de Benjamini–Hochberg (<code>q ≤ 0,05</code>) entre las 7 provincias, prueba <em>t</em> de Welch e intervalos de confianza al 95 % respecto a la referencia interna <code>2001–2010</code>, así como <strong>Z-scores mensuales</strong> e <strong>IEA calibrado</strong>.</p>
+    <p>La escena 3D utiliza estilización visual alimentada por los datos puntuales de cada territorio; no es fotografía satelital ni modelo físico de microescala. Los 479 puntos distritales (<code>sectors.json</code>) y los 472 polígonos de apoyo (<code>district-borders.json</code>) aplican ajustes microclimáticos por centroide y elevación y no equivalen a mediciones satelitales independientes.</p>
+
+    <h2>Cartografía, software y tipografía</h2>
+    <table>
+      <tr><th>Componente</th><th>Licencia / condiciones</th></tr>
+      <tr><td>OpenStreetMap</td><td>© OpenStreetMap contributors, <a href="https://www.openstreetmap.org/copyright">ODbL</a>. Uso sujeto a la <a href="https://operations.osmfoundation.org/policies/tiles/">política de teselas</a>.</td></tr>
+      <tr><td>geoBoundaries CRI ADM2 (2020)</td><td>CC0 1.0, vía Wikimedia Commons; cubre las 7 provincias y los 83 cantones de la representación 2020 (7 + 83 = 90 puntos de referencia en <code>manifest.json</code>). <a href="https://www.geoboundaries.org/api/current/gbOpen/CRI/ADM2/">Procedencia</a>.</td></tr>
+      <tr><td>Natural Earth</td><td><a href="https://www.naturalearthdata.com/about/terms-of-use/">Dominio público</a>, polígonos mundiales de la vista orbital.</td></tr>
+      <tr><td>Three.js 0.160.1</td><td>MIT. <a href="/vendor/THREE-LICENSE.txt">Aviso incluido</a>.</td></tr>
+      <tr><td>Leaflet 1.9.4</td><td>BSD-2-Clause. <a href="/vendor/LEAFLET-LICENSE.txt">Aviso incluido</a>.</td></tr>
+      <tr><td>Tipografía e iconografía</td><td>Tipografía de interfaz y números tabulares vía Google Fonts (OFL) e iconografía vectorial inline estilo Lucide (ISC/MIT).</td></tr>
+    </table>
+
+    <h2>Alojamiento de prueba</h2>
+    <p>Despliegue de evaluación en Vercel Hobby (uso académico/no comercial, sujeto a cuotas; ver <a href="https://vercel.com/legal/terms">términos</a>).</p>
+  </article>
+</body>
+</html>

@@ -2,6 +2,7 @@ import {fetchJSON} from './data-client.js';
 import {publishWeather} from './weather-state.js';
 import {hasCompleteForecast,summarizeSevenDayForecast} from './forecast-science.js';
 import {locale,tx} from './i18n.js';
+import {icon} from './icons.js';
 
 const $=s=>document.querySelector(s),cache=new Map(),pending=new Map();
 const variableMeta={
@@ -88,19 +89,19 @@ function renderForecastChartSvg(days,varKey,variable){
   }
   const yAt=val=>top+((max-val)/(max-min||1))*ph;
 
-  let html=`<defs><linearGradient id="fc-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#81e8bf" stop-opacity=".24"/><stop offset="100%" stop-color="#81e8bf" stop-opacity=".01"/></linearGradient></defs>`;
+  let html=`<defs><linearGradient id="fc-area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent)" stop-opacity=".22"/><stop offset="100%" stop-color="var(--accent)" stop-opacity=".01"/></linearGradient></defs>`;
   for(let t=0;t<=4;t++){
     const tick=min+(max-min)*t/4,y=yAt(tick);
-    html+=`<line x1="${left}" x2="${W-right}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#1d3b5c" stroke-dasharray="3 5"/>`;
-    html+=`<text x="${left-9}" y="${(y+3.5).toFixed(1)}" text-anchor="end" fill="#93aec9" font-size="10" font-family="monospace">${fmt(tick,variable.digits)}</text>`;
+    html+=`<line x1="${left}" x2="${W-right}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="var(--border)" stroke-dasharray="3 5"/>`;
+    html+=`<text x="${left-9}" y="${(y+3.5).toFixed(1)}" text-anchor="end" fill="var(--muted)" font-size="10" font-family="var(--mono)">${fmt(tick,variable.digits)}</text>`;
   }
 
   if(isTemp){
     const tempPairs=days.map((d,i)=>Number.isFinite(d.T2M_MIN)&&Number.isFinite(d.T2M_MAX)?{x:xAt(i),lowY:yAt(d.T2M_MIN),highY:yAt(d.T2M_MAX)}:null);
-    html+=buildBandSvg(tempPairs,'#80bfe81a','#80bfe866');
+    html+=buildBandSvg(tempPairs,'rgba(35,185,209,.12)','rgba(35,185,209,.48)');
     if(varKey==='T2M'){
       const ensPairs=days.map((d,i)=>d.ensemble&&Number.isFinite(d.ensemble.p10)&&Number.isFinite(d.ensemble.p90)?{x:xAt(i),lowY:yAt(d.ensemble.p10),highY:yAt(d.ensemble.p90)}:null);
-      html+=buildBandSvg(ensPairs,'#f5b3161c','#f5b31677');
+      html+=buildBandSvg(ensPairs,'rgba(252,191,11,.14)','rgba(252,191,11,.55)');
     }
   }
 
@@ -109,7 +110,7 @@ function renderForecastChartSvg(days,varKey,variable){
     days.forEach((d,i)=>{
       if(!Number.isFinite(d.PRECTOTCORR)||d.PRECTOTCORR<=0)return;
       const topY=yAt(d.PRECTOTCORR),h=Math.max(2,baseY-topY);
-      html+=`<rect x="${(xAt(i)-barW/2).toFixed(1)}" y="${topY.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="#80bfe838" stroke="#80bfe899" stroke-width="1"/>`;
+      html+=`<rect x="${(xAt(i)-barW/2).toFixed(1)}" y="${topY.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="var(--blue)" fill-opacity=".22" stroke="var(--blue)" stroke-width="1"/>`;
     });
   }
 
@@ -120,17 +121,17 @@ function renderForecastChartSvg(days,varKey,variable){
     html+=`<path d="${area}" fill="url(#fc-area)"/>`;
   }
   const linePath=buildLinePath(pts);
-  if(linePath)html+=`<path d="${linePath}" fill="none" stroke="${varKey==='PRECTOTCORR'?'#80bfe8':'#81e8bf'}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
+  if(linePath)html+=`<path d="${linePath}" fill="none" stroke="${varKey==='PRECTOTCORR'?'var(--blue)':'var(--accent)'}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
 
   days.forEach((d,i)=>{
     const x=xAt(i),p=pts[i];
     const dayTag=i===0?tx('TOMORROW','MAÑANA'):dateText(d.date,{weekday:'short'}).toUpperCase();
-    html+=`<text x="${x.toFixed(1)}" y="${H-22}" text-anchor="middle" fill="#a8c2da" font-size="10" font-weight="600">${dayTag}</text>`;
-    html+=`<text x="${x.toFixed(1)}" y="${H-8}" text-anchor="middle" fill="#7c9ab8" font-size="9.5" font-family="monospace">${dateText(d.date)}</text>`;
+    html+=`<text x="${x.toFixed(1)}" y="${H-22}" text-anchor="middle" fill="var(--text)" font-size="10" font-weight="600">${dayTag}</text>`;
+    html+=`<text x="${x.toFixed(1)}" y="${H-8}" text-anchor="middle" fill="var(--muted)" font-size="9.5" font-family="var(--mono)">${dateText(d.date)}</text>`;
     if(p){
-      const col=varKey==='PRECTOTCORR'?'#80bfe8':'#81e8bf';
-      html+=`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4.5" fill="${col}" stroke="#071426" stroke-width="1.5"/>`;
-      html+=`<text x="${p.x.toFixed(1)}" y="${Math.max(14,p.y-10).toFixed(1)}" text-anchor="middle" fill="#edf6fc" font-size="11" font-weight="600">${fmt(p.val,variable.digits)}</text>`;
+      const col=varKey==='PRECTOTCORR'?'var(--blue)':'var(--accent)';
+      html+=`<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4.5" fill="${col}" stroke="var(--surface)" stroke-width="1.5"/>`;
+      html+=`<text x="${p.x.toFixed(1)}" y="${Math.max(14,p.y-10).toFixed(1)}" text-anchor="middle" fill="var(--text)" font-size="11" font-weight="600">${fmt(p.val,variable.digits)}</text>`;
     }
   });
   return `<svg id="forecast-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${variable.name} (${variable.unit})">${html}</svg>`;
@@ -185,8 +186,8 @@ export function initForecast(){
   document.addEventListener('gaiatrack:lang',()=>{
     if(selectedSite)$('#forecast-location').textContent=`${selectedSite.name} · ${tx('reference point','punto de referencia')}`;
     else{
-      $('#forecast-location').textContent=tx('Costa Rica · Choose a province','Costa Rica · Elegí una provincia');
-      $('#forecast-status').textContent=tx('Choose a province or canton in the Explorer to load its 7-day forecast.','Elegí una provincia o cantón en el Explorador para consultar su pronóstico de 7 días.');
+      $('#forecast-location').textContent=tx('Costa Rica · Choose a province','Costa Rica · Elige una provincia');
+      $('#forecast-status').textContent=tx('Choose a province or canton in the Explorer to load its 7-day forecast.','Elige una provincia o cantón en el Explorador para consultar su pronóstico de 7 días.');
     }
     if(forecast)render();
   });
@@ -196,8 +197,8 @@ export async function updateForecast(site,variable,refresh=false){
   initForecast();
   if(!site){
     selectedSite=null;forecast=null;request++;
-    $('#forecast-location').textContent=tx('Costa Rica · Choose a province','Costa Rica · Elegí una provincia');
-    $('#forecast-status').textContent=tx('Choose a province or canton in the Explorer to load its 7-day forecast.','Elegí una provincia o cantón en el Explorador para consultar su pronóstico de 7 días.');
+    $('#forecast-location').textContent=tx('Costa Rica · Choose a province','Costa Rica · Elige una provincia');
+    $('#forecast-status').textContent=tx('Choose a province or canton in the Explorer to load its 7-day forecast.','Elige una provincia o cantón en el Explorador para consultar su pronóstico de 7 días.');
     $('#forecast-status').hidden=false;$('#forecast-days').innerHTML='';$('#forecast-detail').innerHTML='';$('#forecast-period').textContent='';$('#forecast-update').textContent='';$('#forecast-refresh').disabled=true;$('#forecast-download').disabled=true;
     return;
   }
@@ -222,7 +223,7 @@ export async function updateForecast(site,variable,refresh=false){
     forecast=result;render();
   }catch(e){
     if(token!==request)return;
-    $('#forecast-status').textContent=e.message||tx('Forecast unavailable. Click Refresh to retry.','El pronóstico no está disponible. Usá Actualizar para reintentar.');
+    $('#forecast-status').textContent=e.message||tx('Forecast unavailable. Click Refresh to retry.','El pronóstico no está disponible. Usa Actualizar para reintentar.');
     $('#forecast-status').hidden=false;
   }finally{if(token===request){$('#forecast-refresh').disabled=false;$('#forecast-download').disabled=!forecast;}}
 }
@@ -242,16 +243,37 @@ function render(){
     return `<button type="button" class="${key===selectedVariable?'selected':''}" data-fvar="${key}" aria-pressed="${key===selectedVariable}">${p.short}</button>`;
   }).join('');
   const legendHtml=`<span class="fc-legend"><i></i>${variable.name}${isTemp?` <b class="band"></b>${tx('Min–Max range','Rango mín–máx')}`:''}${selectedVariable==='T2M'&&hasEns?` <b class="ens"></b>GFS P10–P90`:''}</span>`;
-  const daysGridHtml=forecast.days.map((d,i)=>{
+  const focusVals=forecast.days.map(d=>d[selectedVariable]).filter(Number.isFinite);
+  const fMin=focusVals.length?Math.min(...focusVals):0;
+  const fMax=focusVals.length?Math.max(...focusVals):1;
+  const fSpan=Math.max(1e-6,fMax-fMin);
+  const daysTableHtml=forecast.days.map((d,i)=>{
     const known=Number.isFinite(d.PRECTOTCORR),rainy=known&&d.PRECTOTCORR>=1;
-    const icon=known?`<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H8a5 5 0 0 1-.5-10 7.5 7.5 0 0 1 14.4-1A5.5 5.5 0 0 1 24 21h-1"/>${rainy?'<path d="m12 22-2 5m8-5-2 5m8-5-2 5"/>':'<path d="M12 21h8"/>'}</svg>`:'—';
-    return `<article class="forecast-day-card"><div class="forecast-day-head"><div><span class="forecast-weekday">${i===0?tx('TOMORROW','MAÑANA'):dateText(d.date,{weekday:'short'}).toUpperCase()}</span><span class="forecast-date">${dateText(d.date)}</span></div><span class="forecast-symbol" aria-hidden="true">${icon}</span></div>
-      <div class="forecast-day-focus"><strong>${fmt(d[selectedVariable],variable.digits)} <small>${variable.unit}</small></strong><span class="forecast-day-sub">${variable.name}</span></div>
-      <div class="forecast-day-overview"><span>${tx('Min / Max','Mín / Máx')} <b>${fmt(d.T2M_MIN,1)}° / ${fmt(d.T2M_MAX,1)}°C</b></span><span>${tx('Rain','Lluvia')} <b>${fmt(d.PRECTOTCORR,1)} mm</b></span></div>
-      <details class="forecast-day-more"><summary>${tx('All readings','Todas las variables')}</summary><dl class="forecast-day-metrics"><div><dt>${tx('Mean temperature','Temperatura media')}</dt><dd>${fmt(d.T2M,1)} °C</dd></div><div><dt>${tx('Max. hourly rain probability','Prob. horaria máx. de lluvia')}</dt><dd>${fmt(d.rainProbability,0)} %</dd></div><div><dt>${tx('Relative humidity','Humedad relativa')}</dt><dd>${fmt(d.RH2M,0)} %</dd></div><div><dt>${tx('Solar radiation','Radiación solar')}</dt><dd>${fmt(d.ALLSKY_SFC_SW_DWN,1)} MJ/m²</dd></div><div><dt>${tx('Soil moisture','Humedad del suelo')}</dt><dd>${fmt(d.GWETTOP,3)} m³/m³</dd></div><div><dt>GFS P10–P90</dt><dd>${d.ensemble?`${fmt(d.ensemble.p10,1)}–${fmt(d.ensemble.p90,1)} °C`:'—'}</dd></div></dl></details></article>`;
+    const condIcon=known?icon(rainy?'cloud-rain':'cloud'):'—';
+    const val=d[selectedVariable];
+    const barPct=Number.isFinite(val)?(selectedVariable==='PRECTOTCORR'?(fMax>0?(val/fMax)*100:0):(18+((val-fMin)/fSpan)*82)):0;
+    const dayLabel=i===0?tx('Tomorrow','Mañana'):dateText(d.date,{weekday:'short'});
+    return `<tr class="forecast-day-row${i===0?' is-tomorrow':''}">
+      <td>
+        <span class="forecast-weekday">${dayLabel}</span>
+        <span class="forecast-date">${dateText(d.date)}</span>
+      </td>
+      <td class="forecast-cond-cell"><span class="forecast-symbol" aria-hidden="true">${condIcon}</span></td>
+      <td class="forecast-focus-cell">
+        <div class="forecast-val-bar">
+          <strong>${fmt(val,variable.digits)} <small>${variable.unit}</small></strong>
+          <span class="forecast-bar-track" aria-hidden="true"><i style="width:${barPct.toFixed(0)}%"></i></span>
+        </div>
+      </td>
+      <td class="forecast-range-cell">${fmt(d.T2M_MIN,1)}° / ${fmt(d.T2M_MAX,1)}°C</td>
+      <td class="forecast-rain-cell">${fmt(d.PRECTOTCORR,1)} mm <small>${Number.isFinite(d.rainProbability)?`(${fmt(d.rainProbability,0)}%)`:''}</small></td>
+      <td class="forecast-more-cell">
+        <details class="forecast-day-more"><summary>${tx('Details','Detalles')}</summary><dl class="forecast-day-metrics"><div><dt>${tx('Humidity','Humedad')}</dt><dd>${fmt(d.RH2M,0)}%</dd></div><div><dt>${tx('Solar','Radiación')}</dt><dd>${fmt(d.ALLSKY_SFC_SW_DWN,1)} MJ/m²</dd></div><div><dt>${tx('Soil','Suelo')}</dt><dd>${fmt(d.GWETTOP,3)} m³/m³</dd></div><div><dt>GFS P10–P90</dt><dd>${d.ensemble?`${fmt(d.ensemble.p10,1)}–${fmt(d.ensemble.p90,1)} °C`:'—'}</dd></div></dl></details>
+      </td>
+    </tr>`;
   }).join('');
 
-  $('#forecast-days').innerHTML=`<div class="forecast-chart-box"><div class="forecast-chart-head"><div><span class="section-label">${tx('7-DAY VARIATION CHART','GRÁFICO DE VARIACIÓN A 7 DÍAS')}</span>${legendHtml}</div><div class="forecast-var-pills" role="group" aria-label="${tx('Select forecast variable','Seleccionar variable del pronóstico')}">${pillsHtml}</div></div>${renderForecastChartSvg(forecast.days,selectedVariable,variable)}</div><div class="forecast-days-grid">${daysGridHtml}</div>`;
+  $('#forecast-days').innerHTML=`<div class="forecast-chart-box"><div class="forecast-chart-head"><div><span class="section-label">${tx('7-DAY VARIATION CHART','GRÁFICO DE VARIACIÓN A 7 DÍAS')}</span>${legendHtml}</div><div class="forecast-var-pills" role="group" aria-label="${tx('Select forecast variable','Seleccionar variable del pronóstico')}">${pillsHtml}</div></div>${renderForecastChartSvg(forecast.days,selectedVariable,variable)}</div><div class="forecast-table-wrap"><table class="forecast-table"><thead><tr><th>${tx('Day','Día')}</th><th>${tx('Sky','Cielo')}</th><th>${variable.short}</th><th>${tx('Min / Max','Mín / Máx')}</th><th>${tx('Rain (Prob.)','Lluvia (Prob.)')}</th><th>${tx('Extras','Variables')}</th></tr></thead><tbody>${daysTableHtml}</tbody></table></div>`;
   $('#forecast-days').querySelectorAll('[data-fvar]').forEach(btn=>{
     btn.onclick=()=>{selectedVariable=btn.dataset.fvar;render();};
   });
@@ -268,7 +290,7 @@ function render(){
     ?tx(`<strong>Mean temperature spread · GFS ensemble</strong><br>Shaded P10–P90 band shows 10th to 90th percentile spread across ${summary?.ensembleMembers??'—'} GFS members for each forecast date. Range may differ from the auto-selected main model and is not a calibrated confidence interval.`,`<strong>Dispersión de temperatura media · conjunto GFS</strong><br>La banda P10–P90 muestra el rango entre los percentiles 10 y 90 de ${summary?.ensembleMembers??'—'} miembros GFS para cada fecha. Puede diferir del modelo principal automático y no equivale a un intervalo de confianza calibrado.`)
     :tx('Ensemble spread is unavailable for these dates; no uncertainty range is fabricated.','El conjunto de pronósticos no está disponible para estas fechas; no se inventa un rango de incertidumbre.');
 
-  $('#forecast-detail').innerHTML=`<div class="forecast-detail-top"><span class="section-label">${tx('7-DAY AUTOMATED OUTLOOK ANALYSIS','ANÁLISIS AUTOMÁTICO DE LOS 7 DÍAS')}</span><span>${tx('Model synthesis · not a direct observation','Síntesis automática del modelo · no es observación directa')}</span></div>${synthesis?`<p class="forecast-synthesis">${synthesis}</p>`:''}${analysisCardsHtml}<div class="ensemble-note"><span>◎</span><p>${ensText}</p></div><p class="forecast-unit-note">${tx('Forecast soil moisture is volumetric content at 0–1 cm (m³/m³). It is not directly comparable to the 0–1 NASA historical index.','La humedad del suelo del pronóstico es contenido volumétrico en 0–1 cm (m³/m³). No se compara directamente con el índice 0–1 del histórico NASA.')}</p>`;
+  $('#forecast-detail').innerHTML=`<div class="forecast-detail-top"><span class="section-label">${tx('7-DAY AUTOMATED OUTLOOK ANALYSIS','ANÁLISIS AUTOMÁTICO DE LOS 7 DÍAS')}</span><span>${tx('Model synthesis · not a direct observation','Síntesis automática del modelo · no es observación directa')}</span></div>${synthesis?`<p class="forecast-synthesis">${synthesis}</p>`:''}${analysisCardsHtml}<div class="ensemble-note"><span>${icon('activity')}</span><p>${ensText}</p></div><p class="forecast-unit-note">${tx('Forecast soil moisture is volumetric content at 0–1 cm (m³/m³). It is not directly comparable to the 0–1 NASA historical index.','La humedad del suelo del pronóstico es contenido volumétrico en 0–1 cm (m³/m³). No se compara directamente con el índice 0–1 del histórico NASA.')}</p>`;
   const stamp=new Date(forecast.retrievedAt).toLocaleString(locale(),{timeZone:'America/Costa_Rica',dateStyle:'short',timeStyle:'short'});
   $('#forecast-update').textContent=tx(
     `Retrieved: ${stamp} (Costa Rica). Open-Meteo · automatic model selection. Reference elevation: ${fmt(forecast.modelPoint.elevation,0)} m. Shared cache up to 60 minutes.`,
