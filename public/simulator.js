@@ -72,9 +72,48 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
     return out;
   }
 
+  const hoverMarkup=(padT,H,padB)=>`<g class="sim-hover-g" visibility="hidden" pointer-events="none">
+    <line class="sim-h-line" x1="0" y1="${padT}" x2="0" y2="${H-padB}" stroke="rgba(245,179,22,.55)" stroke-width="1.2" stroke-dasharray="3 3"/>
+    <circle class="sim-h-dot" cx="0" cy="0" r="4.8" fill="#f5b316" stroke="#081322" stroke-width="1.6"/>
+    <rect class="sim-h-bg" x="0" y="0" width="120" height="22" rx="5" fill="rgba(8,19,34,.94)" stroke="rgba(245,179,22,.65)" stroke-width="1"/>
+    <text class="sim-h-txt" x="0" y="0" fill="#fde68a" font-size="11" font-weight="600" text-anchor="middle"></text>
+  </g>`;
+
+  function wireChartHover(svg,hoverPts){
+    if(!svg||!hoverPts?.length)return;
+    const g=svg.querySelector('.sim-hover-g');
+    if(!g)return;
+    const line=g.querySelector('.sim-h-line'),dot=g.querySelector('.sim-h-dot'),bg=g.querySelector('.sim-h-bg'),txt=g.querySelector('.sim-h-txt');
+    const vb=svg.viewBox.baseVal;
+    const W=vb?.width||680;
+    svg.style.cursor='crosshair';
+    svg.addEventListener('pointermove',e=>{
+      const r=svg.getBoundingClientRect();
+      if(!r.width)return;
+      const sx=((e.clientX-r.left)/r.width)*W;
+      let best=hoverPts[0],bestD=Math.abs(best.x-sx);
+      for(let i=1;i<hoverPts.length;i++){
+        const d=Math.abs(hoverPts[i].x-sx);
+        if(d<bestD){best=hoverPts[i];bestD=d;}
+      }
+      g.setAttribute('visibility','visible');
+      line.setAttribute('x1',best.x.toFixed(1));line.setAttribute('x2',best.x.toFixed(1));
+      dot.setAttribute('cx',best.x.toFixed(1));dot.setAttribute('cy',best.y.toFixed(1));
+      txt.textContent=best.text;
+      const tw=Math.max(88,best.text.length*6.7+16);
+      const bx=Math.max(8,Math.min(W-tw-8,best.x-tw/2));
+      const by=best.y>40?best.y-30:best.y+10;
+      bg.setAttribute('x',bx.toFixed(1));bg.setAttribute('y',by.toFixed(1));bg.setAttribute('width',tw.toFixed(1));
+      txt.setAttribute('x',(bx+tw/2).toFixed(1));txt.setAttribute('y',(by+15).toFixed(1));
+    });
+    svg.addEventListener('pointerleave',()=>g.setAttribute('visibility','hidden'));
+  }
+
+  let activeHoverPts=[];
+
   function buildHourlySvg(hPred){
     const pts=hPred.points;
-    if(pts.length<2)return `<p class="sim-footnote">${tx('Loading live 48-hour forecast from Open-Meteo…','Cargando pronóstico horario en vivo de Open-Meteo…')}</p>`;
+    if(pts.length<2){activeHoverPts=[];return `<p class="sim-footnote">${tx('Loading live 48-hour forecast from Open-Meteo…','Cargando pronóstico horario en vivo de Open-Meteo…')}</p>`;}
     const W=680,H=220,padL=54,padR=20,padT=28,padB=30;
     const vals=pts.map(p=>p.value);
     let vMin=Math.min(...vals),vMax=Math.max(...vals);
@@ -85,6 +124,7 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
     const yOf=v=>padT+(1-(v-vMin)/(vMax-vMin))*(H-padT-padB);
     const path=pts.map((p,i)=>`${i===0?'M':'L'}${xOf(p.timeMs).toFixed(1)},${yOf(p.value).toFixed(1)}`).join(' ');
     const area=`${path} L${xOf(pts[pts.length-1].timeMs).toFixed(1)},${(H-padB).toFixed(1)} L${xOf(t0).toFixed(1)},${(H-padB).toFixed(1)} Z`;
+    activeHoverPts=pts.map(p=>({x:xOf(p.timeMs),y:yOf(p.value),text:`${p.label}: ${fmt(p.value,hPred.digits)} ${hPred.unit}`}));
 
     // Ordered 6-hour grid ticks (00h, 06h, 12h, 18h) with day label at midnight or first tick
     const ticks=[];
@@ -109,12 +149,13 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
       <circle cx="${xOf(t0).toFixed(1)}" cy="${yOf(pts[0].value).toFixed(1)}" r="4.5" fill="#4ade80"/>
       <circle cx="${peakX.toFixed(1)}" cy="${peakY.toFixed(1)}" r="4" fill="#f5b316"/>
       <text x="${peakX.toFixed(1)}" y="${Math.max(15,peakY-9)}" text-anchor="${peakAnchor}" fill="#fde68a" font-size="10.5" font-weight="600">${hPred.max.label}: ${fmt(hPred.max.value,hPred.digits)} ${hPred.unit}</text>
+      ${hoverMarkup(padT,H,padB)}
     </svg>`;
   }
 
   function buildDailySvg(dPred,unit,digits){
     const pts=dPred.points;
-    if(pts.length<2)return `<p class="sim-footnote">${tx('Loading 7-day forecast from Open-Meteo…','Cargando pronóstico de 7 días desde Open-Meteo…')}</p>`;
+    if(pts.length<2){activeHoverPts=[];return `<p class="sim-footnote">${tx('Loading 7-day forecast from Open-Meteo…','Cargando pronóstico de 7 días desde Open-Meteo…')}</p>`;}
     const W=680,H=220,padL=54,padR=18,padT=24,padB=30;
     const all=[...pts.map(p=>p.value),...pts.map(p=>p.lo).filter(Number.isFinite),...pts.map(p=>p.hi).filter(Number.isFinite)];
     let vMin=Math.min(...all),vMax=Math.max(...all);
@@ -125,6 +166,7 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
     const hasBand=pts.every(p=>Number.isFinite(p.lo)&&Number.isFinite(p.hi));
     const bandPoly=hasBand?[...pts.map((p,i)=>`${xOf(i).toFixed(1)},${yOf(p.hi).toFixed(1)}`),...[...pts].reverse().map((p,i)=>`${xOf(pts.length-1-i).toFixed(1)},${yOf(p.lo).toFixed(1)}`)].join(' '):'';
     const path=pts.map((p,i)=>`${i===0?'M':'L'}${xOf(i).toFixed(1)},${yOf(p.value).toFixed(1)}`).join(' ');
+    activeHoverPts=pts.map((p,i)=>({x:xOf(i),y:yOf(p.value),text:`${p.label}: ${fmt(p.value,digits)} ${unit}`}));
     return `<svg viewBox="0 0 ${W} ${H}" class="sim-svg" role="img" aria-label="${tx('7-day forecast','Pronóstico 7 días')}">
       <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(148,163,184,.25)"/>
       <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="rgba(148,163,184,.25)"/>
@@ -132,12 +174,13 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
       ${hasBand?`<polygon points="${bandPoly}" fill="rgba(245,179,22,.16)"/>`:''}
       <path d="${path}" fill="none" stroke="#f5b316" stroke-width="2.4"/>
       ${pts.map((p,i)=>`<circle cx="${xOf(i).toFixed(1)}" cy="${yOf(p.value).toFixed(1)}" r="4" fill="#f5b316"/><text x="${xOf(i).toFixed(1)}" y="${Math.max(14,yOf(p.value)-8)}" text-anchor="middle" fill="#fde68a" font-size="10">${fmt(p.value,digits)}</text><text x="${xOf(i).toFixed(1)}" y="${H-9}" text-anchor="middle" fill="#8bb0cc" font-size="10">${p.label}</text>`).join('')}
+      ${hoverMarkup(padT,H,padB)}
     </svg>`;
   }
 
   function buildMonthlySvg(mPred,unit,digits){
     const pts=mPred.points;
-    if(pts.length<3)return `<p class="sim-footnote">${tx('Monthly climatology unavailable for this site.','Climatología mensual no disponible para este sitio.')}</p>`;
+    if(pts.length<3){activeHoverPts=[];return `<p class="sim-footnote">${tx('Monthly climatology unavailable for this site.','Climatología mensual no disponible para este sitio.')}</p>`;}
     const W=680,H=220,padL=54,padR=18,padT=24,padB=30;
     const all=[...pts.map(p=>p.predicted),...pts.map(p=>p.normal),...pts.map(p=>p.p10).filter(Number.isFinite),...pts.map(p=>p.p90).filter(Number.isFinite)];
     let vMin=Math.min(...all),vMax=Math.max(...all);
@@ -149,6 +192,7 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
     const bandPoly=hasBand?[...pts.map((p,i)=>`${xOf(i).toFixed(1)},${yOf(p.p90).toFixed(1)}`),...[...pts].reverse().map((p,i)=>`${xOf(pts.length-1-i).toFixed(1)},${yOf(p.p10).toFixed(1)}`)].join(' '):'';
     const normPath=pts.map((p,i)=>`${i===0?'M':'L'}${xOf(i).toFixed(1)},${yOf(p.normal).toFixed(1)}`).join(' ');
     const predPath=pts.map((p,i)=>`${i===0?'M':'L'}${xOf(i).toFixed(1)},${yOf(p.predicted).toFixed(1)}`).join(' ');
+    activeHoverPts=pts.map((p,i)=>({x:xOf(i),y:yOf(p.predicted),text:`${p.label}: ${fmt(p.predicted,digits)} ${unit}`}));
     return `<svg viewBox="0 0 ${W} ${H}" class="sim-svg" role="img" aria-label="${tx('12-month seasonal projection','Proyección estacional 12 meses')}">
       <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(148,163,184,.25)"/>
       <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="rgba(148,163,184,.25)"/>
@@ -158,11 +202,12 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
       <path d="${predPath}" fill="none" stroke="#f5b316" stroke-width="2.5"/>
       ${pts.map((p,i)=>`<circle cx="${xOf(i).toFixed(1)}" cy="${yOf(p.predicted).toFixed(1)}" r="3.4" fill="#f5b316"/><text x="${xOf(i).toFixed(1)}" y="${H-9}" text-anchor="middle" fill="#8bb0cc" font-size="9.5">${i%2===0||i===pts.length-1?p.shortLabel:''}</text>`).join('')}
       <text x="${W-padR}" y="${padT-8}" text-anchor="end" fill="#fde68a" font-size="10">${tx('Amber: model · Blue dashed: 25y norm · Band: P10–P90','Ámbar: modelo · Azul: normal 25a · Banda: P10–P90')}</text>
+      ${hoverMarkup(padT,H,padB)}
     </svg>`;
   }
 
   function buildAnnualSvg(pts,annPred,targetYear,unit,digits){
-    if(pts.length<3||!annPred)return `<p class="sim-footnote">${tx('Insufficient historical series for chart.','Serie histórica insuficiente para graficar.')}</p>`;
+    if(pts.length<3||!annPred){activeHoverPts=[];return `<p class="sim-footnote">${tx('Insufficient historical series for chart.','Serie histórica insuficiente para graficar.')}</p>`;}
     const W=680,H=220,padL=54,padR=18,padT=24,padB=30;
     const minYYear=pts[0].year,maxYYear=Math.max(targetYear,annPred.lastYear+2);
     const last=pts[pts.length-1];
@@ -179,6 +224,10 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
     const varPoly=`${xLast},${yOf(annPred.anchorLast+annPred.sigma).toFixed(1)} ${xTarget},${yOf(annPred.variabilityBand[1]).toFixed(1)} ${xTarget},${yOf(annPred.variabilityBand[0]).toFixed(1)} ${xLast},${yOf(annPred.anchorLast-annPred.sigma).toFixed(1)}`;
     const ciPoly=`${xLast},${yAnchorLast} ${xTarget},${yOf(annPred.trendBand[1]).toFixed(1)} ${xTarget},${yOf(annPred.trendBand[0]).toFixed(1)}`;
     const ticks=[minYYear,Math.round((minYYear+last.year)/2),last.year,targetYear];
+    activeHoverPts=[
+      ...pts.map(p=>({x:xOf(p.year),y:yOf(p.value),text:`${p.year}: ${fmt(p.value,digits)} ${unit}`})),
+      ...Array.from({length:Math.max(0,targetYear-last.year)},(_,i)=>last.year+1+i).map(yr=>({x:xOf(yr),y:yOf(annPred.atYear(yr)),text:`${yr}: ${fmt(annPred.atYear(yr),digits)} ${unit}`}))
+    ];
 
     return `<svg viewBox="0 0 ${W} ${H}" class="sim-svg" role="img" aria-label="${tx('Historical series and future projection','Serie histórica y proyección futura')}">
       <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(148,163,184,.25)"/>
@@ -193,6 +242,7 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
       <circle cx="${xTarget}" cy="${yTarget}" r="4.5" fill="#f5b316"/>
       <text x="${xTarget}" y="${Math.max(14,yOf(annPred.predicted)-9)}" text-anchor="end" fill="#fde68a" font-size="11" font-weight="600">${targetYear}: ${fmt(annPred.predicted,digits)} ${unit}</text>
       ${[...new Set(ticks)].map(yr=>`<text x="${xOf(yr).toFixed(1)}" y="${H-9}" text-anchor="middle" fill="#8bb0cc" font-size="10">${yr}</text>`).join('')}
+      ${hoverMarkup(padT,H,padB)}
     </svg>`;
   }
 
@@ -378,6 +428,7 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
     el.querySelectorAll('[data-hz]').forEach(b=>b.onclick=()=>{state.horizon=b.dataset.hz;render();});
     el.querySelectorAll('.sim-preset').forEach(b=>b.onclick=()=>{state.deltaT=+b.dataset.dt;state.deltaP=+b.dataset.dp;render();});
     el.querySelectorAll('[data-pick-var]').forEach(r=>r.onclick=()=>{state.varKey=r.dataset.pickVar;render();});
+    wireChartHover(el.querySelector('.sim-svg'),activeHoverPts);
   }
 
   function open({site,district=null}={}){if(site)state.site=site;state.district=district;el.hidden=false;render();}
