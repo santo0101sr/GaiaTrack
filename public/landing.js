@@ -3,7 +3,7 @@ import {getLang,getTheme,setLang,toggleTheme,themeToggleHtml,tx} from './i18n.js
 // Paste the final Pitch Video URL here when ready; UI stays hidden while empty.
 export const PITCH_VIDEO_URL='';
 
-const DEMO_VIDEO_SRC='assets/gaiatrack-demo.mp4?v=20261115en';
+const DEMO_VIDEO_SRC='assets/gaiatrack-demo.mp4?v=20261115enw';
 const PAPER_PDF_SRC='assets/gaia-eb-research-paper.pdf';
 const BRAND_LOGO_SRC='assets/gaia-eb-final.png';
 
