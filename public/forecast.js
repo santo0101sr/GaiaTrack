@@ -205,7 +205,7 @@ export async function updateForecast(site,variable,refresh=false){
   const changed=site.id!==selectedSite?.id;selectedSite=site;selectedVariable=variable;
   $('#forecast-location').textContent=`${site.name} · ${tx('reference point','punto de referencia')}`;
   const stored=cache.get(site.id);
-  if(stored&&hasCompleteForecast(stored.days)&&Date.now()-Date.parse(stored.retrievedAt)<60*60*1000){forecast=stored;request++;render();return;}
+  if(!refresh&&stored&&hasCompleteForecast(stored.days)&&Date.now()-Date.parse(stored.retrievedAt)<60*60*1000){forecast=stored;request++;render();return;}
   if(!changed&&pending.has(site.id))return;
   forecast=null;const token=++request;
   $('#forecast-status').textContent=tx('Querying Open-Meteo and GFS ensemble…','Consultando Open-Meteo y el conjunto GFS…');

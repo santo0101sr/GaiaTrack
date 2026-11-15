@@ -16,10 +16,11 @@ export function createProvinceExplorer({host,manifest,geo,meshes,beacons,borders
   const cantonSelect=host.querySelector('#hud-site-select');
   const sites=new Map(manifest.sites.map(s=>[s.id,s]));
   const name=id=>manifest.provinces.find(p=>p.id===id)?.name??'Costa Rica';
+  const provinceSiteId=id=>manifest.provinces.find(p=>p.id===id)?.siteId??id;
   const activate=id=>{selected=null;onSelect(id);};
 
-  provinceSelect.onchange=()=>provinceSelect.value?activate(provinceSelect.value):country(true);
-  cantonSelect.onchange=()=>activate(cantonSelect.value);
+  provinceSelect.onchange=()=>provinceSelect.value?activate(provinceSiteId(provinceSelect.value)):country(true);
+  cantonSelect.onchange=()=>{if(cantonSelect.value)activate(cantonSelect.value);};
 
   function focus(){
     const site=sites.get(selected);

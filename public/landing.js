@@ -82,6 +82,7 @@ export function closeLanding(target='app'){
   hasEnteredApp=true;
   pauseDemoVideo();
   document.body.classList.remove('landing-open');
+  document.body.setAttribute?.('data-landing-entered',target);
   portal.hidden=true;
   portal.setAttribute('aria-hidden','true');
 

@@ -34,12 +34,12 @@ const rawVariables=[
 ];
 
 const state={variable:'T2M',site:null,year:2025,start:2001,end:2025,anomaly:false,compare:false,compareSite:'sarapiqui',radarMode:false};
-let lastMapSite=null,mapOverview=true,ecological=null,riskSummary=null,provinceDrawerOpen=false,siteDrawerOpen=false;
+let lastMapSite=null,mapOverview=true,ecological=null,riskSummary=null,provinceDrawerOpen=false,siteDrawerOpen=false,pendingSiteId=null;
 const annualCache=new Map(),historyFailures=new Set(),historyLoading=new Map();
 let annual,manifest,geo,data={},map,boundaryLayer,markers={},seaMarkers=[],timer=null;
 const v=()=>{const r=rawVariables.find(x=>x.id===state.variable);const l=r[getLang()];return {id:r.id,icon:r.icon,digits:r.digits,...l};};
 const format=(n,d=v().digits)=>Number.isFinite(n)?new Intl.NumberFormat(locale(),{minimumFractionDigits:d,maximumFractionDigits:d}).format(n):tx('No data','Sin datos');
-const signed=(n,d=v().digits)=>(n>0?'+':'')+format(n,d);
+const signed=(n,d=v().digits)=>Number.isFinite(n)?((n>0?'+':'')+format(n,d)):tx('No data','Sin datos');
 const series=(id=state.site)=>{if(!id)return [];const key=id+':'+state.variable;if(!annualCache.has(key))annualCache.set(key,annualPoints(annual,id,state.variable));return annualCache.get(key);};
 const valueAt=(id,year)=>annualValue(annual,id,state.variable,year);
 const deltaUnit=()=>state.variable==='RH2M'?tx('pp','p.p.'):v().unit;
@@ -75,9 +75,9 @@ function options(select,value){
   select.value=value||'';
 }
 function selectSite(id){
-  if(!id){state.site=null;mapOverview=true;stop();render();return;}
-  if(!data[id])return;
-  state.site=id;stop();render();
+  if(!id){pendingSiteId=null;state.site=null;mapOverview=true;if(provinceDrawerOpen)siteDrawerOpen=false;if(manifest){stop();render();}return;}
+  if(!data[id]){if(!manifest)pendingSiteId=id;return;}
+  pendingSiteId=null;state.site=id;if(provinceDrawerOpen)siteDrawerOpen=true;stop();render();
 }
 document.addEventListener('gaiatrack:select-site',e=>selectSite(e.detail.site));
 
@@ -420,6 +420,8 @@ function renderStats(){
     if($('#calc-ttest-meta'))$('#calc-ttest-meta').textContent=tx('Welch two-sample t-test vs. 2001–2010 baseline','Prueba t de Welch frente a la línea base 2001–2010');
     if($('#calc-ci'))$('#calc-ci').textContent='—';
     if($('#calc-ci-meta'))$('#calc-ci-meta').textContent=tx('95% confidence interval for mean and Theil–Sen slope','Intervalo de confianza 95% de la media y pendiente Theil–Sen');
+    const simStrip=$('#sim-projection-strip');
+    if(simStrip)simStrip.innerHTML='';
     renderProvinceScan(slopeDigits);
     $('#science-note').textContent=tx('Annual aggregation removes seasonal cycles to isolate multi-year trends. Exploratory test without multiple-comparison correction; a trend does not establish causes.','La agregación anual elimina ciclos estacionales para aislar tendencias multianuales. Prueba exploratoria sin corrección por comparaciones múltiples; una tendencia no determina sus causas.');
     return;
@@ -510,22 +512,24 @@ function renderStats(){
     const anomHtml=anomalies.length
       ?anomalies.map(a=>`<span class="sim-chip ${a.z>0?'is-high':'is-low'}">${a.year}: ${signed(a.z,1)}σ (${signed(a.diff,v().digits)} ${deltaUnit()})</span>`).join('')
       :`<small>${tx('No years beyond ±1.4σ in this series','Sin años fuera de ±1,4σ en esta serie')}</small>`;
-    const matrixRows=VARIABLES.map(vr=>{
-      const rawArr=(s.series?.[vr.key]||[]).map((val,idx)=>({year:YEARS[idx],value:val})).filter(d=>d.year>=state.start&&d.year<=state.end&&Number.isFinite(d.value));
+    const lang=getLang();
+    const matrixRows=rawVariables.map(vr=>{
+      const vrMeta=vr[lang];
+      const rawArr=annualPoints(annual,state.site,vr.id).filter(d=>d.year>=state.start&&d.year<=state.end&&Number.isFinite(d.value));
       if(!rawArr.length)return '';
       const last=rawArr[rawArr.length-1];
       const bArr=rawArr.filter(d=>d.year>=2001&&d.year<=2010).map(d=>d.value);
       const bAvg=bArr.length?bArr.reduce((a,b)=>a+b,0)/bArr.length:null;
       const dBase=bAvg!==null?last.value-bAvg:null;
-      const tr=mannKendall(rawArr.map(d=>d.year),rawArr.map(d=>d.value));
+      const tr=trend(rawArr);
       const dec=Number.isFinite(tr.slope)?tr.slope*10:null;
       const pr30=Number.isFinite(tr.slope)&&tr.n>=10?last.value+tr.slope*(2030-last.year):null;
       const pr50=Number.isFinite(tr.slope)&&tr.n>=10?last.value+tr.slope*(2050-last.year):null;
       const mAll=rawArr.reduce((a,b)=>a+b.value,0)/rawArr.length;
       const sdAll=rawArr.length>2?Math.sqrt(rawArr.reduce((a,b)=>a+(b.value-mAll)**2,0)/(rawArr.length-1)):0;
       const ext=sdAll>1e-9?rawArr.reduce((best,d)=>{const z=(d.value-mAll)/sdAll;return Math.abs(z)>Math.abs(best.z)?{...d,z}:best;},{z:0}):null;
-      const rowActive=vr.key===state.variable?'is-active':'';
-      return `<tr class="${rowActive}" data-sim-var="${vr.key}"><td><strong>${vr.label()}</strong><small>${vr.unit}</small></td><td>${bAvg!==null?format(bAvg,vr.digits):'—'}</td><td><strong>${format(last.value,vr.digits)}</strong> <small>(${last.year})</small></td><td class="${dBase>0?'is-up':dBase<0?'is-down':''}">${dBase!==null?signed(dBase,vr.digits):'—'}</td><td>${dec!==null?signed(dec,vr.digits+1):'—'}</td><td>${pr30!==null?`${format(pr30,vr.digits)} → ${format(pr50,vr.digits)}`:'—'}</td><td>${ext&&Math.abs(ext.z)>=1?`${ext.year} (${signed(ext.z,1)}σ · ${format(ext.value,vr.digits)})`:'—'}</td></tr>`;
+      const rowActive=vr.id===state.variable?'is-active':'';
+      return `<tr class="${rowActive}" data-sim-var="${vr.id}"><td><strong>${vrMeta.short}</strong><small>${vrMeta.unit}</small></td><td>${bAvg!==null?format(bAvg,vr.digits):'—'}</td><td><strong>${format(last.value,vr.digits)}</strong> <small>(${last.year})</small></td><td class="${dBase>0?'is-up':dBase<0?'is-down':''}">${dBase!==null?signed(dBase,vr.digits):'—'}</td><td>${dec!==null?signed(dec,vr.digits+1):'—'}</td><td>${pr30!==null?`${format(pr30,vr.digits)} → ${format(pr50,vr.digits)}`:'—'}</td><td>${ext&&Math.abs(ext.z)>=1?`${ext.year} (${signed(ext.z,1)}σ · ${format(ext.value,vr.digits)})`:'—'}</td></tr>`;
     }).join('');
     simStrip.innerHTML=`
       <div class="sim-cards-row">
@@ -550,7 +554,7 @@ function renderStats(){
         <div class="sim-matrix-head"><span>${tx('SPECIFIC DATA BY VARIABLE','DATOS ESPECÍFICOS POR VARIABLE')} · <strong>${s.name}</strong></span><small>${tx('Click any row to inspect its chart','Clic en cualquier fila para ver su gráfica')}</small></div>
         <div class="sim-matrix-scroll"><table class="sim-matrix"><thead><tr><th>${tx('Variable','Variable')}</th><th>${tx('Base 01–10','Base 01–10')}</th><th>${tx('Latest','Último')}</th><th>${tx('Diff (Δ)','Diferencia')}</th><th>${tx('Rate / dec','Tasa / déc')}</th><th>${tx('Proj. 2030 → 2050','Proy. 2030 → 2050')}</th><th>${tx('Peak anomaly','Año más atípico')}</th></tr></thead><tbody>${matrixRows}</tbody></table></div>
       </div>`;
-    simStrip.querySelectorAll('[data-sim-var]').forEach(row=>row.addEventListener('click',()=>{state.variable=row.dataset.simVar;$('#quick-variable-select').value=state.variable;render();}));
+    simStrip.querySelectorAll('[data-sim-var]').forEach(row=>row.addEventListener('click',()=>setVariable(row.dataset.simVar)));
     simStrip.querySelector('#jump-whatif')?.addEventListener('click',()=>{document.querySelector('#recomendaciones')?.scrollIntoView({behavior:'smooth'});});
   }
 
@@ -653,6 +657,7 @@ async function boot(){
     ecological=await loadStaticJSON('data/ecological.json?v=1').catch(()=>null);
     riskSummary=computeAllRisks({sites:manifest.sites,annual,ecological});
     data=Object.fromEntries(manifest.sites.map(site=>[site.id,{...site}]));
+    if(pendingSiteId&&data[pendingSiteId]){state.site=pendingSiteId;pendingSiteId=null;}
     buildLayerButtons();
     options($('#site-select'),state.site);options($('#compare-site'),state.compareSite);
     for(const id of ['#start-year','#end-year']){$(id).innerHTML=Array.from({length:25},(_,i)=>`<option>${2001+i}</option>`).join('');$(id).onchange=setPeriod;}
