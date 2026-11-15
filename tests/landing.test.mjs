@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
-test('Unified single giant slide renders centered logo, Trend Detective quantified benefits, video without chapters, NASA challenge banner, hidden pitch slot, and one-way 3D entry', async () => {
+test('Unified slide renders creators carousel with dormant photo support, outside NASA footnote, Light/Dark theme toggle, and one-way 3D entry', async () => {
   const originalDocument = globalThis.document;
   const originalWindow = globalThis.window;
   const originalLocalStorage = globalThis.localStorage;
@@ -30,12 +32,18 @@ test('Unified single giant slide renders centered logo, Trend Detective quantifi
       this.id = attrs.id || '';
       this.value = '';
       this.textContent = '';
-      this.hidden = false;
+      this.hidden = 'hidden' in attrs;
       this.scrollTop = 0;
       this.paused = false;
+      this.currentTime = 0;
       this.attrs = { ...attrs };
       this.children = [];
       this.classList = new ClassList(classNames);
+      const cssProps = new Map();
+      this.style = {
+        setProperty(k, v) { cssProps.set(k, String(v)); },
+        getPropertyValue(k) { return cssProps.get(k) || ''; }
+      };
     }
     set innerHTML(html) {
       this._innerHTML = html;
@@ -43,6 +51,10 @@ test('Unified single giant slide renders centered logo, Trend Detective quantifi
       collections.set('.lp-giant-slide', []);
       collections.set('[data-enter-app]', []);
       collections.set('[data-lp-lang]', []);
+      collections.set('[data-lp-theme]', []);
+      collections.set('[data-theme-toggle]', []);
+      collections.set('[data-author-dot]', []);
+      collections.set('.lp-authors-track', []);
 
       for (const match of html.matchAll(/<([a-z0-9-]+)\s+([^>]*?)>/gi)) {
         const [, tag, attrStr] = match;
@@ -54,8 +66,12 @@ test('Unified single giant slide renders centered logo, Trend Detective quantifi
         const el = new MockElement(tag, attrs, classNames);
         if (attrs.id) elements.set('#' + attrs.id, el);
         if (classNames.includes('lp-giant-slide')) collections.get('.lp-giant-slide').push(el);
+        if (classNames.includes('lp-authors-track')) collections.get('.lp-authors-track').push(el);
         if ('data-enter-app' in attrs) collections.get('[data-enter-app]').push(el);
         if ('data-lp-lang' in attrs) collections.get('[data-lp-lang]').push(el);
+        if ('data-lp-theme' in attrs) collections.get('[data-lp-theme]').push(el);
+        if ('data-theme-toggle' in attrs) collections.get('[data-theme-toggle]').push(el);
+        if ('data-author-dot' in attrs) collections.get('[data-author-dot]').push(el);
       }
     }
     get innerHTML() { return this._innerHTML || ''; }
@@ -84,12 +100,13 @@ test('Unified single giant slide renders centered logo, Trend Detective quantifi
   doc.documentElement = new MockElement('html');
   doc.createElement = tag => new MockElement(tag);
   doc.getElementById = id => elements.get('#' + id) || null;
-  doc.querySelector = sel => elements.get(sel) || null;
-  doc.querySelectorAll = () => [];
+  doc.querySelector = sel => collections.get(sel)?.[0] || elements.get(sel) || null;
+  doc.querySelectorAll = sel => collections.get(sel) || [];
 
   let resizeEvents = 0;
   globalThis.document = doc;
   globalThis.window = {
+    innerWidth: 1280,
     dispatchEvent(evt) { if (evt?.type === 'resize') resizeEvents++; }
   };
   globalThis.localStorage = {
@@ -102,15 +119,23 @@ test('Unified single giant slide renders centered logo, Trend Detective quantifi
   get('#region-mode').addEventListener('click', () => { regionClicks++; });
 
   try {
+    const i18nMod = await import('../public/i18n.js?i18n-test=' + Date.now());
     const landingMod = await import('../public/landing.js?landing-test=' + Date.now());
     const portal = get('#landing-portal');
 
     assert.equal(doc.body.classList.contains('landing-open'), true);
     assert.equal(portal.getAttribute('aria-hidden'), 'false');
 
-    // Unified single giant slide without bottom section bar or video chapter buttons
+    // Unified single giant slide without bottom section bar, video chapters, or inside NASA box
     assert.equal(portal.querySelectorAll('.lp-giant-slide').length, 1);
-    assert.doesNotMatch(portal.innerHTML, /class="lp-nav"|lp-slider-bar|lp-chapters|lp-chap|data-slide=|lp-prev|lp-next|data-go-next/);
+    assert.doesNotMatch(portal.innerHTML, /class="lp-nav"|lp-slider-bar|lp-chapters|lp-chap|data-slide=|lp-prev|lp-next|data-go-next|lp-nasa-banner/);
+
+    // Simplified gray NASA footnote strictly outside .lp-giant-slide with zero emojis
+    const fnMatch = portal.innerHTML.match(/<p class="lp-nasa-footnote">([^<]+)<\/p>/);
+    assert.ok(fnMatch, 'Expected .lp-nasa-footnote outside the box');
+    assert.equal(fnMatch[1].trim(), '2026 NASA Space Apps Challenge · Earth System Trend Detective');
+    assert.equal(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(fnMatch[1]), false);
+    assert.ok(portal.innerHTML.lastIndexOf('</div>') < portal.innerHTML.indexOf('lp-nasa-footnote'));
 
     // Dormant pitch link stays configured in code (empty) and completely hidden from DOM
     assert.equal(landingMod.PITCH_VIDEO_URL, '');
@@ -119,32 +144,59 @@ test('Unified single giant slide renders centered logo, Trend Detective quantifi
     assert.equal(doc.getElementById('landing-pitch-modal'), null);
     assert.equal(doc.getElementById('open-landing-btn'), null);
 
-    // Verify centered brand logo, PDF, demo video, Trend Detective + quantified SbN metrics, 6 authors, and NASA Space Apps banner
+    // Creators carousel & dormant photo option in code without upload UI
+    assert.equal(landingMod.AUTHORS.length, 6);
+    for (const a of landingMod.AUTHORS) {
+      assert.equal(a.photo, '');
+      assert.ok(portal.innerHTML.includes(a.name), `Missing author ${a.name}`);
+      assert.ok(portal.innerHTML.includes(`>${a.initials}<`), `Missing initials ${a.initials}`);
+    }
+    assert.equal(
+      landingMod.renderAuthorAvatar({ name: 'Test User', initials: 'TU', photo: '' }),
+      '<div class="lp-avatar" aria-hidden="true">TU</div>'
+    );
+    assert.equal(
+      landingMod.renderAuthorAvatar({ name: 'Test User', initials: 'TU', photo: 'assets/creators/tu.jpg' }),
+      '<div class="lp-avatar has-photo"><img src="http://127.0.0.1:4173/assets/creators/tu.jpg" alt="Test User" loading="lazy"></div>'
+    );
+    assert.equal(
+      landingMod.renderAuthorAvatar({ name: 'Test User', initials: 'TU', photo: 'javascript:alert(1)' }),
+      '<div class="lp-avatar" aria-hidden="true">TU</div>'
+    );
+    assert.doesNotMatch(portal.innerHTML, /type="file"|upload-photo|edit-photo/i);
+    assert.match(portal.innerHTML, /lp-authors-carousel/);
+
+    // Step carousel forward and backward
+    const track = portal.querySelector('.lp-authors-track');
+    assert.equal(track.getAttribute('data-author-index'), '0');
+    get('#lp-authors-next').click();
+    assert.equal(track.getAttribute('data-author-index'), '1');
+    get('#lp-authors-prev').click();
+    assert.equal(track.getAttribute('data-author-index'), '0');
+
+    // Logo-based Light/Dark mode toggle across landing and shared i18n state
+    assert.equal(i18nMod.getTheme(), 'dark');
+    assert.equal(doc.documentElement.getAttribute('data-theme'), 'dark');
+    assert.equal(doc.body.classList.contains('light-mode'), false);
+    get('#lp-theme-toggle').click();
+    assert.equal(i18nMod.getTheme(), 'light');
+    assert.equal(doc.documentElement.getAttribute('data-theme'), 'light');
+    assert.equal(doc.body.classList.contains('light-mode'), true);
+    assert.equal(storage.get('gaiatrack_theme'), 'light');
+    get('#lp-theme-toggle').click();
+    assert.equal(i18nMod.getTheme(), 'dark');
+    assert.equal(doc.body.classList.contains('light-mode'), false);
+
+    // Main app static HTML also exposes topbar theme toggle
+    const indexHtml = await fs.readFile(path.resolve('public/index.html'), 'utf8');
+    assert.match(indexHtml, /id="topbar-theme-toggle"[^>]*data-theme-toggle/);
+
+    // Verify centered brand logo, PDF, demo video, and quantified Trend Detective metrics
     assert.match(portal.innerHTML, /assets\/gaia-eb-final\.png/);
     assert.match(portal.innerHTML, /assets\/gaia-eb-research-paper\.pdf/);
     assert.match(portal.innerHTML, /assets\/gaiatrack-demo\.mp4/);
-    for (const token of [
-      '2001–2025',
-      '84',
-      '95%',
-      '89%',
-      '−44.8%',
-      '−32.6%',
-      '17.5M',
-      'NASA Space Apps Challenge',
-      'Earth System Trend Detective'
-    ]) {
-      assert.ok(portal.innerHTML.includes(token), `Missing quantified metric/challenge token: ${token}`);
-    }
-    for (const author of [
-      'Francinny Saldaña Abarca',
-      'Darren Araya Monge',
-      'Santiago Ramirez Víquez',
-      'Camila Garay Jiménez',
-      'Derling Torres Campos',
-      'Kendall Rojas Cartín'
-    ]) {
-      assert.ok(portal.innerHTML.includes(author), `Missing author ${author}`);
+    for (const token of ['2001–2025', '84', '95%', '89%', '−44.8%', '−32.6%', '17.5M']) {
+      assert.ok(portal.innerHTML.includes(token), `Missing quantified metric token: ${token}`);
     }
 
     // Entering main app is one-way: closes portal, pauses demo video, resizes, clears intro, and refuses reopening

@@ -1,4 +1,4 @@
-import {getLang,setLang,tx} from './i18n.js';
+import {getLang,getTheme,setLang,toggleTheme,tx} from './i18n.js';
 
 // Paste the final Pitch Video URL here when ready; UI stays hidden while empty.
 export const PITCH_VIDEO_URL='';
@@ -7,17 +7,29 @@ const DEMO_VIDEO_SRC='assets/gaiatrack-demo.mp4';
 const PAPER_PDF_SRC='assets/gaia-eb-research-paper.pdf';
 const BRAND_LOGO_SRC='assets/gaia-eb-final.png';
 
-const AUTHORS=[
-  {name:'Francinny Saldaña Abarca',initials:'FS',role:['Systems & Data Science','Sistemas y Ciencia de Datos']},
-  {name:'Darren Araya Monge',initials:'DA',role:['Systems & Data Science','Sistemas y Ciencia de Datos']},
-  {name:'Santiago Ramirez Víquez',initials:'SR',role:['Electrical Eng. & Physical Modeling','Ing. Eléctrica y Modelación Física']},
-  {name:'Camila Garay Jiménez',initials:'CG',role:['Web Platform Engineering','Desarrollo de Plataforma Web']},
-  {name:'Derling Torres Campos',initials:'DT',role:['Web Platform Engineering','Desarrollo de Plataforma Web']},
-  {name:'Kendall Rojas Cartín',initials:'KR',role:['Design & Science Communication','Diseño y Comunicación Científica']}
+// Optional creator photos live strictly in code (`photo: ''` shows initials while empty).
+export const AUTHORS=[
+  {name:'Francinny Saldaña Abarca',initials:'FS',photo:'',role:['Systems & Data Science','Sistemas y Ciencia de Datos']},
+  {name:'Darren Araya Monge',initials:'DA',photo:'',role:['Systems & Data Science','Sistemas y Ciencia de Datos']},
+  {name:'Santiago Ramirez Víquez',initials:'SR',photo:'',role:['Electrical Eng. & Physical Modeling','Ing. Eléctrica y Modelación Física']},
+  {name:'Camila Garay Jiménez',initials:'CG',photo:'',role:['Web Platform Engineering','Desarrollo de Plataforma Web']},
+  {name:'Derling Torres Campos',initials:'DT',photo:'',role:['Web Platform Engineering','Desarrollo de Plataforma Web']},
+  {name:'Kendall Rojas Cartín',initials:'KR',photo:'',role:['Design & Science Communication','Diseño y Comunicación Científica']}
 ];
+
+export function renderAuthorAvatar(author){
+  const safePhoto=sanitizeExternalUrl(author?.photo);
+  if(safePhoto){
+    const escapedPhoto=safePhoto.replace(/"/g,'&quot;');
+    const safeName=String(author?.name||'').replace(/"/g,'&quot;');
+    return `<div class="lp-avatar has-photo"><img src="${escapedPhoto}" alt="${safeName}" loading="lazy"></div>`;
+  }
+  return `<div class="lp-avatar" aria-hidden="true">${author?.initials||''}</div>`;
+}
 
 let portal=null;
 let hasEnteredApp=false;
+let authorIndex=0;
 
 function sanitizeExternalUrl(raw){
   if(!raw||typeof raw!=='string')return '';
@@ -168,14 +180,52 @@ function buildBenefitsBlock(){
   `;
 }
 
+function visibleAuthorCols(){
+  const w=typeof window!=='undefined'&&Number.isFinite(window.innerWidth)?window.innerWidth:1280;
+  if(w<=680)return 1;
+  if(w<=980)return 2;
+  return 3;
+}
+
+function clampAuthorIndex(){
+  const maxIdx=Math.max(0,AUTHORS.length-visibleAuthorCols());
+  authorIndex=Math.max(0,Math.min(authorIndex,maxIdx));
+  return maxIdx;
+}
+
+function syncAuthorsCarousel(){
+  if(!portal)return;
+  const maxIdx=clampAuthorIndex();
+  const track=portal.querySelector?.('.lp-authors-track');
+  if(track?.style?.setProperty)track.style.setProperty('--lp-idx',String(authorIndex));
+  if(track)track.setAttribute?.('data-author-index',String(authorIndex));
+  portal.querySelectorAll?.('[data-author-dot]')?.forEach?.((dot,i)=>{
+    const active=i===authorIndex;
+    dot.classList?.toggle?.('active',active);
+    dot.setAttribute?.('aria-selected',String(active));
+    if(dot.hidden!==undefined)dot.hidden=i>maxIdx;
+  });
+}
+
+function stepAuthors(delta){
+  const maxIdx=Math.max(0,AUTHORS.length-visibleAuthorCols());
+  if(maxIdx<=0){authorIndex=0;syncAuthorsCarousel();return;}
+  authorIndex=(authorIndex+delta+(maxIdx+1))%(maxIdx+1);
+  syncAuthorsCarousel();
+}
+
 function buildContent(){
   const lang=getLang();
+  const light=getTheme()==='light';
+  const maxIdx=clampAuthorIndex();
   const pitchHtml=renderPitchButton(tx('🎬 Watch Pitch Video ↗','🎬 Ver Video Pitch ↗'));
   const enterLabel=tx('⌖ Enter 3D Application →','⌖ Entrar a la Aplicación 3D →');
   const paperLabel=tx('📄 Research Paper (PDF) ↗','📄 Paper Científico (PDF) ↗');
 
   return `
-    <div class="lp-corner-lang" role="group" aria-label="${tx('Language','Idioma')}">
+    <div class="lp-corner-lang" role="group" aria-label="${tx('Language & Theme','Idioma y Tema')}">
+      <button type="button" id="lp-theme-toggle" class="lp-theme-btn" data-theme-toggle data-lp-theme aria-pressed="${light}" aria-label="${light?tx('Switch to dark mode','Cambiar a modo oscuro'):tx('Switch to light mode','Cambiar a modo claro')}">${light?tx('🌙 Dark','🌙 Oscuro'):tx('☀️ Light','☀️ Claro')}</button>
+      <span class="lp-corner-sep" aria-hidden="true"></span>
       <button type="button" data-lp-lang="en" class="${lang==='en'?'active':''}" aria-pressed="${lang==='en'}">EN</button>
       <button type="button" data-lp-lang="es" class="${lang==='es'?'active':''}" aria-pressed="${lang==='es'}">ES</button>
     </div>
@@ -185,7 +235,6 @@ function buildContent(){
         <div class="lp-hero-logo">
           <img src="${BRAND_LOGO_SRC}" alt="Gaia E&amp;B — Environment &amp; Benefits">
         </div>
-        <span class="lp-slide-kicker">2026 NASA SPACE APPS CHALLENGE · EARTH SYSTEM TREND DETECTIVE</span>
         <h1 class="lp-title-xl">${tx(
           'Detect <em>environmental trends</em> and quantify <em>nature-based solutions</em> across Costa Rica.',
           'Detectá <em>tendencias ambientales</em> y cuantificá <em>soluciones basadas en la naturaleza</em> en Costa Rica.'
@@ -214,25 +263,27 @@ function buildContent(){
       </section>
 
       <section class="lp-block">
-        <span class="lp-slide-kicker">${tx('AUTHORS & CHALLENGE MISSION','AUTORES Y DESAFÍO NASA')}</span>
+        <span class="lp-slide-kicker">${tx('CREATORS & RESEARCH TEAM','CREADORES Y EQUIPO INVESTIGADOR')}</span>
         <h2 class="lp-slide-heading">${tx('Built in Costa Rica by the Gaia E&B Research Team.','Creado en Costa Rica por el equipo Gaia E&B.')}</h2>
-        <div class="lp-authors-grid">
-          ${AUTHORS.map(a=>`
-            <article class="lp-author-card">
-              <div class="lp-avatar" aria-hidden="true">${a.initials}</div>
-              <div>
-                <strong>${a.name}</strong>
-                <small>${tx(a.role[0],a.role[1])}</small>
-              </div>
-            </article>
-          `).join('')}
+        <div class="lp-authors-carousel" role="region" aria-label="${tx('Creators carousel','Carrusel de creadores')}">
+          <button type="button" class="lp-carousel-btn" id="lp-authors-prev" aria-label="${tx('Previous creators','Creadores anteriores')}">‹</button>
+          <div class="lp-authors-viewport">
+            <div class="lp-authors-track" style="--lp-idx:${authorIndex}" data-author-index="${authorIndex}">
+              ${AUTHORS.map(a=>`
+                <article class="lp-author-card">
+                  ${renderAuthorAvatar(a)}
+                  <div>
+                    <strong>${a.name}</strong>
+                    <small>${tx(a.role[0],a.role[1])}</small>
+                  </div>
+                </article>
+              `).join('')}
+            </div>
+          </div>
+          <button type="button" class="lp-carousel-btn" id="lp-authors-next" aria-label="${tx('Next creators','Siguientes creadores')}">›</button>
         </div>
-        <div class="lp-nasa-banner">
-          <strong>🚀 2026 NASA Space Apps Challenge · Be An Earth System Trend Detective!</strong>
-          <p>${tx(
-            'Created for the 2026 NASA International Space Apps Challenge (Earth System Trend Detective) — visualizing MODIS, GPM, SMAP, MERRA-2 & NASA POWER time series and validating regional trends with Mann–Kendall, Theil–Sen, Welch t-tests & 95% confidence intervals.',
-            'Desarrollado para el 2026 NASA Space Apps Challenge (Earth System Trend Detective) — visualizando series temporales de MODIS, GPM, SMAP, MERRA-2 y NASA POWER, y verificando tendencias regionales con Mann–Kendall, Theil–Sen, pruebas t de Welch e intervalos de confianza del 95%.'
-          )}</p>
+        <div class="lp-authors-dots" role="tablist" aria-label="${tx('Carousel pages','Páginas del carrusel')}">
+          ${AUTHORS.map((_,idx)=>`<button type="button" class="lp-author-dot ${idx===authorIndex?'active':''}" data-author-dot="${idx}" aria-label="${tx(`Slide ${idx+1}`,`Posición ${idx+1}`)}" aria-selected="${idx===authorIndex}"${idx>maxIdx?' hidden':''}></button>`).join('')}
         </div>
         <div class="lp-cta-row">
           <button type="button" class="lp-btn lp-btn-primary lp-btn-xl" data-enter-app>${enterLabel}</button>
@@ -241,13 +292,22 @@ function buildContent(){
         </div>
       </section>
     </div>
+    <p class="lp-nasa-footnote">2026 NASA Space Apps Challenge · Earth System Trend Detective</p>
   `;
 }
 
 function render(){
   if(!portal)return;
+  const prevVideo=portal.querySelector?.('#landing-demo-video');
+  const videoTime=prevVideo&&Number.isFinite(prevVideo.currentTime)?prevVideo.currentTime:0;
+  const wasPaused=prevVideo?prevVideo.paused:true;
   portal.innerHTML=buildContent();
   wireEvents();
+  syncAuthorsCarousel();
+  const nextVideo=portal.querySelector?.('#landing-demo-video');
+  if(nextVideo&&videoTime>0){
+    try{nextVideo.currentTime=videoTime;if(!wasPaused)nextVideo.play?.();}catch{}
+  }
 }
 
 function wireEvents(){
@@ -257,6 +317,17 @@ function wireEvents(){
   });
   portal.querySelectorAll('[data-lp-lang]').forEach(btn=>{
     btn.addEventListener('click',()=>setLang(btn.getAttribute('data-lp-lang')));
+  });
+  portal.querySelectorAll('[data-lp-theme]').forEach(btn=>{
+    btn.addEventListener('click',()=>toggleTheme());
+  });
+  portal.querySelector('#lp-authors-prev')?.addEventListener('click',()=>stepAuthors(-1));
+  portal.querySelector('#lp-authors-next')?.addEventListener('click',()=>stepAuthors(1));
+  portal.querySelectorAll('[data-author-dot]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const idx=Number(btn.getAttribute('data-author-dot'));
+      if(Number.isFinite(idx)){authorIndex=idx;syncAuthorsCarousel();}
+    });
   });
 }
 
@@ -282,6 +353,11 @@ export function initLanding(){
   document.addEventListener('gaiatrack:lang',()=>{
     if(!hasEnteredApp)render();
   });
+  if(typeof window!=='undefined'&&typeof window.addEventListener==='function'){
+    window.addEventListener('resize',()=>{
+      if(!hasEnteredApp)syncAuthorsCarousel();
+    });
+  }
 }
 
 initLanding();
