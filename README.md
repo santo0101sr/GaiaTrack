@@ -53,6 +53,20 @@ Las nubes usan densidad volumétrica procedural con bordes suaves, respetando
 los límites del territorio. Son ilustraciones de las estimaciones del punto de
 referencia; no representan un radar ni una distribución espacial observada.
 El PNG de marca conserva su transparencia, sin un fondo aplicado por CSS.
+
+Los indicadores actuales priorizan los puntos cantonales disponibles sobre los
+puntos provinciales: un cantón con lluvia permanece visible aunque el punto de
+su provincia reporte cero. Una estimación provincial solo se usa como respaldo
+cuando no hay muestras cantonales válidas para esa provincia; no se superponen
+ambos niveles ni se rellenan cantones faltantes como si estuvieran medidos.
+El estado de precipitación permite abrir la lista de puntos con lluvia, su tasa
+equivalente en mm/h y la hora del modelo, y seleccionar uno en el mapa.
+El acumulado reportado determina si se dibuja lluvia; un código general de cielo
+actual no cancela la precipitación de un intervalo precedente. Nubosidad sola
+no crea lluvia. Los datos ausentes o caducados no se muestran como lluvia cero.
+Los trazos orientados a la cámara aumentan en densidad, grosor, longitud y
+velocidad con la intensidad. La escena sigue representando estimaciones de
+modelos por punto; no informa la distribución espacial de un radar observado.
 Las pruebas usan respuestas controladas y no consumen créditos; la validación real
 del modelo elegido requiere completar las dos variables.
 

@@ -66,8 +66,8 @@ export function createProvinceExplorer({host,manifest,geo,meshes,beacons,borders
       ?tx(`${count} cantons · Choose one to explore.`,`${count} cantones · Elegí uno para explorar.`)
       :tx('Seven provinces. Choose where to start.','Siete provincias. Elegí dónde empezar.');
     host.querySelector('.source-integrity').textContent=tx(
-      'NASA POWER + Open-Meteo · Model estimates at a reference point. Not a province-wide average. 3D weather is illustrative.',
-      'NASA POWER + Open-Meteo · Estimaciones para un punto de referencia. No son promedios provinciales. El clima 3D es ilustrativo.');
+      'NASA POWER + Open-Meteo · Reference-point model estimates. Rain and clouds follow the reported data and update time.',
+      'NASA POWER + Open-Meteo · Estimaciones por punto de referencia. Lluvia y nubes responden a los datos reportados y su hora de actualización.');
     navigation.setAttribute('aria-label',tx('Territory navigation','Navegación territorial'));
     navigation.replaceChildren();
     const breadcrumb=document.createElement('div');breadcrumb.className='territory-breadcrumb';

@@ -91,8 +91,8 @@ export function createRainDomain(meshes){
 
 export function rainAppearance(data,count=1200){
   const intensity=weatherScales(data).rain??0;
-  return {intensity,count:intensity>0?Math.max(1,Math.round(intensity*count)):0,
-    speed:.8+Math.sqrt(intensity)*2.8,length:.04+intensity*.19,opacity:intensity>0?.3+intensity*.48:0};
+  return {intensity,count:intensity>0?Math.min(count,Math.max(Math.min(8,count),Math.round(intensity**.65*count))):0,
+    speed:.85+Math.sqrt(intensity)*3.1,length:.07+intensity*.25,width:1.1+intensity*1.9,opacity:intensity>0?.4+intensity*.48:0};
 }
 
 export function createRainField(initialDomain,{count=1200,random=Math.random}={}){
@@ -106,6 +106,25 @@ export function createRainField(initialDomain,{count=1200,random=Math.random}={}
     vertexShader:`attribute float dropFade;varying float fade;void main(){fade=dropFade;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
     fragmentShader:`uniform float opacity;uniform vec3 tint;varying float fade;void main(){gl_FragColor=vec4(tint,opacity*fade);}`});
   const mesh=new THREE.LineSegments(geometry,material);
+  // WebGL lines are usually one pixel wide. Camera-facing ribbons give light
+  // rain a visible tapered drop and heavy rain genuinely wider/denser streaks.
+  const ribbons=new THREE.InstancedBufferGeometry();
+  ribbons.setAttribute('position',new THREE.Float32BufferAttribute([-1,0,0,1,0,0,-1,1,0,-1,1,0,1,0,0,1,1,0],3));
+  const dropBuffer=new THREE.InstancedInterleavedBuffer(positions,6,1);
+  ribbons.setAttribute('dropStart',new THREE.InterleavedBufferAttribute(dropBuffer,3,0));
+  ribbons.setAttribute('dropEnd',new THREE.InterleavedBufferAttribute(dropBuffer,3,3));
+  ribbons.instanceCount=0;
+  const ribbonMaterial=new THREE.ShaderMaterial({transparent:true,depthWrite:false,toneMapped:false,side:THREE.DoubleSide,
+    uniforms:{opacity:{value:0},width:{value:1},resolution:{value:new THREE.Vector2(1280,720)},pixelRatio:{value:1}},
+    vertexShader:`attribute vec3 dropStart;attribute vec3 dropEnd;uniform vec2 resolution;uniform float width;uniform float pixelRatio;varying vec2 dropUV;
+      void main(){vec4 a=projectionMatrix*modelViewMatrix*vec4(dropStart,1.),b=projectionMatrix*modelViewMatrix*vec4(dropEnd,1.);
+        vec2 axis=(b.xy/b.w-a.xy/a.w)*resolution;vec2 side=vec2(-axis.y,axis.x)/max(.001,length(axis));
+        vec4 p=mix(a,b,position.y);p.xy+=side*position.x*width*pixelRatio*(1.-position.y*.65)/resolution*p.w;
+        dropUV=position.xy;gl_Position=p;}`,
+    fragmentShader:`uniform float opacity;varying vec2 dropUV;void main(){float edge=1.-smoothstep(.05,1.,abs(dropUV.x));float tail=pow(1.-dropUV.y,.7);gl_FragColor=vec4(.73,.88,.97,opacity*edge*tail);}`});
+  const streaks=new THREE.Mesh(ribbons,ribbonMaterial);streaks.name='intensity-rain-streaks';streaks.frustumCulled=false;streaks.renderOrder=2;
+  streaks.onBeforeRender=renderer=>{renderer.getDrawingBufferSize(ribbonMaterial.uniforms.resolution.value);ribbonMaterial.uniforms.pixelRatio.value=renderer.getPixelRatio();};
+  mesh.add(streaks);material.visible=false;
   // Buffers change as drops respawn; avoid a stale bounding sphere culling a different territory.
   mesh.frustumCulled=false;
   let domain=null,drops=[],appearance=rainAppearance({},count);
@@ -125,20 +144,24 @@ export function createRainField(initialDomain,{count=1200,random=Math.random}={}
     if(domain===next)return;
     domain=next;drops=[];
     for(let i=0;i<count;i++){const d=spawn();if(d)drops.push(d);}
-    drops.forEach((d,i)=>write(i,d));geometry.attributes.position.needsUpdate=true;
+    drops.forEach((d,i)=>write(i,d));geometry.attributes.position.needsUpdate=true;dropBuffer.needsUpdate=true;
     geometry.setDrawRange(0,Math.min(drops.length,appearance.count)*2);
+    ribbons.instanceCount=Math.min(drops.length,appearance.count);
   }
-  function setOrigin(next){origin.copy(next);drops.forEach((d,i)=>write(i,d));geometry.attributes.position.needsUpdate=true;}
+  function setOrigin(next){origin.copy(next);drops.forEach((d,i)=>write(i,d));geometry.attributes.position.needsUpdate=true;dropBuffer.needsUpdate=true;}
   function setWeather(data){
     appearance=rainAppearance(data,count);mesh.material.opacity=appearance.opacity;material.uniforms.opacity.value=appearance.opacity;
+    ribbonMaterial.uniforms.opacity.value=appearance.opacity;ribbonMaterial.uniforms.width.value=appearance.width;
     mesh.userData.precipitationMmPerHour=data.precipitation??null;
     mesh.userData.rainIntensity=appearance.intensity;
     geometry.setDrawRange(0,Math.min(drops.length,appearance.count)*2);
+    ribbons.instanceCount=Math.min(drops.length,appearance.count);
     // A paused scene also reflects new intensity and drop length immediately.
-    drops.forEach((d,i)=>write(i,d));geometry.attributes.position.needsUpdate=true;
+    drops.forEach((d,i)=>write(i,d));geometry.attributes.position.needsUpdate=true;dropBuffer.needsUpdate=true;
   }
   function animate(dt){
     const active=Math.min(drops.length,appearance.count);
+    if(!active)return;
     for(let i=0;i<active;i++){
       let d=drops[i];
       const fall=appearance.speed*(.82+(i%7)*.055)*dt;
@@ -148,11 +171,11 @@ export function createRainField(initialDomain,{count=1200,random=Math.random}={}
       if(d.y<d.ground){
         const replacement=spawn();
         if(replacement)d=drops[i]=replacement;
-        else {geometry.setDrawRange(0,0);return;}
+        else {geometry.setDrawRange(0,0);ribbons.instanceCount=0;return;}
       }
       write(i,d);
     }
-    geometry.attributes.position.needsUpdate=true;
+    geometry.attributes.position.needsUpdate=true;dropBuffer.needsUpdate=true;
   }
   setDomain(initialDomain);
   return {mesh,geometry,setDomain,setOrigin,setWeather,animate,get domain(){return domain;},get appearance(){return appearance;}};

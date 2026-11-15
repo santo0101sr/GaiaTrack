@@ -40,8 +40,8 @@ test('Rain boundary includes concave territory and islands but excludes holes an
 test('Every positive rate is visible, with increasing density, speed, length and opacity',()=>{
   const values=[.0001,.2,2,8,25].map(precipitation=>rainAppearance({precipitation,weatherCode:61}));
   assert.ok(values[0].count>=1&&values[0].opacity>0);
-  for(let i=1;i<values.length;i++)for(const key of ['count','speed','length','opacity'])assert.ok(values[i][key]>values[i-1][key],key);
-  for(const data of [{precipitation:0},{precipitation:null},{precipitation:5,weatherCode:3}])assert.equal(rainAppearance(data).count,0);
+  for(let i=1;i<values.length;i++)for(const key of ['count','speed','length','opacity','width'])assert.ok(values[i][key]>values[i-1][key],key);
+  for(const data of [{precipitation:0},{precipitation:null},{precipitation:0,weatherCode:3}])assert.equal(rainAppearance(data).count,0);
 });
 
 test('Wind never carries a drop or its tail outside the territory over prolonged animation',()=>{
@@ -54,6 +54,7 @@ test('Wind never carries a drop or its tail outside the territory over prolonged
   }
   field.setWeather({precipitation:0,weatherCode:3});
   assert.equal(field.geometry.drawRange.count,0);
+  assert.equal(field.mesh.getObjectByName('intensity-rain-streaks').geometry.instanceCount,0);
   field.animate(.05);assert.equal(field.geometry.drawRange.count,0);
 });
 

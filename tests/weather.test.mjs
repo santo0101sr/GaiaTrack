@@ -15,10 +15,12 @@ test('Each territory uses its own fresh current data and precipitation interval'
   assert.equal(weatherForScene('forecast','heredia',{precipitation:.1},now).precipitation,.1);
 });
 
-test('Overcast and fog do not rain; drizzle stays light and lightning requires a thunderstorm code',()=>{
+test('Precipitation controls rain independently of cloud codes; lightning requires a thunderstorm code',()=>{
   for(const weatherCode of [0,1,2,3,45,48,71,73,75,77,85,86]) {
-    assert.equal(weatherScales({weatherCode,precipitation:2,clouds:100}).rain,0);
+    assert.equal(weatherScales({weatherCode,precipitation:0,clouds:100}).rain,0);
   }
+  assert.ok(weatherScales({weatherCode:3,precipitation:2,clouds:100}).rain>0);
+  assert.equal(weatherScales({weatherCode:3,clouds:100}).rain,null);
   assert.equal(weatherScales({weatherCode:61,precipitation:0}).rain,0);
   assert.equal(weatherScales({weatherCode:61,precipitation:null}).rain,null);
   const drizzle=weatherScales({weatherCode:51,precipitation:.4});

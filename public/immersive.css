@@ -65,3 +65,20 @@ body.immersive-mode{overflow:hidden;background:#040d1b}.immersive-mode>.topbar{p
 .wx-tip strong{font-size:9px;letter-spacing:.4px;color:#b6efd1}
 .wx-tip span{font-size:9.5px;line-height:1.55;color:#a8c1c8}
 .wx-tip button{align-self:flex-start;padding:0;border:0;font-size:8.5px;color:#18d86b;margin-top:2px}
+
+/* A live, inspectable status for the actual precipitation samples in view. */
+#weather-rain-status{position:absolute;top:96px;left:50%;transform:translateX(-50%);z-index:10;width:310px;max-width:38vw;border:1px solid #33556b;border-radius:11px;background:#0b1c2cee;backdrop-filter:blur(12px);box-shadow:0 8px 30px #0003;color:#d8eaf2;font-size:11px}
+#weather-rain-status>summary{display:flex;align-items:center;gap:9px;padding:12px 15px;list-style:none;cursor:pointer;line-height:1.5}
+#weather-rain-status>summary::-webkit-details-marker{display:none}
+.rain-status-dot{width:7px;height:7px;border-radius:50%;background:#6d8797;flex-shrink:0}
+.rain-status-dot.is-raining{background:#8bdfff;box-shadow:0 0 9px #69cfff88}
+.rain-status-caret{margin-left:auto;color:#93b4c9}
+.rain-status-body{padding:0 14px 12px;border-top:1px solid #2d485e}
+.rain-status-body>small{display:block;padding:10px 0;font-size:9px;line-height:1.6;color:#90aebf}
+.rain-status-body button{display:flex;justify-content:space-between;gap:12px;align-items:center;width:100%;padding:9px 0;text-align:left;border-top:1px solid #233d51;font-size:11px}
+.rain-status-body button:hover{color:#9ee5fc}
+.rain-status-body strong{font-size:10px;color:#9ddcf0;white-space:nowrap;font-weight:500}
+#weather-rain-status p{margin:8px 14px 12px;font-size:9px;color:#8faebf;line-height:1.7}
+#weather-rain-status .rain-status-body p{margin:10px 0 0}
+.lab-open #weather-rain-status{display:none}
+@media(max-width:700px){#weather-rain-status{top:174px;left:12px;transform:none;max-width:calc(100vw - 24px);width:260px}#weather-rain-status>summary{padding:9px 12px;font-size:10px}}

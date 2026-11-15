@@ -97,3 +97,29 @@ test('Rain stops immediately when selecting a dry province, and province effects
     globalThis.document=originalDocument;globalThis.fetch=originalFetch;
   }
 });
+
+test('National and provincial views show a wet canton even with a dry provincial point',async()=>{
+  const originalDocument=globalThis.document,originalFetch=globalThis.fetch;
+  globalThis.document=sceneDocument();globalThis.fetch=async()=>({ok:true,json:async()=>({monthly:[]})});
+  try{
+    const root=new THREE.Group(),light=new THREE.DirectionalLight(),coords=(lon,lat)=>new THREE.Vector3(lon,0,lat);
+    const sites=[{id:'heredia',name:'Heredia',type:'province',province:'heredia'},{id:'heredia-centro',name:'Heredia centro',type:'canton',province:'heredia'},{id:'limon-centro',name:'Limón centro',type:'canton',province:'limon'}];
+    const meshes=sites.filter(item=>item.type==='canton').map((item,index)=>{const mesh=new THREE.Mesh(new THREE.BoxGeometry(1,.26,1),new THREE.MeshStandardMaterial());mesh.position.x=index*4;mesh.userData={...item};root.add(mesh);return mesh;});
+    const raw=(site,rain,x)=>({site,name:site,precipitation:rain,intervalSeconds:900,weatherCode:3,clouds:90,observedAt:new Date().toISOString(),requested:{longitude:x,latitude:0}});
+    publishWeather('current',raw('heredia',0,0));publishWeather('current',raw('heredia-centro',2,0));publishWeather('current',raw('limon-centro',0,4));
+    const scene=createWeatherExperience({root,meshes,light,coords,sites});
+    document.dispatchEvent(new CustomEvent('gaiatrack:territory-view',{detail:{province:null}}));scene.animate(50);
+    const wet=root.getObjectByName('canton-weather-heredia-centro'),dry=root.getObjectByName('canton-weather-limon-centro');
+    assert.equal(wet.visible,true);assert.equal(dry.visible,true);
+    const wetRain=wet.children.find(item=>item.isLineSegments),dryRain=dry.children.find(item=>item.isLineSegments);
+    assert.ok(wetRain.geometry.drawRange.count>0);assert.equal(dryRain.geometry.drawRange.count,0);
+    assert.equal(root.getObjectByName('selected-weather').visible,false);
+    document.dispatchEvent(new CustomEvent('gaiatrack:territory-view',{detail:{province:'limon'}}));scene.animate(100);assert.equal(wet.visible,false);
+    document.dispatchEvent(new CustomEvent('gaiatrack:territory-view',{detail:{province:'heredia'}}));
+    document.dispatchEvent(new CustomEvent('gaiatrack:selection',{detail:{site:'heredia-centro'}}));scene.animate(150);
+    const selected=root.getObjectByName('selected-weather');assert.equal(selected.visible,true);assert.equal(wet.visible,false);
+    const selectedRain=selected.children.find(item=>item.isLineSegments);assert.ok(selectedRain.geometry.drawRange.count>0);
+    publishWeather('current',raw('heredia-centro',0,0));assert.equal(selectedRain.geometry.drawRange.count,0);
+    await Promise.resolve();
+  }finally{globalThis.document=originalDocument;globalThis.fetch=originalFetch;}
+});
