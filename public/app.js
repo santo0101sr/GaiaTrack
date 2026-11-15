@@ -1,6 +1,7 @@
 import {loadStaticJSON,loadHistory} from './data-client.js';
 import {siteOptionsHtml,provinceOptionsHtml,territoryOptionsHtml,annualPoints,annualValue} from './territories.js';
-import {trend,baseline,mean,historyCoverage,detrendedCorrelation,benjaminiHochberg} from './science.js';
+import {trend,baseline,mean,historyCoverage,detrendedCorrelation,benjaminiHochberg,tTest,confidenceInterval} from './science.js';
+import {siteZSummary} from './earth-pulse.js';
 import {initForecast,updateForecast} from './forecast.js';
 import {getLang,locale,tx,applyStaticI18n} from './i18n.js';
 import {computeAllRisks,driverLabel,fetchLiveRadarTemps,riskColor,riskLevel,RISK_GRADIENT_CSS} from './ecological-risk.js';
@@ -375,6 +376,12 @@ function renderStats(){
         ?`<strong>¿Cómo interpreta GaiaTrack esta tendencia?</strong><ul><li><b>Pendiente de Theil–Sen:</b> mediana de todas las pendientes entre pares de años, resistente a valores atípicos.</li><li><b>Prueba de Mann–Kendall (α = 0,05):</b> evalúa aumentos o descensos monótonos sostenidos.</li><li><b>Selección territorial:</b> elegí una provincia para ver los resultados de su punto de referencia.</li></ul>`
         :`<strong>How does GaiaTrack test this trend?</strong><ul><li><b>Theil–Sen slope:</b> median of pairwise year-to-year slopes, resistant to isolated extremes.</li><li><b>Mann–Kendall test (α = 0.05):</b> non-parametric test for sustained monotonic increases or decreases.</li><li><b>Territory selection:</b> choose a province to inspect its reference point results.</li></ul>`;
     }
+    if($('#calc-z-iea'))$('#calc-z-iea').textContent='—';
+    if($('#calc-z-meta'))$('#calc-z-meta').textContent=tx('Select a province or canton to compute monthly Z-scores and IEA','Seleccioná una provincia o cantón para calcular Z-scores mensuales e IEA');
+    if($('#calc-ttest'))$('#calc-ttest').textContent='—';
+    if($('#calc-ttest-meta'))$('#calc-ttest-meta').textContent=tx('Welch two-sample t-test vs. 2001–2010 baseline','Prueba t de Welch frente a la línea base 2001–2010');
+    if($('#calc-ci'))$('#calc-ci').textContent='—';
+    if($('#calc-ci-meta'))$('#calc-ci-meta').textContent=tx('95% confidence interval for mean and Theil–Sen slope','Intervalo de confianza 95% de la media y pendiente Theil–Sen');
     renderProvinceScan(slopeDigits);
     $('#science-note').textContent=tx('Annual aggregation removes seasonal cycles to isolate multi-year trends. Exploratory test without multiple-comparison correction; a trend does not establish causes.','La agregación anual elimina ciclos estacionales para aislar tendencias multianuales. Prueba exploratoria sin corrección por comparaciones múltiples; una tendencia no determina sus causas.');
     return;
@@ -420,8 +427,57 @@ function renderStats(){
   const pop=$('#stat-popover');
   if(pop){
     pop.innerHTML=getLang()==='es'
-      ?`<strong>¿Cómo interpreta GaiaTrack esta tendencia?</strong><ul><li><b>Pendiente de Theil–Sen:</b> mediana de todas las pendientes entre pares de años (${slopeStr}/década). Resiste valores atípicos extremos.</li><li><b>Prueba de Mann–Kendall (α = 0,05):</b> evalúa si existe un aumento o descenso monótono sostenido sin asumir distribución normal.</li><li><b>Autocorrelación lag-1:</b> ${t.autocorrelated?'Detectada aquí (|r| > 1,96/√n); puede inflar falsos positivos, por lo que no confirmamos significancia.':'Sin dependencia residual relevante en este período.'}</li></ul>`
-      :`<strong>How does GaiaTrack test this trend?</strong><ul><li><b>Theil–Sen slope:</b> median of all pairwise year-to-year slopes (${slopeStr}/decade), resistant to isolated extremes.</li><li><b>Mann–Kendall test (α = 0.05):</b> non-parametric test checking whether values consistently rise or fall over the selected window.</li><li><b>Lag-1 autocorrelation:</b> ${t.autocorrelated?'Detected here (|r| > 1.96/√n); year-to-year persistence can inflate false positives, so significance is held back.':'No strong residual lag-1 dependence detected for this window.'}</li></ul>`;
+      ?`<strong>¿Cómo interpreta GaiaTrack estos cálculos?</strong><ul><li><b>Pendiente de Theil–Sen + IC 95%:</b> mediana de todas las pendientes entre pares de años (${slopeStr}/década). Resiste valores atípicos extremos.</li><li><b>Prueba de Mann–Kendall (α = 0,05):</b> evalúa si existe un aumento o descenso monótono sostenido sin asumir distribución normal.</li><li><b>Z-score mensual e IEA calibrado:</b> Z = (X − μ) / s desestacionalizado respecto a 2001–2010; IEA integra temperatura, precipitación y humedad del suelo con acoplamiento termo-hídrico.</li><li><b>Prueba t de Welch e IC 95%:</b> compara la ventana seleccionada contra la base 2001–2010 y estima la incertidumbre de la media con distribución t de Student.</li><li><b>Autocorrelación lag-1:</b> ${t.autocorrelated?'Detectada aquí (|r| > 1,96/√n); puede inflar falsos positivos, por lo que no confirmamos significancia.':'Sin dependencia residual relevante en este período.'}</li></ul>`
+      :`<strong>How does GaiaTrack compute these statistics?</strong><ul><li><b>Theil–Sen slope + 95% CI:</b> median of all pairwise year-to-year slopes (${slopeStr}/decade), resistant to isolated extremes.</li><li><b>Mann–Kendall test (α = 0.05):</b> non-parametric test checking whether values consistently rise or fall over the selected window.</li><li><b>Monthly Z-score &amp; calibrated IEA:</b> deseasonalized Z = (X − μ) / s vs. 2001–2010; IEA combines temperature, rainfall, and soil moisture with thermo-hydro coupling.</li><li><b>Welch t-test &amp; 95% CI:</b> compares the selected window against 2001–2010 and estimates mean uncertainty with Student's t distribution.</li><li><b>Lag-1 autocorrelation:</b> ${t.autocorrelated?'Detected here (|r| > 1.96/√n); year-to-year persistence can inflate false positives, so significance is held back.':'No strong residual lag-1 dependence detected for this window.'}</li></ul>`;
+  }
+
+  // Z-score, calibrated IEA, Welch t-test, and 95% confidence intervals
+  const fullSeries=series();
+  const baseVals=fullSeries.filter(d=>d.year>=2001&&d.year<=2010&&Number.isFinite(d.value)).map(d=>d.value);
+  const winVals=points.filter(d=>Number.isFinite(d.value)).map(d=>d.value);
+  const tt=tTest(winVals,baseVals,0.05);
+  const meanCI=confidenceInterval(winVals,0.05);
+
+  if($('#calc-ttest')){
+    $('#calc-ttest').textContent=tt.t===null?'—':`t = ${format(tt.t,2)} · p ${tt.p<0.001?'< 0.001':'= '+format(tt.p,3)}`;
+  }
+  if($('#calc-ttest-meta')){
+    $('#calc-ttest-meta').textContent=tt.df===null
+      ?tx('At least 2 valid years needed per group','Se requieren al menos 2 años válidos por grupo')
+      :tx(`df = ${format(tt.df,1)} · Δ̄ = ${signed(tt.meanDiff,v().digits)} ${v().unit} (${tt.significant?'p < 0.05':'n.s.'})`,`gl = ${format(tt.df,1)} · Δ̄ = ${signed(tt.meanDiff,v().digits)} ${v().unit} (${tt.significant?'p < 0,05':'n.s.'})`);
+  }
+  if($('#calc-ci')){
+    $('#calc-ci').textContent=meanCI.lower===null?'—':`[${format(meanCI.lower,v().digits)}, ${format(meanCI.upper,v().digits)}] ${v().unit}`;
+  }
+  if($('#calc-ci-meta')){
+    const slopeCIStr=t.slopeCI?` · ${tx('Slope CI','IC pend.')}: [${signed(t.slopeCI.lower*10,slopeDigits)}, ${signed(t.slopeCI.upper*10,slopeDigits)}] ${deltaUnit()}/${tx('dec','déc')}`:'';
+    $('#calc-ci-meta').textContent=meanCI.mean===null
+      ?tx('At least 2 valid years required for 95% CI','Se requieren al menos 2 años válidos para IC 95%')
+      :`${tx('Mean','Media')} ${format(meanCI.mean,v().digits)} ± ${format(meanCI.margin,v().digits)}${slopeCIStr}`;
+  }
+
+  const zSummary=Array.isArray(s.monthly)&&s.monthly.length?siteZSummary(s.monthly,state.start,state.end,2001,2010):null;
+  if($('#calc-z-iea')){
+    const ieaVal=zSummary?.periodIEA?.iea;
+    const zVar=zSummary?.ciByVar?.[state.variable]?.mean;
+    $('#calc-z-iea').textContent=Number.isFinite(ieaVal)
+      ?`${Number.isFinite(zVar)?`Z = ${signed(zVar,2)} · `:''}IEA = ${signed(ieaVal,2)}`
+      :Number.isFinite(zVar)?`Z = ${signed(zVar,2)}`:'—';
+  }
+  if($('#calc-z-meta')){
+    if(zSummary?.periodIEA?.iea!==null&&zSummary?.periodIEA?.iea!==undefined){
+      const stMap={
+        stress:tx('Stress signal','Señal de estrés'),
+        elevated:tx('Elevated','Elevado'),
+        'benign-surplus':tx('Benign surplus','Superávit benigno'),
+        normal:tx('Normal range','Rango normal'),
+        unavailable:tx('Unavailable','No disponible')
+      };
+      const stLabel=stMap[zSummary.periodIEA.status]||zSummary.periodIEA.status;
+      $('#calc-z-meta').textContent=`${stLabel} · ${tx('Coupling','Acopl.')} +${format(zSummary.periodIEA.coupling,2)} · ${tx('Persistence','Persistencia')}: ${zSummary.persistence.maxConsecutive} ${tx('mo','meses')}`;
+    }else{
+      $('#calc-z-meta').textContent=tx('Monthly NASA POWER data required for Z/IEA','Se requieren datos mensuales NASA POWER para Z/IEA');
+    }
   }
 
   // 7-province regional scan ("Where is it changing?")

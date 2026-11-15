@@ -1,14 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  calibratedStressIndex,
   experimentalStressIndex,
   monthlyReference,
+  monthlyZScoreSeries,
   ndviAnomaly,
   pearsonCorrelation,
   precipitationAnomaly,
   simulateScenario,
+  siteZSummary,
   stressIndicators,
   temperatureAnomaly,
+  temporalPersistenceGate,
   waterBalance,
   zScore
 } from '../public/earth-pulse.js';
@@ -66,4 +70,40 @@ test('Seasonal monthlyReference, water balance, Pearson r, and scenario simulato
   assert.equal(scen.t, 24);
   assert.equal(scen.p, 8);
   assert.ok(Math.abs(scen.ndvi - 0.5) < 1e-12);
+});
+
+test('Calibrated IEA with thermo-hydro coupling, coherence gate, persistence, and siteZSummary', () => {
+  const stressed = calibratedStressIndex({ I_T: 1.5, I_P: 1.2, I_V: null, I_S: 1.4 });
+  assert.ok(stressed.coupling > 0);
+  assert.ok(stressed.iea > stressed.linearIea);
+  assert.equal(stressed.status, 'stress');
+
+  const surplus = calibratedStressIndex({ I_T: -0.8, I_P: -1.4, I_V: null, I_S: -1.1 });
+  assert.equal(surplus.coupling, 0);
+  assert.equal(surplus.benignSurplus, true);
+  assert.equal(surplus.status, 'benign-surplus');
+
+  const gate = temporalPersistenceGate([{ iea: 0.2 }, { iea: 0.95 }, { iea: 1.1 }, { iea: 0.4 }], 0.89, 2);
+  assert.equal(gate.persistent, true);
+  assert.equal(gate.maxConsecutive, 2);
+  assert.equal(gate.persistentEvents, 1);
+
+  const monthly = [];
+  for (let y = 2001; y <= 2012; y++) {
+    monthly.push({
+      year: y,
+      month: 3,
+      T2M: y <= 2010 ? 22 + (y % 2) * 0.4 : 25 + (y - 2011) * 0.5,
+      PRECTOTCORR: y <= 2010 ? 5 + (y % 2) * 1.0 : 1,
+      GWETTOP: y <= 2010 ? 0.5 + (y % 2) * 0.04 : 0.25
+    });
+  }
+  const zSeries = monthlyZScoreSeries(monthly, 'T2M', { refStart: 2001, refEnd: 2010 });
+  assert.equal(zSeries.length, 12);
+  assert.ok(zSeries.at(-1).z > 2);
+
+  const summary = siteZSummary(monthly, 2011, 2012, 2001, 2010);
+  assert.equal(summary.persistence.persistent, true);
+  assert.equal(summary.periodIEA.status, 'stress');
+  assert.ok(summary.ciByVar.T2M.lower < summary.ciByVar.T2M.mean);
 });

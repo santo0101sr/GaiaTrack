@@ -50,3 +50,9 @@ dialog[open]{animation:dialogIn .28s cubic-bezier(.22,1,.36,1) both}
 .ep-scenario label{display:flex;flex-direction:column;gap:5px;font-size:10px;color:var(--text);min-width:130px}
 .ep-scenario label strong{color:var(--blue);font-family:var(--display);font-weight:500}
 .ep-note{margin:12px 0 0;font-size:9.5px;color:var(--muted);line-height:1.6}
+.calc-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.calc-grid>div{background:#0c151d;border:1px solid var(--line);border-radius:6px;padding:13px 14px;display:flex;flex-direction:column;gap:5px;min-width:0}
+.calc-grid strong{font:500 18px var(--display);color:var(--text)}
+.calc-grid small{font-size:11px;color:var(--muted);line-height:1.45}
+.calc-formula{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10px;color:var(--blue);background:#0a1016;border:1px solid #25313c88;border-radius:4px;padding:4px 7px;margin-top:4px;overflow-x:auto;white-space:nowrap}
+@media(max-width:850px){.calc-grid{grid-template-columns:1fr}}

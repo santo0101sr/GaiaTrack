@@ -1,3 +1,5 @@
+import { confidenceInterval, trend } from './science.js';
+
 /**
  * EARTH PULSE mathematical engine for environmental anomalies, Z-scores,
  * experimental environmental stress index (IEA), water balance, correlation,
@@ -10,8 +12,25 @@ export function monthlyReference(monthlyRows = [], variable, month, startYear = 
     .map(r => r[variable]);
   if (!vals.length) return { mean: null, std: null, n: 0 };
   const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
-  const variance = vals.reduce((acc, v) => acc + (v - mean) ** 2, 0) / vals.length;
+  const denom = vals.length > 1 ? vals.length - 1 : 1;
+  const variance = vals.reduce((acc, v) => acc + (v - mean) ** 2, 0) / denom;
   return { mean, std: Math.sqrt(variance), n: vals.length };
+}
+
+export function monthlyZScoreSeries(monthlyRows = [], variable, { refStart = 2001, refEnd = 2010 } = {}) {
+  const refs = new Map();
+  for (let m = 1; m <= 12; m++) {
+    refs.set(m, monthlyReference(monthlyRows, variable, m, refStart, refEnd));
+  }
+  return monthlyRows
+    .filter(r => Number.isFinite(r.year) && r.month >= 1 && r.month <= 12)
+    .map(r => {
+      const ref = refs.get(r.month);
+      const value = Number.isFinite(r[variable]) ? r[variable] : null;
+      const z = value !== null && ref ? zScore(value, ref.mean, ref.std) : null;
+      return { year: r.year, month: r.month, value, mean: ref?.mean ?? null, std: ref?.std ?? null, z };
+    })
+    .sort((a, b) => a.year - b.year || a.month - b.month);
 }
 
 export function temperatureAnomaly(observed, historicalMean) {
@@ -100,5 +119,124 @@ export function simulateScenario(base = {}, { deltaT = 0, deltaPPercent = 0, del
     p: Number.isFinite(base.p) ? Math.max(0, base.p * (1 + deltaPPercent / 100)) : null,
     ndvi: Number.isFinite(base.ndvi) ? Math.max(-1, Math.min(1, base.ndvi + deltaNdvi)) : null,
     sm: Number.isFinite(base.sm) ? base.sm : null
+  };
+}
+
+export function calibratedStressIndex(
+  indicators = {},
+  { weights = { I_S: 0.28, I_T: 0.24, I_P: 0.20, I_V: 0.18 }, gamma = 0.15, stressThreshold = 0.89 } = {}
+) {
+  const linear = experimentalStressIndex(indicators, weights);
+  if (linear.iea === null) {
+    return { ...linear, coupling: 0, status: 'unavailable', benignSurplus: false };
+  }
+  const thermal = Number.isFinite(indicators.I_LST) ? indicators.I_LST : indicators.I_T;
+  const sm = indicators.I_S;
+  const coupling = Number.isFinite(thermal) && Number.isFinite(sm)
+    ? gamma * Math.max(0, sm) * Math.max(0, thermal)
+    : 0;
+  const iea = linear.iea + coupling;
+  const benignSurplus = iea < 0 || (Number.isFinite(indicators.I_P) && indicators.I_P <= -0.65 && (!Number.isFinite(thermal) || thermal <= 0));
+  const status = iea >= stressThreshold
+    ? 'stress'
+    : benignSurplus
+      ? 'benign-surplus'
+      : iea >= 0.35
+        ? 'elevated'
+        : 'normal';
+  return {
+    iea,
+    linearIea: linear.iea,
+    coupling,
+    weightsUsed: linear.weightsUsed,
+    activeCount: linear.activeCount,
+    status,
+    benignSurplus
+  };
+}
+
+export function temporalPersistenceGate(ieaSeries = [], threshold = 0.89, minConsecutive = 2) {
+  let run = 0;
+  let maxRun = 0;
+  let persistentEvents = 0;
+  for (const point of ieaSeries) {
+    const val = typeof point === 'number' ? point : point?.iea;
+    if (Number.isFinite(val) && val >= threshold) {
+      run += 1;
+      maxRun = Math.max(maxRun, run);
+      if (run === minConsecutive) persistentEvents += 1;
+    } else {
+      run = 0;
+    }
+  }
+  return {
+    persistent: maxRun >= minConsecutive,
+    maxConsecutive: maxRun,
+    currentConsecutive: run,
+    persistentEvents,
+    threshold,
+    minConsecutive
+  };
+}
+
+export function siteZSummary(monthlyRows = [], startYear = 2001, endYear = 2025, refStart = 2001, refEnd = 2010) {
+  const vars = ['T2M', 'PRECTOTCORR', 'GWETTOP'];
+  const seriesByVar = {};
+  const ciByVar = {};
+  const mkByVar = {};
+  for (const param of vars) {
+    const zAll = monthlyZScoreSeries(monthlyRows, param, { refStart, refEnd });
+    const inWindow = zAll.filter(r => r.year >= startYear && r.year <= endYear && Number.isFinite(r.z));
+    seriesByVar[param] = inWindow;
+    ciByVar[param] = confidenceInterval(inWindow.map(r => r.z), 0.05);
+    mkByVar[param] = trend(inWindow.map(r => ({ year: r.year + (r.month - 0.5) / 12, value: r.z })));
+  }
+
+  const byMonthKey = new Map();
+  for (const r of monthlyRows) {
+    if (r.year >= startYear && r.year <= endYear && r.month >= 1 && r.month <= 12) {
+      byMonthKey.set(`${r.year}-${r.month}`, { year: r.year, month: r.month });
+    }
+  }
+  for (const r of seriesByVar.T2M) {
+    const k = `${r.year}-${r.month}`;
+    if (byMonthKey.has(k)) byMonthKey.get(k).zT = r.z;
+  }
+  for (const r of seriesByVar.PRECTOTCORR) {
+    const k = `${r.year}-${r.month}`;
+    if (byMonthKey.has(k)) byMonthKey.get(k).zP = r.z;
+  }
+  for (const r of seriesByVar.GWETTOP) {
+    const k = `${r.year}-${r.month}`;
+    if (byMonthKey.has(k)) byMonthKey.get(k).zS = r.z;
+  }
+
+  const ieaTimeline = [...byMonthKey.values()]
+    .sort((a, b) => a.year - b.year || a.month - b.month)
+    .map(row => {
+      const indicators = {
+        I_T: Number.isFinite(row.zT) ? row.zT : null,
+        I_P: Number.isFinite(row.zP) ? -row.zP : null,
+        I_V: null,
+        I_S: Number.isFinite(row.zS) ? -row.zS : null
+      };
+      return { year: row.year, month: row.month, ...calibratedStressIndex(indicators) };
+    });
+
+  const validIea = ieaTimeline.filter(d => Number.isFinite(d.iea)).map(d => d.iea);
+  const meanIndicators = {
+    I_T: Number.isFinite(ciByVar.T2M.mean) ? ciByVar.T2M.mean : null,
+    I_P: Number.isFinite(ciByVar.PRECTOTCORR.mean) ? -ciByVar.PRECTOTCORR.mean : null,
+    I_V: null,
+    I_S: Number.isFinite(ciByVar.GWETTOP.mean) ? -ciByVar.GWETTOP.mean : null
+  };
+  return {
+    seriesByVar,
+    ciByVar,
+    mkByVar,
+    ieaTimeline,
+    ieaCI: confidenceInterval(validIea, 0.05),
+    periodIEA: calibratedStressIndex(meanIndicators),
+    persistence: temporalPersistenceGate(ieaTimeline)
   };
 }

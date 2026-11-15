@@ -8,7 +8,9 @@ import {
   detrendedResiduals,
   detrendedCorrelation,
   benjaminiHochberg,
-  collapseToUniqueCells
+  collapseToUniqueCells,
+  tTest,
+  confidenceInterval
 } from '../public/science.js';
 import { normalizeForecast, quantile, costaRicaDay } from '../public/forecast-science.js';
 
@@ -171,4 +173,28 @@ test('Cached forecasts reproduce real source arrays, complete humidity and genui
       assert.ok(day.ensemble.p10 <= day.ensemble.p50 && day.ensemble.p50 <= day.ensemble.p90);
     }
   }
+});
+
+test('Welch t-test, Student confidence intervals, and Theil-Sen slopeCI behave accurately', () => {
+  const base = [20.1, 20.3, 19.9, 20.0, 20.2, 20.4, 19.8, 20.1, 20.0, 20.2];
+  const recent = [21.2, 21.4, 21.1, 21.5, 21.3, 21.0, 21.6, 21.4, 21.2, 21.3];
+  const tt = tTest(recent, base, 0.05);
+  assert.equal(tt.type, 'two-sample');
+  assert.ok(tt.t > 10);
+  assert.ok(tt.p < 0.001);
+  assert.equal(tt.significant, true);
+
+  const oneSample = tTest(recent, 21.3, 0.05);
+  assert.equal(oneSample.type, 'one-sample');
+  assert.ok(oneSample.p > 0.5);
+  assert.equal(oneSample.significant, false);
+
+  const ci = confidenceInterval(base, 0.05);
+  assert.equal(ci.n, 10);
+  assert.ok(ci.lower < ci.mean && ci.mean < ci.upper);
+
+  const series = Array.from({ length: 15 }, (_, i) => ({ year: 2001 + i, value: 10 + 0.25 * i + (i % 2 ? 0.1 : -0.1) }));
+  const tr = trend(series);
+  assert.ok(tr.slopeCI !== null);
+  assert.ok(tr.slopeCI.lower <= tr.slope && tr.slope <= tr.slopeCI.upper);
 });
