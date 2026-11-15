@@ -4,7 +4,7 @@ export async function fetchJSON(url,{timeoutMs=20000,signal}={}){
   const controller=new AbortController();
   const abort=()=>controller.abort(signal.reason);
   if(signal?.aborted)abort();else signal?.addEventListener('abort',abort,{once:true});
-  const timer=setTimeout(()=>controller.abort(new Error('La consulta tardó demasiado. Reintentá.')),timeoutMs);
+  const timer=setTimeout(()=>controller.abort(new Error('La consulta tardó demasiado. Reintenta.')),timeoutMs);
   try {
     const response=await fetch(url,{signal:controller.signal});
     if(!response.ok){

@@ -7,33 +7,35 @@ import {getLang,locale,tx,applyStaticI18n} from './i18n.js';
 import {computeAllRisks,driverLabel,fetchLiveRadarTemps,riskColor,riskLevel,RISK_GRADIENT_CSS} from './ecological-risk.js';
 import {validateGaiaAction} from './gaia-actions.js';
 import {resolveLocalRequest,historicalEvidence,summarizeEvidence} from './gaia-guide.js';
+import {uniqueCellCountForSites,MERRA2_RES,CERES_RES} from './site-facts.js';
+import {icon} from './icons.js';
 
 const $=s=>document.querySelector(s);
 const rawVariables=[
-  {id:'T2M',icon:'◴',digits:1,
+  {id:'T2M',icon:icon('thermometer'),digits:1,
     en:{name:'Mean temperature',short:'Mean temp.',unit:'°C',definition:'Annual mean of daily air temperature at 2 m.',resolution:'Meteorology: 0.5° × 0.625° grid cells (approx. 55 × 68 km).'},
     es:{name:'Temperatura media',short:'Temp. media',unit:'°C',definition:'Promedio anual de la temperatura diaria del aire a 2 m.',resolution:'Meteorología: celdas de 0,5° × 0,625° (aprox. 55 × 68 km).'}},
-  {id:'T2M_MIN',icon:'↓',digits:1,
+  {id:'T2M_MIN',icon:icon('arrow-down'),digits:1,
     en:{name:'Minimum temperature',short:'Min temp.',unit:'°C',definition:'Annual mean of daily minimum air temperature at 2 m; not an all-time record low.',resolution:'Meteorology: 0.5° × 0.625° grid cells (approx. 55 × 68 km).'},
     es:{name:'Temperatura mínima',short:'Temp. mínima',unit:'°C',definition:'Promedio anual de las mínimas diarias del aire a 2 m; no es el mínimo absoluto.',resolution:'Meteorología: celdas de 0,5° × 0,625° (aprox. 55 × 68 km).'}},
-  {id:'T2M_MAX',icon:'↑',digits:1,
+  {id:'T2M_MAX',icon:icon('arrow-up'),digits:1,
     en:{name:'Maximum temperature',short:'Max temp.',unit:'°C',definition:'Annual mean of daily maximum air temperature at 2 m; not an all-time record high.',resolution:'Meteorology: 0.5° × 0.625° grid cells (approx. 55 × 68 km).'},
     es:{name:'Temperatura máxima',short:'Temp. máxima',unit:'°C',definition:'Promedio anual de las máximas diarias del aire a 2 m; no es el máximo absoluto.',resolution:'Meteorología: celdas de 0,5° × 0,625° (aprox. 55 × 68 km).'}},
-  {id:'ALLSKY_SFC_SW_DWN',icon:'☼',digits:1,
+  {id:'ALLSKY_SFC_SW_DWN',icon:icon('sun'),digits:1,
     en:{name:'Solar radiation',short:'Solar radiation',unit:'MJ/m²/day',definition:'Daily downward solar energy at surface, averaged across the year including cloud effects.',resolution:'Radiation: 1° × 1° grid cells (approx. 111 × 109 km).'},
     es:{name:'Radiación solar',short:'Radiación solar',unit:'MJ/m²/día',definition:'Energía solar diaria incidente en superficie, promediada en el año. Incluye el efecto de las nubes.',resolution:'Radiación: celdas de 1° × 1° (aprox. 111 × 109 km).'}},
-  {id:'PRECTOTCORR',icon:'≋',digits:0,
+  {id:'PRECTOTCORR',icon:icon('cloud-rain'),digits:0,
     en:{name:'Precipitation',short:'Precipitation',unit:'mm/yr',definition:'Estimated annual total derived from bias-corrected daily precipitation.',resolution:'Meteorology: 0.5° × 0.625° grid cells (approx. 55 × 68 km).'},
     es:{name:'Precipitación',short:'Precipitación',unit:'mm/año',definition:'Acumulación anual estimada a partir de la precipitación diaria corregida.',resolution:'Meteorología: celdas de 0,5° × 0,625° (aprox. 55 × 68 km).'}},
-  {id:'GWETTOP',icon:'◉',digits:2,
+  {id:'GWETTOP',icon:icon('leaf'),digits:2,
     en:{name:'Surface soil moisture',short:'Soil moisture',unit:'index 0–1',definition:'Modeled topsoil wetness index (0–1). Not equivalent to volumetric water percentage.',resolution:'MERRA-2: 0.5° × 0.625° grid cells. Modeled surface wetness index.'},
     es:{name:'Humedad superficial del suelo',short:'Humedad del suelo',unit:'índice 0–1',definition:'Índice de humedad de la capa superficial del suelo del modelo. No equivale a porcentaje volumétrico de agua.',resolution:'MERRA-2: celdas de 0,5° × 0,625°. Índice modelado de humedad superficial.'}},
-  {id:'RH2M',icon:'◌',digits:1,
+  {id:'RH2M',icon:icon('droplets'),digits:1,
     en:{name:'Relative humidity',short:'Air humidity',unit:'%',definition:'Annual mean of relative humidity of air at 2 m above the surface.',resolution:'Meteorology: 0.5° × 0.625° grid cells (approx. 55 × 68 km).'},
     es:{name:'Humedad relativa del aire',short:'Humedad del aire',unit:'%',definition:'Promedio anual de la humedad relativa del aire a 2 m sobre la superficie.',resolution:'Meteorología: celdas de 0,5° × 0,625° (aprox. 55 × 68 km).'}}
 ];
 
-const state={variable:'T2M',site:null,year:2025,start:2001,end:2025,anomaly:false,compare:false,compareSite:'sarapiqui',radarMode:false};
+const state={variable:'T2M',site:null,year:2025,start:2001,end:2025,anomaly:false,viewMode:'value',compare:false,compareSite:'sarapiqui',radarMode:false};
 let lastMapSite=null,mapOverview=true,ecological=null,riskSummary=null,provinceDrawerOpen=false,siteDrawerOpen=false,pendingSiteId=null;
 const annualCache=new Map(),historyFailures=new Set(),historyLoading=new Map();
 let annual,manifest,geo,data={},map,boundaryLayer,markers={},seaMarkers=[],timer=null;
@@ -67,7 +69,7 @@ function options(select,value){
   if(!select)return;
   if(select.id==='site-select'){
     const province=value?manifest.sites.find(s=>s.id===value)?.province:null;
-    select.innerHTML=province?territoryOptionsHtml(manifest,province,getLang()):`<option value="">${tx('Choose a province first','Elegí primero una provincia')}</option>`;
+    select.innerHTML=province?territoryOptionsHtml(manifest,province,getLang()):`<option value="">${tx('Choose a province first','Elige primero una provincia')}</option>`;
     select.value=value||'';
     return;
   }
@@ -94,7 +96,7 @@ function setVariable(id){state.variable=id;render();}
 function updateRadarButtons(){
   const normalBtn=$('#mode-normal'),radarBtn=$('#mode-radar');
   if(normalBtn){normalBtn.textContent=tx('Normal','Normal');normalBtn.classList.toggle('selected',!state.radarMode);normalBtn.setAttribute('aria-pressed',String(!state.radarMode));}
-  if(radarBtn){radarBtn.textContent=tx('🌿 Ecological Risk','🌿 Riesgo ecológico');radarBtn.classList.toggle('selected',state.radarMode);radarBtn.setAttribute('aria-pressed',String(state.radarMode));}
+  if(radarBtn){radarBtn.innerHTML=`${icon('shield-alert')} ${tx('Ecological Risk','Riesgo ecológico')}`;radarBtn.classList.toggle('selected',state.radarMode);radarBtn.setAttribute('aria-pressed',String(state.radarMode));}
 }
 function setRadarMode(enabled,{broadcast=true}={}){
   const next=Boolean(enabled);
@@ -110,7 +112,7 @@ function setRadarMode(enabled,{broadcast=true}={}){
   if(broadcast)document.dispatchEvent(new CustomEvent('gaiatrack:radar-mode',{detail:{enabled:state.radarMode}}));
 }
 document.addEventListener('gaiatrack:radar-mode',e=>setRadarMode(e.detail?.enabled,{broadcast:false}));
-function stop(){if(timer){clearInterval(timer);timer=null;}$('#play').textContent='▶';$('#play').setAttribute('aria-label',tx('Play time series','Reproducir evolución temporal'));}
+function stop(){if(timer){clearInterval(timer);timer=null;}$('#play').innerHTML=icon('play');$('#play').setAttribute('aria-label',tx('Play time series','Reproducir evolución temporal'));}
 function setYear(year){state.year=Number(year);document.dispatchEvent(new CustomEvent('gaiatrack:selection',{detail:{site:state.site,variable:state.variable,year:state.year}}));renderMap();renderInspector();renderChart();$('#year-slider').value=state.year;$('#selected-year').textContent=state.year;}
 
 function syncTerritoryBar(){
@@ -122,7 +124,7 @@ function syncTerritoryBar(){
       ?tx('Territory','Territorio')
       :(selectedSite?`${tx('Select territory','Seleccionar territorio')} · ${selectedSite.name}`:tx('Select territory','Seleccionar territorio'));
   }
-  if(toggleCaret)toggleCaret.textContent=provinceDrawerOpen?'◂':'▸';
+  if(toggleCaret)toggleCaret.innerHTML=provinceDrawerOpen?icon('chevron-left'):icon('chevron-right');
   if(toggleBtn){
     toggleBtn.setAttribute('aria-expanded',String(provinceDrawerOpen));
     toggleBtn.classList.toggle('is-open',provinceDrawerOpen);
@@ -132,10 +134,10 @@ function syncTerritoryBar(){
   if(siteDrawer)siteDrawer.hidden=!(provinceDrawerOpen&&siteDrawerOpen&&Boolean(selectedSite));
   if(expandBtn){
     expandBtn.hidden=!(selectedSite&&(!provinceDrawerOpen||!siteDrawerOpen));
-    expandBtn.textContent=tx('▸ Province view','▸ Vista provincia');
+    expandBtn.innerHTML=`${icon('chevron-right')} ${tx('Province view','Vista provincia')}`;
   }
-  if($('#minimize-province-btn'))$('#minimize-province-btn').textContent='◂';
-  if($('#minimize-site-btn'))$('#minimize-site-btn').textContent='◂';
+  if($('#minimize-province-btn'))$('#minimize-province-btn').innerHTML=icon('chevron-left');
+  if($('#minimize-site-btn'))$('#minimize-site-btn').innerHTML=icon('chevron-left');
 }
 
 function render(){
@@ -144,7 +146,7 @@ function render(){
   options($('#site-select'),state.site);
   $('#site-select').hidden=false;
   $('#site-select').classList.toggle('has-selection',Boolean(selectedSite));
-  const provHtml=`<option value="">${tx('Choose a province','Elegí una provincia')}</option>`+provinceOptionsHtml(manifest);
+  const provHtml=`<option value="">${tx('Choose a province','Elige una provincia')}</option>`+provinceOptionsHtml(manifest);
   const provVal=selectedSite?selectedSite.province:'';
   $('#province-select').innerHTML=provHtml;
   $('#province-select').value=provVal;
@@ -168,17 +170,17 @@ function render(){
 function renderInspector(){
   if(!state.site){
     $('#history-retry').hidden=true;
-    if($('#inspector-place'))$('#inspector-place').textContent=tx('Costa Rica · Choose a province','Costa Rica · Elegí una provincia');
-    $('#point-coordinates').textContent=tx('COSTA RICA · 7 PROVINCES · 83 CANTONS','COSTA RICA · 7 PROVINCIAS · 83 CANTONES');
+    if($('#inspector-place'))$('#inspector-place').textContent=tx('Costa Rica · Choose a province','Costa Rica · Elige una provincia');
+    $('#point-coordinates').textContent=tx(`COSTA RICA · ${manifest?.provinces?.length??7} PROVINCES · ${manifest?.sites?.filter(s=>s.type==='canton').length??83} CANTONS`,`COSTA RICA · ${manifest?.provinces?.length??7} PROVINCIAS · ${manifest?.sites?.filter(s=>s.type==='canton').length??83} CANTONES`);
     $('#metric-year').textContent=state.year;$('#metric-value').textContent='—';
     $('#history-quality').textContent=tx(
       'Choose a province on the map or selector to inspect a NASA POWER reference point.',
-      'Elegí una provincia en el mapa o en el selector para inspeccionar un punto de referencia NASA POWER.'
+      'Elige una provincia en el mapa o en el selector para inspeccionar un punto de referencia NASA POWER.'
     );
-    $('#baseline-difference').textContent=tx('Choose a province','Elegí una provincia');
+    $('#baseline-difference').textContent=tx('Choose a province','Elige una provincia');
     $('#insight').textContent=tx(
       'Showing all of Costa Rica. Select a province or canton on the map to explore its historical evolution.',
-      'Mostrando todo Costa Rica. Seleccioná una provincia o cantón en el mapa para explorar su evolución histórica.'
+      'Mostrando todo Costa Rica. Selecciona una provincia o cantón en el mapa para explorar su evolución histórica.'
     );
     $('#mini-chart').innerHTML='';
     return;
@@ -192,7 +194,7 @@ function renderInspector(){
     `${coverage.validDays}/${coverage.expectedDays} valid days (${format(coverage.percent,1)}%) · ${coverage.validMonths}/12 valid months · ${state.year}${coverage.estimated?' · Accumulated rain estimated due to missing days':''}.`,
     `${coverage.validDays}/${coverage.expectedDays} días válidos (${format(coverage.percent,1)} %) · ${coverage.validMonths}/12 meses válidos · ${state.year}${coverage.estimated?' · Lluvia acumulada estimada por días faltantes':''}.`
   );
-  if(!s.monthly)$('#history-quality').textContent=historyFailures.has(s.id)?tx('Historical detail unavailable. Retry below.','No se pudo cargar el detalle histórico. Reintentá abajo.'):tx('Loading historical coverage…','Cargando cobertura histórica…');
+  if(!s.monthly)$('#history-quality').textContent=historyFailures.has(s.id)?tx('Historical detail unavailable. Retry below.','No se pudo cargar el detalle histórico. Reintenta abajo.'):tx('Loading historical coverage…','Cargando cobertura histórica…');
   $('#history-retry').hidden=!historyFailures.has(s.id);
   $('#baseline-difference').textContent=Number.isFinite(diff)?`${signed(diff)} ${deltaUnit()}`:tx('No baseline','Sin referencia');
   const t=trend(points.filter(p=>p.year>=state.start&&p.year<=state.end));
@@ -202,7 +204,7 @@ function renderInspector(){
       `In ${s.name}, the ${state.start}–${state.end} series shows ${direction}: ${signed(t.slope*10)} ${deltaUnit()} per decade. ${t.autocorrelated?'Temporal dependence requires reviewing significance.':t.p<.05?'The exploratory test detects a statistical signal.':'The test finds insufficient evidence of a trend.'}`,
       `En ${s.name}, la serie ${state.start}–${state.end} muestra ${direction}: ${signed(t.slope*10)} ${deltaUnit()} por década. ${t.autocorrelated?'La dependencia temporal requiere revisar la significancia.':t.p<.05?'La prueba exploratoria detecta una señal estadística.':'La prueba no encuentra evidencia suficiente de una tendencia.'}`
     )
-    :tx('Expand the period to at least ten complete years to evaluate trend evidence.','Ampliá el período a por lo menos diez años completos para evaluar la evidencia de tendencia.');
+    :tx('Expand the period to at least ten complete years to evaluate trend evidence.','Amplía el período a por lo menos diez años completos para evaluar la evidencia de tendencia.');
   const valid=points.filter(p=>Number.isFinite(p.value));const values=valid.map(p=>p.value),min=Math.min(...values),max=Math.max(...values);const x=y=>8+(y-2001)/24*264,y=n=>55-(n-min)/(max-min||1)*44;
   $('#mini-chart').innerHTML=`<path d="${valid.map((p,i)=>`${i?'L':'M'}${x(p.year)},${y(p.value)}`).join(' ')}" fill="none" stroke="${currentColor}" stroke-width="1.7"/>${Number.isFinite(current)?`<circle cx="${x(state.year)}" cy="${y(current)}" r="3.5" fill="${currentColor}"/>`:''}`;
 }
@@ -277,44 +279,94 @@ function initMap(){
   $('#fit-heredia')&&($('#fit-heredia').onclick=()=>map.fitBounds([[9.95,-84.25],[10.80,-83.75]]));
 }
 
+function seriesStats(pts){
+  const basePts=pts.filter(p=>p.year>=2001&&p.year<=2010&&Number.isFinite(p.value)).map(p=>p.value);
+  const baseMean=basePts.length?mean(basePts):null;
+  const baseStd=basePts.length>1?Math.sqrt(basePts.reduce((a,v)=>a+(v-baseMean)**2,0)/(basePts.length-1)):null;
+  return {baseMean,baseStd};
+}
+
 function renderChart(){
   const svg=$('#history-chart');
   const mobile=innerWidth<580,W=mobile?440:960,H=300,left=mobile?48:64,right=18,top=16,bottom=32;
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const vm=state.viewMode||(state.anomaly?'anomaly':'value');
   if(!state.site){
-    svg.innerHTML=`<text x="50%" y="50%" fill="#a1b0bb" text-anchor="middle">${mobile?tx('Select a territory to start','Elegí un territorio para empezar'):tx('Choose a province above or in the regional scan below to plot its 2001–2025 series.','Elegí una provincia arriba o en el escaneo regional de abajo para graficar su serie 2001–2025.')}</text>`;
+    svg.innerHTML=`<text x="50%" y="50%" fill="#a1b0bb" text-anchor="middle">${mobile?tx('Select a territory to start','Elige un territorio para empezar'):tx('Choose a province above or in the regional scan below to plot its 2001–2025 series.','Elige una provincia arriba o en el escaneo regional de abajo para graficar su serie 2001–2025.')}</text>`;
     $('#chart-label').textContent=`${v().name} · Costa Rica`;
     const legendWrap=document.querySelector('.chart-legend');
-    if(legendWrap)legendWrap.innerHTML=`<i></i><span id="legend-site">${tx('Choose a province','Elegí una provincia')}</span><i class="dash"></i> ${tx('Sen trend','Tendencia de Sen')}`;
+    if(legendWrap)legendWrap.innerHTML=`<i></i><span id="legend-site">${tx('Choose a province','Elige una provincia')}</span><i class="dash"></i> ${tx('Sen trend','Tendencia de Sen')}`;
     const tooltip=$('#chart-tooltip');
     if(tooltip){tooltip.hidden=true;tooltip.classList.remove('is-visible');tooltip.setAttribute('aria-hidden','true');}
     return;
   }
   const all=series();
-  const display=s=>s.filter(p=>p.year>=state.start&&p.year<=state.end&&Number.isFinite(p.value)).map(p=>({...p,value:p.value-(state.anomaly?baseline(s):0)}));
+  const display=s=>{
+    const {baseMean,baseStd}=seriesStats(s);
+    return s.filter(p=>p.year>=state.start&&p.year<=state.end&&Number.isFinite(p.value)).map(p=>{
+      if(vm==='zscore'){
+        return {...p,raw:p.value,value:(Number.isFinite(baseMean)&&Number.isFinite(baseStd)&&baseStd>1e-9)?(p.value-baseMean)/baseStd:0};
+      }
+      if(vm==='anomaly'){
+        return {...p,raw:p.value,value:Number.isFinite(baseMean)?p.value-baseMean:p.value};
+      }
+      return {...p,raw:p.value};
+    });
+  };
   const primary=display(all),secondary=state.compare?display(series(state.compareSite)):[];
   const combined=[...primary,...secondary];
   if(!combined.length){svg.innerHTML=`<text x="50%" y="50%" fill="#a1b0bb" text-anchor="middle">${tx('No complete years available.','No hay años completos disponibles.')}</text>`;return;}
   let min=Math.min(...combined.map(p=>p.value)),max=Math.max(...combined.map(p=>p.value));
+  if(vm==='zscore'){min=Math.min(min,-2.1);max=Math.max(max,2.1);}
   const padding=(max-min||1)*.18;min-=padding;max+=padding;
   const x=year=>left+(year-state.start)/(state.end-state.start||1)*(W-left-right),y=value=>top+(max-value)/(max-min)*(H-top-bottom);
   const tr=trend(primary),displayTrend=p=>tr.intercept+tr.slope*p.year;
   const ticks=Array.from({length:5},(_,i)=>min+(max-min)*i/4);
   let html=`<defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${currentColor}" stop-opacity=".18"/><stop offset="100%" stop-color="${currentColor}" stop-opacity="0"/></linearGradient></defs>`;
-  for(const tick of ticks){html+=`<line x1="${left}" x2="${W-right}" y1="${y(tick)}" y2="${y(tick)}" stroke="#293641" stroke-dasharray="3 5"/><text x="${left-12}" y="${y(tick)+4}" text-anchor="end" fill="#92a4b2" font-size="${mobile?12:11}" font-family="monospace">${format(tick,state.variable==='GWETTOP'?2:state.variable==='PRECTOTCORR'?0:1)}</text>`;}
+  if(state.start<=2010&&state.end>=2001){
+    const bx1=x(Math.max(state.start,2001)),bx2=x(Math.min(state.end,2010));
+    if(bx2>bx1)html+=`<rect x="${bx1.toFixed(1)}" y="${top}" width="${(bx2-bx1).toFixed(1)}" height="${(H-top-bottom).toFixed(1)}" fill="var(--accent)" opacity=".05"/><text x="${(bx1+6).toFixed(1)}" y="${top+12}" fill="var(--muted)" font-size="9" font-family="var(--mono)">${tx('2001–2010 ref.','Ref. 2001–2010')}</text>`;
+  }
+  const tickDigits=vm==='zscore'?1:state.variable==='GWETTOP'?2:state.variable==='PRECTOTCORR'?0:1;
+  for(const tick of ticks){html+=`<line x1="${left}" x2="${W-right}" y1="${y(tick)}" y2="${y(tick)}" stroke="var(--border)" stroke-dasharray="3 5"/><text x="${left-12}" y="${y(tick)+4}" text-anchor="end" fill="var(--muted)" font-size="${mobile?12:11}" font-family="var(--mono)">${format(tick,tickDigits)}</text>`;}
+  if(vm==='zscore'||vm==='anomaly'){
+    if(0>=min&&0<=max){
+      html+=`<line x1="${left}" x2="${W-right}" y1="${y(0)}" y2="${y(0)}" stroke="var(--z-zero)" stroke-width="1" stroke-dasharray="4 4" opacity=".75"/>`;
+    }
+    if(vm==='zscore'){
+      for(const refZ of [-1.96,1.96]){
+        if(refZ>=min&&refZ<=max){
+          html+=`<line x1="${left}" x2="${W-right}" y1="${y(refZ)}" y2="${y(refZ)}" stroke="var(--warn)" stroke-width="1" stroke-dasharray="2 4" opacity=".6"/><text x="${W-right-4}" y="${y(refZ)-4}" text-anchor="end" fill="var(--warn)" font-size="10" font-family="var(--mono)">Z = ${refZ>0?'+1.96':'−1.96'}</text>`;
+        }
+      }
+    }
+  }
   const years=Array.from({length:state.end-state.start+1},(_,i)=>state.start+i).filter((yr,i,arr)=>i===0||i===arr.length-1||yr%(mobile?5:3)===0);
-  for(const year of years){if(year!==state.start&&year-state.start<2||year!==state.end&&state.end-year<2)continue;html+=`<text x="${x(year)}" y="${H-8}" text-anchor="middle" fill="#92a4b2" font-size="${mobile?12:11}" font-family="monospace">${year}</text>`;}
+  for(const year of years){if(year!==state.start&&year-state.start<2||year!==state.end&&state.end-year<2)continue;html+=`<text x="${x(year)}" y="${H-8}" text-anchor="middle" fill="var(--muted)" font-size="${mobile?12:11}" font-family="var(--mono)">${year}</text>`;}
   const path=pts=>pts.map((p,i)=>`${i?'L':'M'}${x(p.year)},${y(p.value)}`).join(' ');
+  const chartUnit=vm==='zscore'?'Z':vm==='anomaly'?deltaUnit():v().unit;
+  const valDigits=vm==='zscore'?2:v().digits;
   if(primary.length){
     html+=`<path d="${path(primary)} L${x(primary.at(-1).year)},${H-bottom} L${x(primary[0].year)},${H-bottom} Z" fill="url(#area)"/><path d="${path(primary)}" stroke="${currentColor}" fill="none" stroke-width="2"/>`;
-    if(primary.length>1)html+=`<path d="M${x(primary[0].year)},${y(displayTrend(primary[0]))} L${x(primary.at(-1).year)},${y(displayTrend(primary.at(-1)))}" stroke="${currentColor}" stroke-width="2.2" stroke-dasharray="7 4" opacity=".9"/>`;
+    if(primary.length>1){
+      if(tr.slopeCI&&Number.isFinite(tr.slopeCI.lower)&&Number.isFinite(tr.slopeCI.upper)){
+        const midPt=primary[Math.floor(primary.length/2)];
+        const midY=displayTrend(midPt);
+        const y0=primary[0].year,y1=primary.at(-1).year;
+        const clampY=val=>Math.max(top,Math.min(H-bottom,y(val)));
+        const y0L=clampY(midY+tr.slopeCI.lower*(y0-midPt.year)),y0H=clampY(midY+tr.slopeCI.upper*(y0-midPt.year));
+        const y1L=clampY(midY+tr.slopeCI.lower*(y1-midPt.year)),y1H=clampY(midY+tr.slopeCI.upper*(y1-midPt.year));
+        html+=`<polygon points="${x(y0).toFixed(1)},${y0L.toFixed(1)} ${x(y1).toFixed(1)},${y1L.toFixed(1)} ${x(y1).toFixed(1)},${y1H.toFixed(1)} ${x(y0).toFixed(1)},${y0H.toFixed(1)}" fill="${currentColor}" opacity=".12"/>`;
+      }
+      html+=`<path d="M${x(primary[0].year)},${y(displayTrend(primary[0]))} L${x(primary.at(-1).year)},${y(displayTrend(primary.at(-1)))}" stroke="${currentColor}" stroke-width="2.2" stroke-dasharray="7 4" opacity=".9"/>`;
+    }
   }
-  if(secondary.length)html+=`<path d="${path(secondary)}" fill="none" stroke="#14b8e6" stroke-width="2"/>`;
-  if(state.year>=state.start&&state.year<=state.end)html+=`<line x1="${x(state.year)}" x2="${x(state.year)}" y1="${top}" y2="${H-bottom}" stroke="#18d86b" opacity=".25"/>`;
+  if(secondary.length)html+=`<path d="${path(secondary)}" fill="none" stroke="var(--blue)" stroke-width="2"/>`;
+  if(state.year>=state.start&&state.year<=state.end)html+=`<line x1="${x(state.year)}" x2="${x(state.year)}" y1="${top}" y2="${H-bottom}" stroke="var(--accent)" opacity=".35"/>`;
   for(const [kind,pts] of [['main',primary],['compare',secondary]])for(const p of pts){
     const name=kind==='main'?data[state.site].name:data[state.compareSite].name;
-    const label=`${name}, ${p.year}: ${signed(p.value)} ${state.anomaly?deltaUnit():v().unit}`;
-    html+=`<circle class="chart-point" data-kind="${kind}" data-year="${p.year}" data-value="${p.value}" cx="${x(p.year)}" cy="${y(p.value)}" r="${mobile?4.5:3.8}" fill="${kind==='main'?currentColor:'#14b8e6'}" tabindex="0" aria-label="${label}"><title>${label}</title></circle>`;
+    const label=`${name}, ${p.year}: ${vm==='value'?format(p.value,valDigits):signed(p.value,valDigits)} ${chartUnit}`;
+    html+=`<circle class="chart-point" data-kind="${kind}" data-year="${p.year}" data-value="${p.value}" data-raw="${p.raw}" cx="${x(p.year)}" cy="${y(p.value)}" r="${mobile?4.5:3.8}" fill="${kind==='main'?currentColor:'var(--blue)'}" tabindex="0" aria-label="${label}"><title>${label}</title></circle>`;
   }
   svg.innerHTML=html;
 
@@ -329,7 +381,9 @@ function renderChart(){
   const legendWrap=document.querySelector('.chart-legend');
   if(legendWrap)legendWrap.innerHTML=`<i></i><span id="legend-site">${data[state.site].name}${state.compare?` / ${data[state.compareSite].name} (${tx('blue','azul')}${corrText})`:''}</span><i class="dash"></i> ${tx('Sen trend','Tendencia de Sen')}`;
 
-  $('#chart-label').textContent=`${v().name} · ${state.anomaly?tx('deviation from 2001–2010 · ','desviación respecto a 2001–2010 · '):''}${state.anomaly?deltaUnit():v().unit}`;
+  $('#chart-label').textContent=vm==='zscore'
+    ?`${v().name} · ${tx('standardized Z-score vs. 2001–2010 (sd)','Z-score estandarizado vs. 2001–2010 (DE)')}`
+    :`${v().name} · ${vm==='anomaly'?tx('deviation from 2001–2010 · ','desviación respecto a 2001–2010 · '):''}${chartUnit}`;
   const tooltip=$('#chart-tooltip');
   tooltip.hidden=false;
   tooltip.classList.remove('is-visible');
@@ -338,15 +392,14 @@ function renderChart(){
   const cmpBase=state.compare?baseline(series(state.compareSite)):null;
   svg.querySelectorAll('.chart-point').forEach(el=>{
     const show=()=>{
-      const yr=+el.dataset.year,val=+el.dataset.value,kind=el.dataset.kind;
+      const yr=+el.dataset.year,val=+el.dataset.value,raw=+el.dataset.raw,kind=el.dataset.kind;
       const siteId=kind==='main'?state.site:state.compareSite;
       const base=kind==='main'?mainBase:cmpBase;
-      const unit=state.anomaly?deltaUnit():v().unit;
-      const anom=state.anomaly?val:(Number.isFinite(base)?val-base:null);
+      const anom=Number.isFinite(base)&&Number.isFinite(raw)?raw-base:null;
       const otherId=state.compare?(kind==='main'?state.compareSite:state.site):null;
-      const otherRaw=otherId?valueAt(otherId,yr):null;
-      const otherVal=Number.isFinite(otherRaw)?(state.anomaly&&Number.isFinite(kind==='main'?cmpBase:mainBase)?otherRaw-(kind==='main'?cmpBase:mainBase):state.anomaly?null:otherRaw):null;
-      tooltip.innerHTML=`<div class="tt-head"><span>${data[siteId].name}</span><b>${yr}</b></div><div class="tt-val">${state.anomaly?signed(val):format(val)} <small>${unit}</small></div>${Number.isFinite(anom)&&!state.anomaly?`<div class="tt-sub">${tx('vs 2001–2010','vs 2001–2010')}: ${signed(anom)} ${deltaUnit()}</div>`:''}${Number.isFinite(otherVal)?`<div class="tt-cmp">${data[otherId].name}: ${state.anomaly?signed(otherVal):format(otherVal)} ${unit}</div>`:''}`;
+      const otherSeries=otherId?display(series(otherId)):[];
+      const otherPt=otherSeries.find(p=>p.year===yr);
+      tooltip.innerHTML=`<div class="tt-head"><span>${data[siteId].name}</span><b>${yr}</b></div><div class="tt-val">${vm==='value'?format(val,valDigits):signed(val,valDigits)} <small>${chartUnit}</small></div>${vm!=='value'&&Number.isFinite(raw)?`<div class="tt-sub">${tx('Observed','Observado')}: ${format(raw,v().digits)} ${v().unit}</div>`:Number.isFinite(anom)?`<div class="tt-sub">vs 2001–2010: ${signed(anom)} ${deltaUnit()}</div>`:''}${otherPt?`<div class="tt-cmp">${data[otherId].name}: ${vm==='value'?format(otherPt.value,valDigits):signed(otherPt.value,valDigits)} ${chartUnit}</div>`:''}`;
       const p=svg.createSVGPoint();p.x=+el.getAttribute('cx');p.y=+el.getAttribute('cy');
       const pos=p.matrixTransform(svg.getScreenCTM()),rect=$('.chart-wrap').getBoundingClientRect();
       tooltip.classList.add('is-visible');
@@ -364,19 +417,39 @@ function renderChart(){
 function renderProvinceScan(slopeDigits){
   const scanEl=$('#province-scan');
   if(!scanEl||!manifest)return;
-  const rows=PROVINCE_IDS.filter(id=>data[id]).map(id=>{
-    const pt=trend(series(id).filter(d=>d.year>=state.start&&d.year<=state.end));
-    return {id,pt,p:pt.n>=10?pt.p:null,autocorrelated:pt.autocorrelated};
+  const provSites=PROVINCE_IDS.map(id=>data[id]).filter(Boolean);
+  const uniqueCells=uniqueCellCountForSites(provSites,state.variable);
+  const resTag=state.variable==='ALLSKY_SFC_SW_DWN'
+    ?`CERES ${CERES_RES.latDeg}°×${CERES_RES.lonDeg}°`
+    :`MERRA-2 ${MERRA2_RES.latDeg}°×${MERRA2_RES.lonDeg}°`;
+  const hintEl=$('#scan-hint');
+  if(hintEl){
+    hintEl.textContent=tx(
+      `Click any province · ${provSites.length} provinces span ${uniqueCells} unique ${resTag} cells (nearby territories may share one cell)`,
+      `Haz clic en cualquier provincia · ${provSites.length} provincias ocupan ${uniqueCells} celdas únicas ${resTag} (territorios cercanos comparten celda)`
+    );
+  }
+  const rows=provSites.map(site=>{
+    const id=site.id;
+    const pts=series(id).filter(d=>d.year>=state.start&&d.year<=state.end);
+    const pt=trend(pts);
+    const full=series(id);
+    const baseVals=full.filter(d=>d.year>=2001&&d.year<=2010&&Number.isFinite(d.value)).map(d=>d.value);
+    const winVals=pts.filter(d=>Number.isFinite(d.value)).map(d=>d.value);
+    const welch=winVals.length>=2&&baseVals.length>=2?tTest(winVals,baseVals,0.05):null;
+    return {id,pt,welch,p:pt.n>=10?pt.p:null,autocorrelated:pt.autocorrelated};
   });
   const bh=benjaminiHochberg(rows,0.05);
-  scanEl.innerHTML=bh.map(({id,pt,q,fdrSignificant})=>{
+  scanEl.innerHTML=bh.map(({id,pt,welch,q,fdrSignificant})=>{
     const pSig=pt.n>=10&&!pt.autocorrelated&&pt.p<.05;
     const pSlope=pt.slope===null?'—':`${signed(pt.slope*10,slopeDigits)} ${deltaUnit()}`;
+    const ciStr=pt.slopeCI?`IC95 [${signed(pt.slopeCI.lower*10,slopeDigits)}, ${signed(pt.slopeCI.upper*10,slopeDigits)}]`:'';
     const pStr=Number.isFinite(pt.p)?(pt.p<.001?'<0.001':'='+format(pt.p,3)):'—';
     const qStr=Number.isFinite(q)?(q<.001?'<0.001':'='+format(q,3)):'—';
-    const tag=pt.n<10?`< 10${tx('y','a')}`:pt.autocorrelated?tx('autocorr.','autocorr.'):fdrSignificant?`p ${pStr} · q ${qStr} ★`:pSig?`p ${pStr} · q ${qStr}`:`n.s.`;
+    const wStr=Number.isFinite(welch?.p)?` · t-p ${welch.p<.001?'<0.001':'='+format(welch.p,3)}`:'';
+    const tag=pt.n<10?`< 10${tx('y','a')}`:pt.autocorrelated?tx('autocorr.','autocorr.'):fdrSignificant?`p ${pStr} · q ${qStr}${wStr} ★`:pSig?`p ${pStr} · q ${qStr}${wStr}`:`p ${pStr} · q ${qStr}`;
     const cls=`prov-card${id===state.site?' is-active':''}${fdrSignificant?' is-sig':pt.autocorrelated?' is-warn':''}`;
-    return `<button type="button" class="${cls}" data-prov="${id}"><span class="prov-name">${data[id].name}</span><strong class="prov-slope">${pSlope}<small>/${tx('dec','déc')}</small></strong><span class="prov-tag">${tag}</span></button>`;
+    return `<button type="button" class="${cls}" data-prov="${id}"><span class="prov-name">${data[id].name}</span><strong class="prov-slope">${pSlope}<small>/${tx('dec','déc')}</small></strong>${ciStr?`<small class="prov-ci">${ciStr}</small>`:''}<span class="prov-tag">${tag}</span></button>`;
   }).join('');
   scanEl.querySelectorAll('.prov-card').forEach(btn=>{
     btn.onclick=()=>selectSite(btn.dataset.prov);
@@ -387,13 +460,13 @@ function renderStats(){
   const slopeDigits=state.variable==='GWETTOP'?3:2;
   if(!state.site){
     $('#slope').textContent='—';
-    $('#significance').textContent=tx('Choose a province','Elegí una provincia');
+    $('#significance').textContent=tx('Choose a province','Elige una provincia');
     $('#significance').style.color='var(--text)';
-    $('#pvalue').textContent=tx('Select a province or canton to compute Mann–Kendall','Seleccioná una provincia o cantón para calcular Mann–Kendall');
+    $('#pvalue').textContent=tx('Select a province or canton to compute Mann–Kendall','Selecciona una provincia o cantón para calcular Mann–Kendall');
     $('#sample-count').textContent=`— / ${state.start}–${state.end}`;
     $('#coverage-note').textContent=tx('Daily data aggregation · years with 12 valid months','Agregación de datos diarios · años con 12 meses válidos');
     $('#flow-variable').textContent=v().short;
-    $('#flow-region').textContent=tx('Costa Rica (choose)','Costa Rica (elegí)');
+    $('#flow-region').textContent=tx('Costa Rica (choose)','Costa Rica (elige)');
     $('#flow-period').textContent=`${state.start}–${state.end}`;
     $('#flow-trend').textContent='—';
     $('#flow-significance').textContent='—';
@@ -404,18 +477,18 @@ function renderStats(){
       verdictEl.className='trend-verdict is-neutral';
       $('#verdict-badge').textContent=tx('NATIONAL OVERVIEW','VISTA NACIONAL');
       $('#verdict-summary').textContent=tx(
-        'Choose a province in the Explorer or click any province card below to inspect its Theil–Sen slope and Mann–Kendall test.',
-        'Elegí una provincia en el Explorador o hacé clic en cualquier provincia abajo para inspeccionar su pendiente Theil–Sen y prueba Mann–Kendall.'
+        'Choose a province in the Explorer or click any province card below to inspect its Theil–Sen slope, 95% CI, and Mann–Kendall test.',
+        'Elige una provincia en el Explorador o haz clic en cualquier provincia abajo para inspeccionar su pendiente Theil–Sen, IC 95 % y prueba Mann–Kendall.'
       );
     }
     const pop=$('#stat-popover');
     if(pop){
       pop.innerHTML=getLang()==='es'
-        ?`<strong>¿Cómo interpreta GaiaTrack esta tendencia?</strong><ul><li><b>Pendiente de Theil–Sen:</b> mediana de todas las pendientes entre pares de años, resistente a valores atípicos.</li><li><b>Prueba de Mann–Kendall (α = 0,05):</b> evalúa aumentos o descensos monótonos sostenidos.</li><li><b>Selección territorial:</b> elegí una provincia para ver los resultados de su punto de referencia.</li></ul>`
+        ?`<strong>¿Cómo interpreta GaiaTrack esta tendencia?</strong><ul><li><b>Pendiente de Theil–Sen:</b> mediana de todas las pendientes entre pares de años, resistente a valores atípicos.</li><li><b>Prueba de Mann–Kendall (α = 0,05):</b> evalúa aumentos o descensos monótonos sostenidos.</li><li><b>Selección territorial:</b> elige una provincia para ver los resultados de su punto de referencia.</li></ul>`
         :`<strong>How does GaiaTrack test this trend?</strong><ul><li><b>Theil–Sen slope:</b> median of pairwise year-to-year slopes, resistant to isolated extremes.</li><li><b>Mann–Kendall test (α = 0.05):</b> non-parametric test for sustained monotonic increases or decreases.</li><li><b>Territory selection:</b> choose a province to inspect its reference point results.</li></ul>`;
     }
     if($('#calc-z-iea'))$('#calc-z-iea').textContent='—';
-    if($('#calc-z-meta'))$('#calc-z-meta').textContent=tx('Select a province or canton to compute monthly Z-scores and IEA','Seleccioná una provincia o cantón para calcular Z-scores mensuales e IEA');
+    if($('#calc-z-meta'))$('#calc-z-meta').textContent=tx('Select a province or canton to compute monthly Z-scores and IEA','Selecciona una provincia o cantón para calcular Z-scores mensuales e IEA');
     if($('#calc-ttest'))$('#calc-ttest').textContent='—';
     if($('#calc-ttest-meta'))$('#calc-ttest-meta').textContent=tx('Welch two-sample t-test vs. 2001–2010 baseline','Prueba t de Welch frente a la línea base 2001–2010');
     if($('#calc-ci'))$('#calc-ci').textContent='—';
@@ -430,12 +503,27 @@ function renderStats(){
   const decSlope=t.slope===null?null:t.slope*10;
   const slopeStr=decSlope===null?tx('No data','Sin datos'):`${signed(decSlope,slopeDigits)} ${deltaUnit()}`;
   const isSig=t.n>=10&&!t.autocorrelated&&t.p<.05;
+  const fullSeries=series();
+  const baseVals=fullSeries.filter(d=>d.year>=2001&&d.year<=2010&&Number.isFinite(d.value)).map(d=>d.value);
+  const winVals=points.filter(d=>Number.isFinite(d.value)).map(d=>d.value);
+  const tt=tTest(winVals,baseVals,0.05);
+  const meanCI=confidenceInterval(winVals,0.05);
+
+  const ciLabel=t.slopeCI?`${tx('95% CI','IC 95 %')} [${signed(t.slopeCI.lower*10,slopeDigits)}, ${signed(t.slopeCI.upper*10,slopeDigits)}]`:'';
+  const welchLabel=Number.isFinite(tt.p)?`Welch p ${tt.p<.001?'< 0.001':'= '+format(tt.p,3)}`:'';
   $('#slope').textContent=slopeStr;
   $('#significance').textContent=t.n<10?tx('Period too short','Período insuficiente'):t.autocorrelated?tx('Check dependence','Revisar dependencia'):isSig?tx('Statistical signal','Señal estadística'):tx('Insufficient evidence','Sin evidencia suficiente');
-  $('#significance').style.color=isSig?'var(--accent)':t.autocorrelated?'#f5b316':'var(--text)';
-  $('#pvalue').textContent=t.p===null?tx('At least 10 complete years required','Se requieren al menos 10 años completos'):`p ${t.p<.001?'< 0.001':'= '+format(t.p,3)} · ${tx('Two-sided Mann–Kendall · α = 0.05','Mann–Kendall bilateral · α = 0,05')}`;
+  $('#significance').style.color=isSig?'var(--accent)':t.autocorrelated?'var(--warn)':'var(--text)';
+  $('#pvalue').textContent=t.p===null
+    ?tx('At least 10 complete years required','Se requieren al menos 10 años completos')
+    :`MK p ${t.p<.001?'< 0.001':'= '+format(t.p,3)}${ciLabel?' · '+ciLabel:''}${welchLabel?' · '+welchLabel:''}`;
   $('#sample-count').textContent=`${t.n} ${tx('years','años')} / ${state.start}–${state.end}`;
-  $('#coverage-note').textContent=tx('Daily data aggregation · years with 12 valid months','Agregación de datos diarios · años con 12 meses válidos');
+  const sameProvinceSites=(manifest?.sites||[]).filter(x=>x.province===s.province&&x.type==='canton');
+  const provCells=uniqueCellCountForSites(sameProvinceSites,state.variable);
+  $('#coverage-note').textContent=tx(
+    `12 valid mo/yr · ${sameProvinceSites.length} cantons in ${provCells} NASA grid cell${provCells===1?'':'s'}`,
+    `12 meses válidos/año · ${sameProvinceSites.length} cantones en ${provCells} celda${provCells===1?'':'s'} NASA`
+  );
 
   // 5-step Detective workflow bar
   $('#flow-variable').textContent=v().short;
@@ -452,15 +540,15 @@ function renderStats(){
     verdictEl.className=`trend-verdict ${isSig?'is-sig':t.autocorrelated?'is-warn':'is-neutral'}`;
     $('#verdict-badge').textContent=t.n<10?tx('SHORT PERIOD','PERÍODO CORTO'):t.autocorrelated?tx('CHECK DEPENDENCE','REVISAR DEPENDENCIA'):isSig?tx('SIGNIFICANT TREND · α = 0.05','TENDENCIA SIGNIFICATIVA · α = 0,05'):tx('NOT SIGNIFICANT · α = 0.05','SIN SIGNIFICANCIA · α = 0,05');
     $('#verdict-summary').textContent=t.n<10
-      ?tx(`Select at least 10 complete years in ${s.name} to run the Mann–Kendall significance test.`,`Seleccioná al menos 10 años completos en ${s.name} para ejecutar la prueba de significancia Mann–Kendall.`)
+      ?tx(`Select at least 10 complete years in ${s.name} to run the Mann–Kendall significance test.`,`Selecciona al menos 10 años completos en ${s.name} para ejecutar la prueba de significancia Mann–Kendall.`)
       :t.autocorrelated
-        ?tx(`${s.name} (${v().short}, ${state.start}–${state.end}): ${slopeStr}/${tx('decade','década')}. Lag-1 residual autocorrelation exceeded |r| > 1.96/√n; treat p ${t.p<.001?'< 0.001':'= '+format(t.p,3)} as exploratory.`,
-            `${s.name} (${v().short}, ${state.start}–${state.end}): ${slopeStr}/década. La autocorrelación residual de orden 1 superó |r| > 1,96/√n; interpretá p ${t.p<.001?'< 0.001':'= '+format(t.p,3)} como exploratorio.`)
+        ?tx(`${s.name} (${v().short}, ${state.start}–${state.end}): ${slopeStr}/${tx('decade','década')}${ciLabel?' ('+ciLabel+')':''}. Lag-1 residual autocorrelation exceeded |r| > 1.96/√n; treat MK p ${t.p<.001?'< 0.001':'= '+format(t.p,3)} as exploratory.`,
+            `${s.name} (${v().short}, ${state.start}–${state.end}): ${slopeStr}/década${ciLabel?' ('+ciLabel+')':''}. La autocorrelación residual de orden 1 superó |r| > 1,96/√n; interpreta MK p ${t.p<.001?'< 0.001':'= '+format(t.p,3)} como exploratorio.`)
         :isSig
-          ?tx(`${s.name} (${v().short}, ${state.start}–${state.end}): ${decSlope>0?tx('upward','ascendente'):decSlope<0?tx('downward','descendente'):tx('flat','estable')} slope of ${slopeStr}/decade with significant trend evidence (p ${t.p<.001?'< 0.001':'= '+format(t.p,3)}).`,
-              `${s.name} (${v().short}, ${state.start}–${state.end}): tendencia ${decSlope>0?'ascendente':decSlope<0?'descendente':'estable'} de ${slopeStr}/década con evidencia significativa (p ${t.p<.001?'< 0.001':'= '+format(t.p,3)}).`)
-          :tx(`${s.name} (${v().short}, ${state.start}–${state.end}): estimated change of ${slopeStr}/decade, but natural interannual variability keeps p = ${format(t.p,3)} above 0.05.`,
-              `${s.name} (${v().short}, ${state.start}–${state.end}): cambio estimado de ${slopeStr}/década, pero la variabilidad interanual mantiene p = ${format(t.p,3)} por encima de 0,05.`);
+          ?tx(`${s.name} (${v().short}, ${state.start}–${state.end}): ${decSlope>0?tx('upward','ascendente'):decSlope<0?tx('downward','descendente'):tx('flat','estable')} slope of ${slopeStr}/decade (${ciLabel}, MK p ${t.p<.001?'< 0.001':'= '+format(t.p,3)}${welchLabel?', '+welchLabel:''}).`,
+              `${s.name} (${v().short}, ${state.start}–${state.end}): tendencia ${decSlope>0?'ascendente':decSlope<0?'descendente':'estable'} de ${slopeStr}/década (${ciLabel}, MK p ${t.p<.001?'< 0.001':'= '+format(t.p,3)}${welchLabel?', '+welchLabel:''}).`)
+          :tx(`${s.name} (${v().short}, ${state.start}–${state.end}): estimated change of ${slopeStr}/decade (${ciLabel}, MK p = ${format(t.p,3)}${welchLabel?', '+welchLabel:''}); interannual variability prevents confirming a trend.`,
+              `${s.name} (${v().short}, ${state.start}–${state.end}): cambio estimado de ${slopeStr}/década (${ciLabel}, MK p = ${format(t.p,3)}${welchLabel?', '+welchLabel:''}); la variabilidad interanual impide confirmar tendencia.`);
   }
 
   // Interactive "?" significance explainer popover content
@@ -470,13 +558,6 @@ function renderStats(){
       ?`<strong>¿Cómo interpreta GaiaTrack estos cálculos?</strong><ul><li><b>Pendiente de Theil–Sen + IC 95%:</b> mediana de todas las pendientes entre pares de años (${slopeStr}/década). Resiste valores atípicos extremos.</li><li><b>Prueba de Mann–Kendall (α = 0,05):</b> evalúa si existe un aumento o descenso monótono sostenido sin asumir distribución normal.</li><li><b>Z-score mensual e IEA calibrado:</b> Z = (X − μ) / s desestacionalizado respecto a 2001–2010; IEA integra temperatura, precipitación y humedad del suelo con acoplamiento termo-hídrico.</li><li><b>Prueba t de Welch e IC 95%:</b> compara la ventana seleccionada contra la base 2001–2010 y estima la incertidumbre de la media con distribución t de Student.</li><li><b>Autocorrelación lag-1:</b> ${t.autocorrelated?'Detectada aquí (|r| > 1,96/√n); puede inflar falsos positivos, por lo que no confirmamos significancia.':'Sin dependencia residual relevante en este período.'}</li></ul>`
       :`<strong>How does GaiaTrack compute these statistics?</strong><ul><li><b>Theil–Sen slope + 95% CI:</b> median of all pairwise year-to-year slopes (${slopeStr}/decade), resistant to isolated extremes.</li><li><b>Mann–Kendall test (α = 0.05):</b> non-parametric test checking whether values consistently rise or fall over the selected window.</li><li><b>Monthly Z-score &amp; calibrated IEA:</b> deseasonalized Z = (X − μ) / s vs. 2001–2010; IEA combines temperature, rainfall, and soil moisture with thermo-hydro coupling.</li><li><b>Welch t-test &amp; 95% CI:</b> compares the selected window against 2001–2010 and estimates mean uncertainty with Student's t distribution.</li><li><b>Lag-1 autocorrelation:</b> ${t.autocorrelated?'Detected here (|r| > 1.96/√n); year-to-year persistence can inflate false positives, so significance is held back.':'No strong residual lag-1 dependence detected for this window.'}</li></ul>`;
   }
-
-  // Z-score, calibrated IEA, Welch t-test, and 95% confidence intervals
-  const fullSeries=series();
-  const baseVals=fullSeries.filter(d=>d.year>=2001&&d.year<=2010&&Number.isFinite(d.value)).map(d=>d.value);
-  const winVals=points.filter(d=>Number.isFinite(d.value)).map(d=>d.value);
-  const tt=tTest(winVals,baseVals,0.05);
-  const meanCI=confidenceInterval(winVals,0.05);
 
   if($('#calc-ttest')){
     $('#calc-ttest').textContent=tt.t===null?'—':`t = ${format(tt.t,2)} · p ${tt.p<0.001?'< 0.001':'= '+format(tt.p,3)}`;
@@ -672,21 +753,28 @@ async function boot(){
     $('#year-slider').oninput=e=>{stop();setYear(e.target.value);};
     $('#compare').onchange=e=>{state.compare=e.target.checked;renderChart();};
     $('#compare-site').onchange=e=>{state.compareSite=e.target.value;state.compare=true;$('#compare').checked=true;renderChart();};
-    $('#annual-view').onclick=()=>{state.anomaly=false;updateView();};
-    $('#anomaly-view').onclick=()=>{state.anomaly=true;updateView();};
+    function updateView(){
+      for(const [id,active] of [['#annual-view',state.viewMode==='value'],['#anomaly-view',state.viewMode==='anomaly'],['#zscore-view',state.viewMode==='zscore']]){
+        const el=$(id);
+        if(el){el.classList.toggle('selected',active);el.setAttribute('aria-pressed',String(active));}
+      }
+      renderChart();
+    }
+    $('#annual-view').onclick=()=>{state.anomaly=false;state.viewMode='value';updateView();};
+    $('#anomaly-view').onclick=()=>{state.anomaly=true;state.viewMode='anomaly';updateView();};
+    if($('#zscore-view'))$('#zscore-view').onclick=()=>{state.anomaly=false;state.viewMode='zscore';updateView();};
     if($('#mode-normal'))$('#mode-normal').onclick=()=>setRadarMode(false);
     if($('#mode-radar'))$('#mode-radar').onclick=()=>setRadarMode(true);
     updateRadarButtons();
-    function updateView(){for(const [id,active] of [['#annual-view',!state.anomaly],['#anomaly-view',state.anomaly]]){$(id).classList.toggle('selected',active);$(id).setAttribute('aria-pressed',String(active));}renderChart();}
     $('#play').onclick=()=>{
       if(timer){stop();return;}if(state.start===state.end)return;if(state.year>=state.end)setYear(state.start);
-      $('#play').textContent='Ⅱ';$('#play').setAttribute('aria-label',tx('Pause time series','Pausar evolución temporal'));
+      $('#play').innerHTML=icon('pause');$('#play').setAttribute('aria-label',tx('Pause time series','Pausar evolución temporal'));
       timer=setInterval(()=>{if(state.year>=state.end){stop();return;}setYear(state.year+1);},850);
     };
     for(const id of ['#method-open','#sources-open','#help-open'])$(id).onclick=showMethod;
     $('#method-close').onclick=$('#method-done').onclick=()=>$('#method-dialog').close();
     $('#method-dialog').addEventListener('click',e=>{if(e.target===$('#method-dialog')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();}});
-    $('#download').onclick=async()=>{const snapshot={...state};if(!snapshot.site)return;$('#download').disabled=true;try{await Promise.all([snapshot.site,...(snapshot.compare?[snapshot.compareSite]:[])].map(ensureHistory));download(snapshot);}catch{showError(tx('Could not load export data. Please retry.','No se pudieron cargar los datos de exportación. Reintentá.'));}finally{$('#download').disabled=!state.site;}};
+    $('#download').onclick=async()=>{const snapshot={...state};if(!snapshot.site)return;$('#download').disabled=true;try{await Promise.all([snapshot.site,...(snapshot.compare?[snapshot.compareSite]:[])].map(ensureHistory));download(snapshot);}catch{showError(tx('Could not load export data. Please retry.','No se pudieron cargar los datos de exportación. Reintenta.'));}finally{$('#download').disabled=!state.site;}};
     document.querySelectorAll('.period-presets .preset-btn').forEach(btn=>btn.onclick=()=>{
       const p=btn.dataset.preset;
       $('#end-year').value='2025';
@@ -721,7 +809,7 @@ async function boot(){
     document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
   }catch(e){
     console.error(e);
-    showError(tx('Could not load observatory data. Run npm run data and start GaiaTrack with npm start; do not open index.html directly.','No se pudieron cargar los datos del observatorio. Ejecutá npm run data y abrí GaiaTrack con npm start; no abras index.html directamente.'));
+    showError(tx('Could not load observatory data. Run npm run data and start GaiaTrack with npm start; do not open index.html directly.','No se pudieron cargar los datos del observatorio. Ejecuta npm run data y abre GaiaTrack con npm start; no abras index.html directamente.'));
   }
 }
 let gaiaView='3d';
@@ -742,19 +830,19 @@ export function getGaiaLocalReply(question) {
 }
 
 export function applyGaiaAction(input) {
-  if (!manifest) throw Error('El observatorio todavía está cargando. Reintentá en un momento.');
+  if (!manifest) throw Error('El observatorio todavía está cargando. Reintenta en un momento.');
   const action=validateGaiaAction(input,manifest.sites,annual.start,annual.end);
   const next={...getGaiaSelection(),...action};
   if(next.start>next.end)throw Error('Período inválido.');
   stop();
-  Object.assign(state,{site:next.site,variable:next.variable,start:next.start,end:next.end,year:next.year,anomaly:next.anomaly,compare:Boolean(next.compareSite)});
+  Object.assign(state,{site:next.site,variable:next.variable,start:next.start,end:next.end,year:next.year,anomaly:next.anomaly,viewMode:next.anomaly?'anomaly':'value',compare:Boolean(next.compareSite)});
   if(next.compareSite)state.compareSite=next.compareSite;
   state.year=Math.max(state.start,Math.min(state.end,state.year));
   $('#start-year').value=state.start;$('#end-year').value=state.end;
   $('#compare').checked=state.compare;
   $('#year-slider').min=state.start;$('#year-slider').max=state.end;
   $('#year-slider').value=state.year;$('#selected-year').textContent=state.year;
-  for(const [id,active] of [['#annual-view',!state.anomaly],['#anomaly-view',state.anomaly]]){$(id).classList.toggle('selected',active);$(id).setAttribute('aria-pressed',String(active));}
+  for(const [id,active] of [['#annual-view',state.viewMode==='value'],['#anomaly-view',state.viewMode==='anomaly'],['#zscore-view',state.viewMode==='zscore']]){const el=$(id);if(el){el.classList.toggle('selected',active);el.setAttribute('aria-pressed',String(active));}}
   setPeriod();
   if(action.view==='method')showMethod();
   document.dispatchEvent(new CustomEvent('gaiatrack:assistant-view',{detail:{view:action.view??'trends'}}));

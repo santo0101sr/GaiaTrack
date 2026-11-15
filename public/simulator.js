@@ -4,15 +4,16 @@ import {publishWeather,readWeather,readSectors} from './weather-state.js';
 import {buildRecommendations} from './recommendations.js';
 import {buildAnnualPrediction,buildDailyPrediction,buildHourlyPrediction,buildMonthlyPrediction} from './predictor.js';
 import {getLang,locale,tx} from './i18n.js';
+import {icon} from './icons.js';
 
 const VARS=[
-  {key:'T2M',icon:'🌡️',name:()=>tx('Mean temp','Temp. media'),hourlyName:()=>tx('Temperature','Temperatura'),unit:'°C',d:1},
-  {key:'T2M_MAX',icon:'🔥',name:()=>tx('Max temp','Temp. máxima'),unit:'°C',d:1},
-  {key:'T2M_MIN',icon:'❄️',name:()=>tx('Min temp','Temp. mínima'),unit:'°C',d:1},
-  {key:'PRECTOTCORR',icon:'🌧️',name:()=>tx('Rainfall','Lluvia'),unit:'mm/d',d:2},
-  {key:'ALLSKY_SFC_SW_DWN',icon:'☀️',name:()=>tx('Solar rad.','Radiación'),unit:'MJ/m²/d',d:1},
-  {key:'GWETTOP',icon:'🌱',name:()=>tx('Soil moisture','Humedad suelo'),unit:'0–1',d:2},
-  {key:'RH2M',icon:'💧',name:()=>tx('Rel. humidity','Humedad rel.'),unit:'%',d:0}
+  {key:'T2M',icon:icon('thermometer'),name:()=>tx('Mean temp','Temp. media'),hourlyName:()=>tx('Temperature','Temperatura'),unit:'°C',d:1},
+  {key:'T2M_MAX',icon:icon('sun'),name:()=>tx('Max temp','Temp. máxima'),unit:'°C',d:1},
+  {key:'T2M_MIN',icon:icon('wind'),name:()=>tx('Min temp','Temp. mínima'),unit:'°C',d:1},
+  {key:'PRECTOTCORR',icon:icon('cloud-rain'),name:()=>tx('Rainfall','Lluvia'),unit:'mm/d',d:2},
+  {key:'ALLSKY_SFC_SW_DWN',icon:icon('sun'),name:()=>tx('Solar rad.','Radiación'),unit:'MJ/m²/d',d:1},
+  {key:'GWETTOP',icon:icon('leaf'),name:()=>tx('Soil moisture','Humedad suelo'),unit:'0–1',d:2},
+  {key:'RH2M',icon:icon('droplets'),name:()=>tx('Rel. humidity','Humedad rel.'),unit:'%',d:0}
 ];
 
 export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory}){
@@ -346,7 +347,7 @@ export function createSimulator({sites,annual,sectorsCatalog,onSelectTerritory})
             <div class="sim-picker"><label for="sim-prov">${tx('Province','Provincia')}</label><select id="sim-prov">${provs.map(p=>`<option value="${p.id}" ${p.id===siteObj.province?'selected':''}>${p.name}</option>`).join('')}</select></div>
             <div class="sim-picker"><label for="sim-canton">${tx('Canton','Cantón')}</label><select id="sim-canton"><option value="${siteObj.province}" ${siteObj.id===siteObj.province?'selected':''}>${tx('Province overview','Vista provincial')}</option>${cantons.map(c=>`<option value="${c.id}" ${c.id===siteObj.id?'selected':''}>${c.name}</option>`).join('')}</select></div>
             ${dists.length?`<div class="sim-picker"><label for="sim-dist">${tx('District','Distrito')}</label><select id="sim-dist"><option value="">${tx('All districts','Todos')} (${dists.length})</option>${dists.map(d=>`<option value="${d.id}" ${d.id===state.district?'selected':''}>${d.name}</option>`).join('')}</select></div>`:''}
-            <button type="button" id="sim-close" class="sim-close">← ${tx('Back to 3D','Volver al 3D')}</button>
+            <button type="button" id="sim-close" class="sim-close">${icon('arrow-left')} ${tx('Back to 3D','Volver al 3D')}</button>
           </div>
         </header>
 

@@ -1,4 +1,5 @@
 import {tx} from './i18n.js';
+import {icon} from './icons.js';
 
 export function attachMovablePanel(panel, {id, english, spanish, parent}) {
   const toolbar=document.createElement('div');
@@ -6,7 +7,7 @@ export function attachMovablePanel(panel, {id, english, spanish, parent}) {
   const handle=document.createElement('button');
   handle.type='button';handle.className='panel-move';
   const minimize=document.createElement('button');
-  minimize.type='button';minimize.className='panel-minimize';minimize.textContent='−';
+  minimize.type='button';minimize.className='panel-minimize';minimize.innerHTML=icon('eye-off');
   const dock=document.createElement('button');
   dock.type='button';dock.className='panel-dock';dock.hidden=true;
   toolbar.append(handle,minimize);parent.append(dock);
@@ -14,10 +15,10 @@ export function attachMovablePanel(panel, {id, english, spanish, parent}) {
   const clamp=(value,min,max)=>Math.max(min,Math.min(value,Math.max(min,max)));
   function labels(){
     const name=tx(english,spanish);
-    handle.textContent=tx('⠿ Move','⠿ Mover');
-    handle.setAttribute('aria-label',tx(`Move ${name}; use arrow keys`,`Mover ${name}; usá las flechas`));
+    handle.innerHTML=`${icon('grip')} ${tx('Move','Mover')}`;
+    handle.setAttribute('aria-label',tx(`Move ${name}; use arrow keys`,`Mover ${name}; usa las flechas`));
     minimize.setAttribute('aria-label',tx(`Minimize ${name}`,`Minimizar ${name}`));
-    dock.textContent=tx(`› ${name}`,`› ${name}`);
+    dock.innerHTML=`${icon('chevron-right')} ${name}`;
     dock.setAttribute('aria-label',tx(`Restore ${name}`,`Restaurar ${name}`));
   }
   function place(x,y){

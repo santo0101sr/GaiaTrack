@@ -1,84 +1,167 @@
-body.immersive-mode{overflow:hidden;background:#040d1b}.immersive-mode>.topbar{position:fixed;inset:0 0 auto;height:84px;z-index:80;background:linear-gradient(#061326d9,transparent);border-bottom:1px solid #14b8e624}.immersive-mode>main{display:none}#immersive{position:fixed;inset:0;z-index:0}#world-canvas{position:absolute;inset:0;touch-action:none}#world-canvas canvas{display:block;cursor:grab}#world-canvas canvas:active{cursor:grabbing}.scene-vignette{position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#040d1cbd,transparent 40%,transparent 70%,#040d1c80),linear-gradient(0deg,#040d1c,transparent 30%,transparent 80%,#040d1c44)}.flight-intro{position:absolute;left:4%;top:17%;pointer-events:none;animation:arrive 1s both}.flight-intro h1{font:500 clamp(32px,3.8vw,58px)/1.12 var(--display);letter-spacing:-2px;margin-top:18px}.flight-intro em{font-style:normal;color:#18d86b}.flight-intro p{color:#9cb9d0;font-size:13px;line-height:1.9;margin-top:22px}.flight-panel{position:absolute;right:4%;top:25%;z-index:6;width:240px;border:1px solid #14b8e642;padding:23px;background:linear-gradient(135deg,#0d2544b8,#071529d6);backdrop-filter:blur(16px);border-radius:4px;animation:arrive 1.2s .15s both}.flight-kicker{font-size:8px;letter-spacing:1.5px;color:#99c2e0}.flight-panel h2{font:500 32px var(--display);margin:22px 0 8px}.flight-panel .mono{font-size:9px;color:#8eb2cf}.flight-reading{display:flex;align-items:baseline;gap:10px;margin:28px 0 5px}.flight-reading strong{font:500 55px var(--display);color:#edf7fc;letter-spacing:-2px}.flight-reading>span{font-size:12px;color:#9fc2dc}.flight-panel>p{font-size:10px;line-height:1.8;color:#a4c1d6}.flight-rule{height:1px;background:#14b8e630;margin:20px 0}.flight-source{font-size:8px!important;letter-spacing:.8px;color:#18d86b!important}.flight-source span{color:#9eb5c7;letter-spacing:0;font-size:10px;display:block;margin-top:8px}.flight-panel button{margin-top:20px;width:100%;padding:11px 0;border-bottom:1px solid #18d86b;color:#18d86b;font-size:11px;display:flex;justify-content:space-between}.flight-bottom{position:absolute;bottom:6%;left:50%;z-index:30;transform:translateX(-50%);width:max-content;max-width:96%;display:flex;align-items:center;flex-direction:column;gap:18px}.flight-controls{display:flex;gap:5px;padding:6px;background:#091930d9;backdrop-filter:blur(15px);border:1px solid #1c4a7588;border-radius:8px}.flight-controls button{padding:13px 20px;color:#9ab9d1;font-size:11px;border-radius:4px;white-space:nowrap;transition:.25s}.flight-controls button:hover,.flight-controls button.chosen{color:#9ff8c4;background:#18d86b18;box-shadow:inset 0 0 0 1px #18d86b58}.flight-guidance{display:flex;align-items:center;gap:15px;color:#7b99b5;font-size:8px;letter-spacing:1px}.flight-guidance button{font-size:9px;color:#9ec0d9;letter-spacing:0}#flight-label{position:absolute;left:4%;bottom:18%;font:9px monospace;letter-spacing:3px;color:#8cb8d9;border-left:2px solid #18d86b;padding:12px 15px}.scene-disclaimer{position:absolute;bottom:13px;left:0;width:100%;text-align:center;font-size:8px;color:#6f8da8;pointer-events:none}.lab-open>main{display:block;position:fixed;inset:110px 3% 22px;overflow:auto;z-index:40;background:#071528e8;backdrop-filter:blur(8px);padding:0 25px 20px;border:1px solid #1c4a7588;border-radius:9px;scrollbar-color:#265480 transparent}.lab-open .flight-intro,.lab-open .flight-panel,.lab-open .flight-bottom,.lab-open #flight-label{display:none}#close-lab{position:fixed;top:84px;left:3%;color:#18d86b;z-index:90;font-size:10px;padding:6px 0}#scene-loading{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);padding:18px;background:#0b1d36dc;color:#18d86b;max-width:350px;text-align:center;font-size:12px;line-height:1.8}.immersive-mode dialog{z-index:100} .lab-open .workspace{background:#0c1f38cc}.lab-open .intro{padding-top:26px}.lab-open .topbar{background:#071528ee}@keyframes arrive{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
-@media(max-width:850px){.flight-intro{top:14%}.flight-intro h1{font-size:39px}.flight-intro p{font-size:11px}.flight-panel{width:200px;right:3%;top:43%;padding:17px}.flight-panel h2{font-size:25px;margin-top:14px}.flight-reading{margin-top:15px}.flight-reading strong{font-size:40px}.flight-rule{margin:12px 0}.flight-source{display:none}.flight-panel button{margin-top:14px}.flight-controls button{padding:12px;font-size:10px}.flight-guidance>span{display:none}.flight-bottom{bottom:6%}#flight-label{bottom:22%}.lab-open>main{inset:110px 12px 15px;padding:0 16px 20px}}
-@media(max-width:580px){.immersive-mode>.topbar{height:70px}.flight-intro{top:13%;left:6%}.flight-intro h1{font-size:32px;letter-spacing:-1px}.flight-intro p{font-size:10px;line-height:1.6;margin-top:10px}.flight-intro .eyebrow{font-size:7px}.flight-panel{top:auto;bottom:23%;right:5%;width:156px;padding:13px}.flight-kicker{font-size:6px;letter-spacing:.6px}.flight-panel h2{font-size:23px;margin:12px 0 5px}.flight-panel .mono{font-size:7px}.flight-reading{margin:10px 0 0}.flight-reading strong{font-size:35px}.flight-reading>span{font-size:9px}.flight-panel>p{font-size:8px}.flight-rule,.flight-source{display:none}.flight-panel button{font-size:9px;margin-top:8px}.flight-controls{display:grid;grid-template-columns:1fr 1fr;width:310px}.flight-controls button{padding:10px;font-size:10px}.flight-bottom{bottom:5%;gap:12px}.scene-disclaimer{font-size:6px;padding:0 15px;bottom:7px}#flight-label{font-size:7px;left:5%;bottom:25%;max-width:115px;line-height:1.9;padding:8px}.flight-guidance button{font-size:9px}.lab-open>main{inset:99px 8px 12px;padding:0 12px 16px}#close-lab{top:74px}.lab-open .intro h1{font-size:25px}.immersive-mode .topbar nav{gap:11px}.immersive-mode .topbar nav a[href='#explorador']{display:none}}
-@media(prefers-reduced-motion:reduce){.flight-intro,.flight-panel{animation:none}}
-@media(min-width:581px) and (max-width:850px){.flight-panel{top:auto;bottom:25%;width:185px;max-height:43vh;overflow:auto}.flight-panel .flight-source{display:none}}
-.flight-live{font:8px var(--font);color:#8ed8eb;letter-spacing:.4px;border-bottom:1px solid #6abdbb33;padding:11px 0;line-height:1.6}.current-panel{padding-bottom:22px}.current-panel #current-status{font-size:12px;line-height:1.8;color:var(--muted);margin-top:20px}.current-panel .forecast-metrics strong{font-size:22px}.current-panel a{color:var(--blue)}
-.weather-console{position:absolute;left:4%;top:43%;width:285px;padding:17px;background:linear-gradient(140deg,#0d2544df,#071426df);border:1px solid #14b8e644;backdrop-filter:blur(16px);border-radius:6px;z-index:3}.weather-title{display:flex;align-items:center;gap:8px;font-size:8px;letter-spacing:1px;color:#9ec2de}.weather-switch{display:flex;gap:5px;margin:15px 0 10px}.weather-console button{font-size:10px;padding:7px 10px;border:1px solid #1c4a7544;border-radius:3px;color:#b5cde0}.weather-console button.chosen{color:#18d86b;border-color:#18d86b66;background:#18d86b12}.weather-console button:hover{color:#18d86b}#weather-date{font-size:10px;color:#18d86b;line-height:1.7;margin:10px 0 13px}.weather-readings{display:grid;grid-template-columns:1fr 1fr;gap:12px}.weather-readings>div{display:flex;flex-direction:column;gap:5px}.weather-readings span{font-size:9px;color:#99b9d4}.weather-readings strong{font:500 15px var(--display);color:#edf7fc}.weather-console label{display:block;font-size:9px;color:#93b3ce;margin:16px 0 11px}.weather-timeline-actions{display:flex;align-items:center;justify-content:space-between;margin-top:12px}.weather-timeline-actions span{font:8px monospace;color:#93b3ce}.weather-days{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}.weather-days button{padding:5px;font-size:8px}.weather-explainer{color:#86a6c2;font-size:8px;line-height:1.7;margin:14px 0 7px}.weather-console>a{font-size:8px;color:#94c4e4;text-decoration:underline}.lab-open .weather-console{display:none}.scene-disclaimer{z-index:2}.weather-console [hidden]{display:none!important}
-#weather-clean-view{position:absolute;top:100px;right:4%;z-index:5;font-size:10px;color:#bdd4d7;border:1px solid #8cafb244;padding:9px;background:#0a1824bb;border-radius:4px}.clean-cockpit .flight-intro,.clean-cockpit .flight-panel,.clean-cockpit .weather-console{display:none}.lab-open #weather-clean-view{display:none}@media(max-width:580px){#weather-clean-view{top:80px;font-size:8px;padding:6px}}
-@media(max-width:1100px){.weather-console{top:auto;bottom:23%;width:250px;max-height:43vh;overflow-y:auto}.flight-intro h1{font-size:36px}.flight-intro p{font-size:11px}.weather-readings strong{font-size:13px}}
-@media(max-width:580px){.flight-intro{top:12%}.flight-intro h1{font-size:28px}.flight-intro>p{display:none}.weather-console{left:4%;bottom:23%;width:185px;max-height:43vh;padding:11px}.weather-title{font-size:6px;letter-spacing:.5px}.weather-switch{margin:9px 0}.weather-console button{font-size:8px;padding:6px}.weather-readings{gap:8px}.weather-readings strong{font-size:12px}.weather-readings span{font-size:8px}.weather-explainer{font-size:7px;margin-top:10px}#weather-date{font-size:8px}.flight-panel{width:142px;right:3%;bottom:23%;max-height:36vh;overflow:auto}.flight-panel h2{font-size:21px}.flight-reading strong{font-size:30px}.weather-days{gap:3px}.weather-days button{font-size:7px;padding:4px}.weather-console label{font-size:8px}.flight-bottom{bottom:4.5%}}
-/* Atmospheric observatory: restrained HUD, luminous glass and a clear stage. */
-.scene-vignette{background:radial-gradient(ellipse at 57% 42%,transparent 20%,#030a1555 68%,#020711c9 100%),linear-gradient(90deg,#040b1590,transparent 36%,transparent 72%,#040b1570),linear-gradient(0deg,#020812cc,transparent 22%,transparent 82%,#040b1540)}
-.immersive-mode>.topbar{height:80px;background:#05101ad6;backdrop-filter:none;border-color:#79ccdb16}.brand svg{stroke:#a9ebd0}.immersive-mode .brand{font-size:23px}.flight-intro{top:14%;left:3.8%;max-width:330px}.flight-intro .eyebrow{font-size:9px;letter-spacing:2.8px;color:#8bc9d3}.flight-intro h1{font-size:clamp(32px,3.3vw,48px);line-height:1.07;letter-spacing:-1.8px;margin:18px 0}.flight-intro em{color:#b6efd1}.flight-intro p{font-size:9px;line-height:2.1;letter-spacing:1.6px;color:#89a9b9}
-.flight-panel,.weather-console{border:1px solid #9dd6e02e;border-radius:14px;background:linear-gradient(145deg,#112834ea,#07111cf2);box-shadow:0 15px 55px #0004,inset 0 1px #d3faff0c;backdrop-filter:none;scrollbar-width:thin;scrollbar-color:#4b717a55 transparent}.flight-panel:before,.weather-console:before{content:'';display:block;position:absolute;left:20px;right:20px;top:-1px;height:1px;background:linear-gradient(90deg,transparent,#a9eddb70,transparent)}.flight-panel{top:25%;right:3.8%;width:225px;padding:24px}.flight-kicker{font-size:8px;color:#8cbbc4}.flight-panel h2{font-size:30px;margin-top:25px}.flight-reading strong{font-size:60px;letter-spacing:-3px;color:#effff7;text-shadow:0 0 30px #70d6cc20}.flight-live{font-size:8px;padding-bottom:14px;color:#a4d9df}.flight-panel .mono{font-size:8px;color:#7595a5}.flight-source{font-size:8px!important;letter-spacing:1.2px;line-height:2!important;color:#98d9c6!important}.flight-panel button{color:#b6efd1;font-size:10px;border-bottom-color:#8be6c15a}
-.weather-console{left:3.8%;top:auto;bottom:16%;width:286px;padding:20px;max-height:49vh;overflow:auto}.weather-title{font-size:7px;letter-spacing:1.6px;color:#95b6c2}.weather-switch{padding:3px;background:#040c1770;border:1px solid #739daa22;border-radius:6px;gap:3px}.weather-switch button{border-color:transparent;flex:1;border-radius:4px;padding:9px;font-size:10px}.weather-switch button.chosen{color:#c8f7e4;border-color:#a9e7d12e;background:#a9e7d114}#weather-date{font:9px monospace;letter-spacing:.2px;color:#a8daca;margin:14px 0}.weather-readings{gap:17px 10px;margin-top:16px}.weather-readings>div{border-left:2px solid #72b9c044;padding-left:10px;gap:7px}.weather-readings>div:first-child{border-color:#dfb66e88}.weather-readings>div:last-child{border-color:#87d1a877}.weather-readings span{font-size:9px;color:#83a3b2}.weather-readings strong{font-size:16px;letter-spacing:-.4px}.weather-console #weather-focus{font-size:8px;padding:6px 9px;color:#94bfc6;border-color:#7bbbc127}.weather-explainer{font-size:8px;line-height:1.8;color:#6f909f}.weather-console>a{font-size:8px;color:#89ada9}.weather-timeline-actions button{color:#b6efd1}.weather-days button.chosen{background:#a3d8c41a;border-color:#a9e7d14a;color:#c2eedc}
-.flight-controls{border-radius:12px;border-color:#72b6c430;background:#081620eb;padding:6px;box-shadow:0 12px 40px #0005;backdrop-filter:none}.flight-controls button{font-size:10px;padding:14px 22px;border-radius:7px;transition:color .2s,background .2s,box-shadow .2s}.flight-controls button:hover,.flight-controls button.chosen{color:#c8f7e4;background:#8bdfca12;box-shadow:inset 0 0 0 1px #8bdfca35}.flight-bottom{bottom:5%;gap:15px}.flight-guidance{font-size:7px;letter-spacing:1.1px;color:#587889}.flight-guidance button{font-size:8px;color:#8aa8b3}#flight-label{left:auto;right:3.8%;bottom:18%;font-size:8px;letter-spacing:2px;color:#77a6b0;border-color:#97dcc5;padding:10px 14px;max-width:230px}#weather-clean-view{border-radius:7px;top:100px;right:3.8%;font-size:9px;background:#0b1a26e0;border-color:#8bc5cf30;color:#a4c7cf;backdrop-filter:none}.live-dot{background:#a8ebcc;box-shadow:0 0 10px #93dfbd50;animation:signalPulse 3s ease-in-out infinite}.scene-disclaimer{font-size:7px;color:#54717e}
-@keyframes signalPulse{50%{box-shadow:0 0 16px #93dfbd88;opacity:.55}}
-@media(max-width:1100px){.flight-intro{max-width:270px;top:15%}.flight-intro h1{font-size:36px}.flight-panel{width:190px;top:auto;bottom:23%;padding:18px;max-height:43vh;overflow:auto}.flight-panel h2{font-size:25px}.flight-reading strong{font-size:43px}.weather-console{width:245px;bottom:23%;padding:17px;max-height:43vh}.weather-readings strong{font-size:14px}.flight-controls button{padding:12px 16px}}
-@media(max-width:580px){.immersive-mode>.topbar{height:70px}.immersive-mode .brand{font-size:21px}.flight-intro{top:14%;left:5%;max-width:240px}.flight-intro h1{font-size:34px;line-height:1.06}.flight-intro .eyebrow{font-size:7px;letter-spacing:2px}.flight-panel{right:4%;bottom:24%;width:137px;padding:14px;max-height:37vh;border-radius:10px}.flight-panel h2{font-size:22px;margin:17px 0 8px}.flight-reading strong{font-size:35px;letter-spacing:-2px}.flight-kicker{font-size:6px;letter-spacing:.5px}.flight-panel .mono{font-size:7px}.flight-panel button{font-size:8px}.flight-panel>p{font-size:8px}.flight-live{font-size:7px;line-height:1.9}.weather-console{left:4%;bottom:24%;width:181px;padding:12px;max-height:42vh;border-radius:10px}.weather-title{font-size:6px;letter-spacing:.6px}.weather-switch{margin:10px 0}.weather-switch button{padding:7px 5px;font-size:8px}.weather-readings{gap:12px 6px;margin-top:12px}.weather-readings>div{padding-left:6px}.weather-readings strong{font-size:12px}.weather-readings span{font-size:7px}#weather-date{font-size:8px}.weather-explainer{font-size:7px}.flight-controls{width:310px}.flight-controls button{padding:11px;font-size:9px}.flight-bottom{bottom:4%;gap:12px}.flight-guidance button{font-size:8px}#weather-clean-view{top:81px;font-size:8px;padding:6px}#flight-label{display:none}.scene-disclaimer{font-size:6px;padding:0 12px}}
-@media(prefers-reduced-motion:reduce){.live-dot{animation:none}}
-/* Visual & animation polish */
-.flight-intro,.flight-panel,.weather-console{transition:opacity .38s cubic-bezier(.22,1,.36,1),transform .38s cubic-bezier(.22,1,.36,1),border-color .25s ease,box-shadow .25s ease}
-.weather-console{animation:arrive 1.1s .22s both}
-.flight-bottom{animation:arriveBottom .9s .28s both}
-#flight-label{animation:arrive 1s .32s both}
-#weather-clean-view{transition:color .2s,background .2s,border-color .2s,transform .2s;animation:arrive .8s .35s both}
-#weather-clean-view:hover{border-color:#a8ebcc77;color:#e4fbf2;transform:translateY(-1px)}
-.flight-panel:hover,.weather-console:hover{border-color:#a9eddb55;box-shadow:0 20px 65px #0006,inset 0 1px #d3faff18}
-.flight-controls button{transition:color .2s,background .2s,box-shadow .2s,transform .2s}
-.flight-controls button:hover{transform:translateY(-1px)}
-.flight-panel button{transition:color .2s,border-color .2s,transform .2s}
-.flight-panel button:hover{color:#eefaf4;border-bottom-color:#18d86b;transform:translateX(2px)}
-.weather-console button{transition:color .2s,background .2s,border-color .2s,transform .18s}
-.weather-console button:hover{transform:translateY(-1px)}
+/* 3D Immersive Observatory HUD: aligned with tokens.css for Light & Dark modes. */
+body.immersive-mode{overflow:hidden;background:var(--bg)}
+.immersive-mode>.topbar{position:fixed;inset:0 0 auto;height:80px;z-index:80;background:var(--surface);border-bottom:1px solid var(--border);backdrop-filter:none}
+.immersive-mode .brand{font-size:23px}
+.immersive-mode>main{display:none}
+#immersive{position:fixed;inset:0;z-index:0}
+#world-canvas{position:absolute;inset:0;touch-action:none}
+#world-canvas canvas{display:block;cursor:grab}
+#world-canvas canvas:active{cursor:grabbing}
+.scene-vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 57% 42%,transparent 22%,rgba(4,19,21,.34) 68%,rgba(4,19,21,.82) 100%),linear-gradient(90deg,rgba(4,19,21,.62),transparent 36%,transparent 72%,rgba(4,19,21,.48)),linear-gradient(0deg,rgba(4,19,21,.8),transparent 22%,transparent 82%,rgba(4,19,21,.32))}
+.flight-intro{position:absolute;left:3.8%;top:82px;max-width:330px;pointer-events:none;animation:arrive 1s both;transition:opacity .38s cubic-bezier(.22,1,.36,1),transform .38s cubic-bezier(.22,1,.36,1)}
+.flight-intro .eyebrow{font-size:9px;letter-spacing:2.4px;color:var(--accent)}
+.flight-intro h1{font:600 clamp(32px,3.3vw,48px)/1.07 var(--display);letter-spacing:-1.5px;margin:8px 0;color:var(--text)}
+.flight-intro em{font-style:normal;color:inherit}
+.flight-intro p{color:var(--muted);font-size:10.5px;line-height:1.65;margin:6px 0 0;letter-spacing:.2px}
+
+.flight-panel{position:absolute;right:3.8%;top:138px;z-index:6;width:236px;max-height:calc(100vh - 285px);overflow-y:auto;border:1px solid var(--border-strong);padding:18px 20px;background:var(--surface);backdrop-filter:blur(8px);border-radius:12px;box-shadow:0 14px 40px rgba(0,0,0,.28);scrollbar-width:thin;scrollbar-color:var(--border-strong) transparent;animation:arrive 1.2s .15s both;transition:opacity .38s cubic-bezier(.22,1,.36,1),transform .38s cubic-bezier(.22,1,.36,1),border-color .25s ease}
+.flight-panel:hover,.weather-console:hover{border-color:var(--accent)}
+.flight-kicker{font-size:9px;letter-spacing:1.3px;color:var(--blue);display:flex;align-items:center;gap:7px}
+.flight-panel h2{font:600 28px var(--display);margin:12px 0 6px;color:var(--text)}
+.flight-panel .mono{font-size:9px;color:var(--muted)}
+.flight-reading{display:flex;align-items:baseline;gap:10px;margin:14px 0 4px}
+.flight-reading strong{font:600 54px var(--display);color:var(--text);letter-spacing:-2.5px}
+.flight-reading>span{font-size:12px;color:var(--muted)}
+.flight-panel>p{font-size:10px;line-height:1.7;color:var(--muted)}
+.flight-rule{height:1px;background:var(--border);margin:16px 0}
+.flight-source{font-size:9px!important;letter-spacing:.8px;line-height:1.75!important;color:var(--accent)!important}
+.flight-source span{color:var(--muted);letter-spacing:0;font-size:10px;display:block;margin-top:6px}
+.flight-panel button{margin-top:16px;width:100%;padding:10px 0;border-bottom:1px solid var(--accent);color:var(--accent);font-size:11px;display:flex;justify-content:space-between;align-items:center;transition:color .2s,border-color .2s,transform .2s}
+.flight-panel button:hover{color:var(--text);transform:translateX(2px)}
+.flight-live{font:9px var(--font);color:var(--blue);letter-spacing:.4px;border-bottom:1px solid var(--border);padding:10px 0 12px;line-height:1.6}
+.hud-select{width:100%;margin-top:10px;padding:7px 9px;font:500 11px var(--font);color:var(--text);background:var(--surface-raised);border:1px solid var(--border-strong);border-radius:6px;cursor:pointer;outline:none;transition:border-color .2s}
+.hud-select:hover,.hud-select:focus{border-color:var(--accent)}
+
+.flight-bottom{position:absolute;bottom:4.5%;left:50%;z-index:30;transform:translateX(-50%);width:max-content;max-width:96%;display:flex;align-items:center;flex-direction:column;gap:14px;animation:arriveBottom .9s .28s both}
+.flight-controls{display:flex;gap:5px;padding:6px;background:var(--surface);backdrop-filter:blur(8px);border:1px solid var(--border-strong);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.28)}
+.flight-controls button{display:inline-flex;align-items:center;gap:7px;padding:12px 18px;color:var(--muted);font-size:11px;font-weight:500;border-radius:7px;white-space:nowrap;transition:color .2s,background .2s,box-shadow .2s,transform .2s}
+.flight-controls button:hover{color:var(--text);background:var(--surface-raised);transform:translateY(-1px)}
+.flight-controls button.chosen{color:var(--accent);background:var(--surface-subtle);box-shadow:inset 0 0 0 1px var(--accent)}
+.flight-guidance{display:flex;align-items:center;gap:14px;color:var(--muted);font-size:8.5px;letter-spacing:.9px}
+.flight-guidance button{display:inline-flex;align-items:center;gap:5px;font-size:9.5px;color:var(--text);letter-spacing:0}
+.flight-guidance button:hover{color:var(--accent)}
+#flight-label{position:absolute;right:3.8%;bottom:84px;font:9px var(--mono);letter-spacing:2px;color:var(--muted);border-left:2px solid var(--accent);padding:10px 14px;max-width:230px;animation:arrive 1s .32s both}
+.scene-disclaimer{position:absolute;bottom:10px;left:0;width:100%;text-align:center;font-size:8.5px;color:var(--muted);pointer-events:none;z-index:2}
+
+.lab-open>main{display:block;position:fixed;inset:110px 3% 22px;overflow:auto;z-index:40;background:var(--bg);backdrop-filter:none;padding:0 25px 20px;border:1px solid var(--border);border-radius:12px;scrollbar-color:var(--border-strong) transparent;animation:labSlideIn .38s cubic-bezier(.22,1,.36,1) both}
+.lab-open .flight-intro,.lab-open .flight-panel,.lab-open .flight-bottom,.lab-open #flight-label{display:none}
+#close-lab{position:fixed;top:84px;left:3%;color:var(--accent);z-index:90;font-size:11px;font-weight:600;padding:6px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;display:inline-flex;align-items:center;gap:6px}
+#scene-loading{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);padding:18px 22px;background:var(--surface);color:var(--accent);border:1px solid var(--border-strong);border-radius:10px;max-width:350px;text-align:center;font-size:12px;line-height:1.8}
+.immersive-mode dialog{z-index:100}
+.lab-open .workspace{background:var(--surface)}
+.lab-open .intro{padding-top:26px}
+.lab-open .topbar{background:var(--surface)}
+
+.current-panel{padding-bottom:22px}
+.current-panel #current-status{font-size:12px;line-height:1.8;color:var(--muted);margin-top:20px}
+.current-panel .forecast-metrics strong{font-size:22px}
+.current-panel a{color:var(--blue)}
+
+.weather-console{position:absolute;left:3.8%;top:248px;bottom:auto;width:302px;max-height:calc(100vh - 355px);overflow:auto;padding:16px 18px;background:var(--surface);border:1px solid var(--border-strong);backdrop-filter:none;border-radius:12px;box-shadow:0 14px 40px rgba(0,0,0,.28);z-index:3;scrollbar-width:thin;scrollbar-color:var(--border-strong) transparent;animation:arrive 1.1s .22s both;transition:opacity .38s cubic-bezier(.22,1,.36,1),transform .38s cubic-bezier(.22,1,.36,1),border-color .25s ease}
+.weather-title{display:flex;align-items:center;gap:8px;font-size:8.5px;letter-spacing:1.4px;color:var(--muted)}
+.weather-switch{display:flex;padding:3px;background:var(--bg);border:1px solid var(--border);border-radius:7px;gap:3px;margin:12px 0 10px}
+.weather-console button{font-size:10px;padding:7px 9px;border:1px solid var(--border);border-radius:5px;color:var(--muted);display:inline-flex;align-items:center;gap:5px;transition:color .2s,background .2s,border-color .2s,transform .18s}
+.weather-switch button{border-color:transparent;flex:1;justify-content:center;padding:8px;font-size:10px}
+.weather-console button:hover{color:var(--text);border-color:var(--border-strong);transform:translateY(-1px)}
+.weather-console button.chosen,.weather-switch button.chosen{color:var(--accent);border-color:var(--accent);background:var(--surface-subtle)}
+#weather-date{font:9.5px var(--mono);letter-spacing:.2px;color:var(--blue);line-height:1.6;margin:10px 0}
+.weather-readings{display:grid;grid-template-columns:1fr 1fr;gap:12px 10px;margin-top:12px}
+.weather-readings>div{display:flex;flex-direction:column;gap:5px;border-left:2px solid var(--blue);padding-left:10px}
+.weather-readings>div:first-child{border-color:var(--warn)}
+.weather-readings>div:last-child{border-color:var(--accent)}
+.weather-readings span{font-size:9px;color:var(--muted)}
+.weather-readings strong{font:600 14px var(--display);color:var(--text);line-height:1.35}
+.weather-console label{display:block;font-size:9px;color:var(--muted);margin:12px 0 8px}
+.weather-timeline-actions{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.weather-timeline-actions span{font:8.5px var(--mono);color:var(--muted)}
+.weather-timeline-actions button{color:var(--accent)}
+.weather-days{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
+.weather-days button{padding:5px 7px;font-size:8.5px}
+.weather-days button.chosen{background:var(--surface-subtle);border-color:var(--accent);color:var(--accent)}
+.weather-explainer{color:var(--muted);font-size:8.5px;line-height:1.7;margin:10px 0 6px}
+.weather-console>a{font-size:8.5px;color:var(--blue);text-decoration:underline;display:inline-flex;align-items:center;gap:4px}
+.weather-actions{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:2px}
+.weather-console #weather-focus{font-size:8.5px;padding:6px 9px;color:var(--blue);border-color:var(--border-strong)}
+.weather-console #weather-focus:hover{color:var(--accent);border-color:var(--accent)}
+.wx-tip{margin-top:12px;padding:10px 11px;border-radius:7px;background:var(--bg);border:1px solid var(--border);display:flex;flex-direction:column;gap:5px}
+.wx-tip strong{font-size:9px;letter-spacing:.4px;color:var(--accent)}
+.wx-tip span{font-size:9.5px;line-height:1.55;color:var(--muted)}
+.wx-tip button{align-self:flex-start;padding:0;border:0;font-size:8.5px;color:var(--accent);margin-top:2px}
+.lab-open .weather-console,.weather-console [hidden]{display:none!important}
+
+#weather-clean-view{position:absolute;top:92px;right:3.8%;z-index:5;font-size:9.5px;color:var(--text);border:1px solid var(--border-strong);padding:8px 11px;background:var(--surface);backdrop-filter:none;border-radius:7px;display:inline-flex;align-items:center;gap:6px;transition:color .2s,background .2s,border-color .2s,transform .2s;animation:arrive .8s .35s both}
+#weather-clean-view:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
+.lab-open #weather-clean-view{display:none}
 .clean-cockpit .flight-intro,.clean-cockpit .flight-panel,.clean-cockpit .weather-console,.intro-playing .flight-intro,.intro-playing .flight-panel,.intro-playing .weather-console,.intro-playing .flight-bottom,.intro-playing #weather-clean-view{display:block;opacity:0;pointer-events:none;transform:translateY(10px) scale(.985)}
-.lab-open>main{animation:labSlideIn .38s cubic-bezier(.22,1,.36,1) both}
+
+#weather-rain-status{position:absolute;top:96px;left:50%;transform:translateX(-50%);z-index:10;width:310px;max-width:38vw;border:1px solid var(--border-strong);border-radius:11px;background:var(--surface);backdrop-filter:none;box-shadow:0 8px 30px rgba(0,0,0,.25);color:var(--text);font-size:11px}
+#weather-rain-status>summary{display:flex;align-items:center;gap:9px;padding:12px 15px;list-style:none;cursor:pointer;line-height:1.5}
+#weather-rain-status>summary::-webkit-details-marker{display:none}
+.rain-status-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0}
+.rain-status-dot.is-raining{background:var(--blue);box-shadow:0 0 9px var(--blue)}
+.rain-status-caret{margin-left:auto;color:var(--muted)}
+.rain-status-body{padding:0 14px 12px;border-top:1px solid var(--border)}
+.rain-status-body>small{display:block;padding:10px 0;font-size:9px;line-height:1.6;color:var(--muted)}
+.rain-status-body button{display:flex;justify-content:space-between;gap:12px;align-items:center;width:100%;padding:9px 0;text-align:left;border-top:1px solid var(--border);font-size:11px}
+.rain-status-body button:hover{color:var(--blue)}
+.rain-status-body strong{font-size:10px;color:var(--blue);white-space:nowrap;font-weight:500}
+#weather-rain-status p{margin:8px 14px 12px;font-size:9px;color:var(--muted);line-height:1.7}
+#weather-rain-status .rain-status-body p{margin:10px 0 0}
+.lab-open #weather-rain-status{display:none}
+
+.live-dot{background:var(--accent);box-shadow:0 0 8px var(--accent);animation:signalPulse 3s ease-in-out infinite}
 .value-pop{animation:valuePop .42s cubic-bezier(.22,1,.36,1)}
+@keyframes signalPulse{50%{opacity:.55}}
+@keyframes arrive{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
 @keyframes arriveBottom{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}
 @keyframes labSlideIn{from{opacity:0;transform:translateY(14px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes valuePop{0%{opacity:.45;transform:translateY(4px) scale(.97)}100%{opacity:1;transform:translateY(0) scale(1)}}
-@media(prefers-reduced-motion:reduce){.weather-console,.flight-bottom,#flight-label,#weather-clean-view,.lab-open>main,.value-pop{animation:none!important}.flight-intro,.flight-panel,.weather-console,#weather-clean-view,.flight-controls button,.flight-panel button,.weather-console button{transition:none!important}}
-/* Layout & overflow fixes for Pronóstico 3D and Telemetry panels */
-.flight-intro{top:82px}
-.flight-intro h1{margin:6px 0}
-.flight-intro p{margin:6px 0 0;line-height:1.5;font-size:8.5px}
-#weather-clean-view{top:92px;right:3.8%}
-.flight-panel{top:138px;max-height:calc(100vh - 285px);overflow-y:auto;padding:18px 20px}
-.hud-select{width:100%;margin-top:12px;padding:7px 9px;font:500 11px var(--font);color:#d9f9eb;background:#0a1c26cc;border:1px solid #8bc8af44;border-radius:6px;cursor:pointer;outline:none;transition:border-color .2s}
-.hud-select:hover,.hud-select:focus{border-color:#18d86b88}
-.flight-panel h2{margin-top:10px}
-.flight-reading{margin:14px 0 4px}
-#flight-label{right:3.8%;bottom:32px}
-.weather-console{top:248px;bottom:auto;width:302px;padding:14px 16px;max-height:calc(100vh - 355px)}
-.weather-readings{gap:12px 10px;margin-top:12px}
-.weather-readings strong{font-size:14px;line-height:1.35}
-#weather-date{margin:10px 0}
-.weather-console label{margin:12px 0 8px}
-.weather-explainer{margin:10px 0 5px}
-@media(max-width:1100px){.weather-console{top:auto;bottom:23%;max-height:calc(100vh - 250px);width:260px}.flight-panel{top:auto;bottom:23%;max-height:calc(100vh - 250px)}}
-@media(max-width:580px){.weather-console{width:190px;max-height:44vh;bottom:24%}.flight-panel{max-height:38vh}}
-.weather-actions{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:2px}
-.weather-console #weather-focus{font-size:8.5px;padding:6px 9px;color:#94bfc6;border-color:#7bbbc127}
-.weather-console #weather-focus:hover{color:#18d86b;border-color:#18d86b66}
-.wx-tip{margin-top:12px;padding:10px 11px;border-radius:7px;background:#07141da8;border:1px solid #8bc8af2a;display:flex;flex-direction:column;gap:5px}
-.wx-tip strong{font-size:9px;letter-spacing:.4px;color:#b6efd1}
-.wx-tip span{font-size:9.5px;line-height:1.55;color:#a8c1c8}
-.wx-tip button{align-self:flex-start;padding:0;border:0;font-size:8.5px;color:#18d86b;margin-top:2px}
 
-/* A live, inspectable status for the actual precipitation samples in view. */
-#weather-rain-status{position:absolute;top:96px;left:50%;transform:translateX(-50%);z-index:10;width:310px;max-width:38vw;border:1px solid #33556b;border-radius:11px;background:#0b1c2cf2;backdrop-filter:none;box-shadow:0 8px 30px #0003;color:#d8eaf2;font-size:11px}
-#weather-rain-status>summary{display:flex;align-items:center;gap:9px;padding:12px 15px;list-style:none;cursor:pointer;line-height:1.5}
-#weather-rain-status>summary::-webkit-details-marker{display:none}
-.rain-status-dot{width:7px;height:7px;border-radius:50%;background:#6d8797;flex-shrink:0}
-.rain-status-dot.is-raining{background:#8bdfff;box-shadow:0 0 9px #69cfff88}
-.rain-status-caret{margin-left:auto;color:#93b4c9}
-.rain-status-body{padding:0 14px 12px;border-top:1px solid #2d485e}
-.rain-status-body>small{display:block;padding:10px 0;font-size:9px;line-height:1.6;color:#90aebf}
-.rain-status-body button{display:flex;justify-content:space-between;gap:12px;align-items:center;width:100%;padding:9px 0;text-align:left;border-top:1px solid #233d51;font-size:11px}
-.rain-status-body button:hover{color:#9ee5fc}
-.rain-status-body strong{font-size:10px;color:#9ddcf0;white-space:nowrap;font-weight:500}
-#weather-rain-status p{margin:8px 14px 12px;font-size:9px;color:#8faebf;line-height:1.7}
-#weather-rain-status .rain-status-body p{margin:10px 0 0}
-.lab-open #weather-rain-status{display:none}
-@media(max-width:700px){#weather-rain-status{top:174px;left:12px;transform:none;max-width:calc(100vw - 24px);width:260px}#weather-rain-status>summary{padding:9px 12px;font-size:10px}}
+@media(max-width:1100px){
+  .flight-intro{max-width:270px;top:92px}.flight-intro h1{font-size:36px}
+  .flight-panel{width:196px;top:auto;bottom:23%;padding:16px;max-height:calc(100vh - 250px)}
+  .flight-panel h2{font-size:24px}.flight-reading strong{font-size:40px}
+  .weather-console{width:255px;top:auto;bottom:23%;padding:16px;max-height:calc(100vh - 250px)}
+  .weather-readings strong{font-size:14px}.flight-controls button{padding:11px 14px}
+}
+@media(max-width:850px){
+  .flight-guidance>span{display:none}
+  .lab-open>main{inset:108px 12px 15px;padding:0 16px 20px}
+}
+@media(max-width:700px){
+  #weather-rain-status{top:174px;left:12px;transform:none;max-width:calc(100vw - 24px);width:260px}
+  #weather-rain-status>summary{padding:9px 12px;font-size:10px}
+}
+@media(max-width:580px){
+  .immersive-mode>.topbar{height:70px}.immersive-mode .brand{font-size:21px}
+  .immersive-mode .topbar nav a[href='#explorador']{display:none}
+  .flight-intro{top:84px;left:5%;max-width:250px}.flight-intro h1{font-size:30px;letter-spacing:-1px}
+  .flight-intro>p{display:none}.flight-intro .eyebrow{font-size:7.5px;letter-spacing:1.8px}
+  .flight-panel{right:4%;bottom:24%;width:146px;padding:12px;max-height:38vh;border-radius:10px}
+  .flight-panel h2{font-size:21px;margin:10px 0 5px}.flight-reading strong{font-size:32px;letter-spacing:-2px}
+  .flight-rule,.flight-source{display:none}
+  .weather-console{left:4%;bottom:24%;width:190px;padding:12px;max-height:44vh;border-radius:10px}
+  .weather-switch button{padding:6px 5px;font-size:8px}
+  .weather-readings{gap:10px 6px;margin-top:10px}.weather-readings>div{padding-left:6px}
+  .weather-readings strong{font-size:12px}.weather-readings span{font-size:7.5px}
+  .flight-controls{display:grid;grid-template-columns:1fr 1fr;width:310px}
+  .flight-controls button{padding:10px;font-size:9.5px;justify-content:center}
+  .flight-bottom{bottom:4.5%;gap:10px}.flight-guidance button{font-size:8.5px}
+  #weather-clean-view{top:81px;font-size:8px;padding:6px 8px}
+  #flight-label{display:none}.scene-disclaimer{font-size:7px;padding:0 12px;bottom:7px}
+  .lab-open>main{inset:99px 8px 12px;padding:0 12px 16px}#close-lab{top:74px}.lab-open .intro h1{font-size:25px}
+}
+@media(prefers-reduced-motion:reduce){
+  .live-dot,.flight-intro,.flight-panel,.weather-console,.flight-bottom,#flight-label,#weather-clean-view,.lab-open>main,.value-pop{animation:none!important}
+  .flight-intro,.flight-panel,.weather-console,#weather-clean-view,.flight-controls button,.flight-panel button,.weather-console button{transition:none!important}
+}
+.debug-overlay{position:fixed;top:92px;right:18px;z-index:20;padding:10px 12px;border-radius:8px;background:rgba(4,16,24,.92);border:1px solid rgba(20,197,232,.48);color:#d7eef4;font:600 11px/1.55 var(--mono);pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.45);min-width:190px;white-space:pre}
+body.light-mode .debug-overlay{background:rgba(244,250,247,.94);color:#0f2c34;border-color:rgba(14,119,240,.45)}
+.quality-control{display:inline-flex;align-items:center;gap:6px;font:600 10.5px var(--font);color:var(--muted);padding:5px 9px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface-subtle)}
+.quality-control select{background:transparent;border:0;color:var(--text);font:600 10.5px var(--font);cursor:pointer;outline:none}
+.quality-control select option{background:var(--bg);color:var(--text)}
+.low-quality-offer{position:fixed;bottom:92px;left:50%;transform:translateX(-50%);z-index:15;display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--radius-md);background:var(--surface);border:1px solid var(--border-strong);box-shadow:0 12px 32px rgba(0,0,0,.35);backdrop-filter:none;font:500 12px/1.4 var(--font);color:var(--text);max-width:min(92vw,540px)}
+.low-quality-offer[hidden]{display:none}
+.low-quality-offer button{padding:6px 12px;border-radius:var(--radius-sm);font:600 11.5px var(--font);cursor:pointer;white-space:nowrap}
+.low-quality-offer #open-2d-explorer{background:var(--accent);color:#03120b;border:0}
+.low-quality-offer #dismiss-2d-offer{background:transparent;color:var(--muted);border:1px solid var(--border);padding:5px 8px}
