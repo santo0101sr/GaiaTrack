@@ -2,7 +2,7 @@ import {getGaiaSelection, applyGaiaAction, getGaiaLocalReply} from './app.js';
 
 const host=document.createElement('aside');
 host.id='gaia-chat';
-host.innerHTML=`<button id="gaia-launch" type="button" aria-expanded="false" aria-controls="gaia-panel">✦ Preguntale a Gaia</button>
+host.innerHTML=`<button id="gaia-launch" type="button" aria-expanded="false" aria-controls="gaia-panel"><svg class="gaia-cloud-bg" viewBox="0 0 220 74" preserveAspectRatio="none" aria-hidden="true"><path d="M 42 68 H 180 C 198 68 210 56 208 42 C 206 30 194 23 182 25 C 178 12 162 5 144 9 C 134 2 114 2 100 10 C 86 4 64 7 56 20 C 42 18 26 26 24 40 C 12 43 10 56 18 64 C 24 68 33 68 42 68 Z"/></svg><span class="gaia-cloud-label">✦ Preguntale a Gaia</span></button>
 <section id="gaia-panel" role="dialog" aria-labelledby="gaia-title" hidden>
   <header><div><strong id="gaia-title">Preguntale a Gaia</strong><small>Tu guía para explorar Costa Rica</small></div><button id="gaia-clear" type="button" aria-label="Borrar conversación">Nueva</button><button id="gaia-close" type="button" aria-label="Cerrar chat">✕</button></header>
   <p class="gaia-notice">Los comandos claros se resuelven aquí, sin usar cuota. Las consultas que necesitan IA se envían con su contexto a OpenRouter y al proveedor del modelo. Contrastá las respuestas con las fuentes.</p>

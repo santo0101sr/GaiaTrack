@@ -2,7 +2,7 @@
 :root{--cr-blue:#2f5fd0;--cr-red:#e0313f;--cr-white:#f4f7fb}
 /* Thin tricolor stripe (blue · white · red · white · blue) at the very top of the page */
 .topbar{position:relative}
-.topbar:before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#0e77f0 0%,#14b8e6 35%,#18d86b 72%,#f5b316 100%);opacity:.95}
+.topbar:before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--cr-blue) 0 16.66%,var(--cr-white) 16.66% 33.33%,var(--cr-red) 33.33% 66.66%,var(--cr-white) 66.66% 83.33%,var(--cr-blue) 83.33% 100%);opacity:.95}
 /* Mini flag chip (horizontal stripes, 1:1:2:1:1) */
 .cr-flag{display:inline-block;width:16px;height:10px;border-radius:2px;flex-shrink:0;background:linear-gradient(180deg,var(--cr-blue) 0 16.66%,var(--cr-white) 16.66% 33.33%,var(--cr-red) 33.33% 66.66%,var(--cr-white) 66.66% 83.33%,var(--cr-blue) 83.33% 100%);box-shadow:0 0 0 1px #ffffff22}
 .region-badge .cr-flag{margin-right:2px}
@@ -541,7 +541,8 @@ html[data-theme="light"] #forecast-chart circle[fill="#81e8bf"]{fill:#0b6e3b;str
 html[data-theme="light"] #forecast-chart circle[fill="#80bfe8"]{fill:#0e77f0;stroke:#ffffff}
 
 /* Assistant Chat in Light Mode */
-html[data-theme="light"] #gaia-launch{background:#0b6e3b;color:#ffffff;border-color:#0e77f0;box-shadow:0 8px 24px rgba(12,50,36,.22)}
+html[data-theme="light"] #gaia-launch{background:transparent;color:#ffffff;border-color:transparent;box-shadow:none;filter:drop-shadow(0 8px 18px rgba(12,50,36,.25))}
+html[data-theme="light"] #gaia-launch .gaia-cloud-bg path{fill:#0b6e3b;stroke:#0e77f0}
 html[data-theme="light"] #gaia-panel{background:#ffffff;border-color:#bfd6cb;color:#0b261b}
 html[data-theme="light"] #gaia-panel header,
 html[data-theme="light"] #gaia-form{border-color:#d4e4dc}

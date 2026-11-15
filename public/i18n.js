@@ -70,7 +70,6 @@ export function applyStaticI18n(){
   setAttr('.brand','aria-label',es?'Gaia E&B, inicio':'Gaia E&B, home');
   setText('.topbar nav a[href="#explorador"]',es?'Explorador':'Explorer');
   setText('.topbar nav a[href="#tendencias"]',es?'Tendencias':'Trends');
-  setText('.topbar nav a[href="#pronostico"]',es?'Contexto y pronóstico':'Context & Forecast');
   const methodBtn=document.querySelector('#method-open');
   if(methodBtn)methodBtn.innerHTML=es?'Datos y método <span>↗</span>':'Data & method <span>↗</span>';
   const regionBadge=document.querySelector('.region-badge');
