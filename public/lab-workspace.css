@@ -203,3 +203,24 @@
 .sim-chip.is-low{background:rgba(20,184,230,.15);border-color:rgba(20,184,230,.4);color:#bae6fd}
 .sim-jump-btn{margin-top:auto;align-self:flex-start;background:rgba(24,216,107,.14);border:1px solid rgba(24,216,107,.38);color:#86efac;border-radius:8px;padding:5px 10px;font-size:.8rem;cursor:pointer}
 .sim-jump-btn:hover{background:rgba(24,216,107,.24)}
+
+/* Clean Simulador layout & specific data matrix */
+.lab-open>main{inset:62px 20px 18px;padding:14px 24px 28px}
+.lab-open .intro,.lab-open .research-cards{display:none}
+.lab-open .sticky-territory-bar{top:0;margin:0 0 18px;z-index:20}
+.lab-open .sticky-territory-bar select:focus{outline:1px solid var(--lab-mint);box-shadow:none}
+.sim-insights-grid{display:flex;flex-direction:column;gap:14px;margin:14px 0 18px}
+.sim-cards-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.sim-matrix-wrap{background:rgba(10,24,44,.78);border:1px solid rgba(56,189,248,.22);border-radius:12px;overflow:hidden}
+.sim-matrix-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 15px;border-bottom:1px solid rgba(56,189,248,.16);font-size:12px;color:#cde4f7}
+.sim-matrix-head small{color:#8fb0cc}
+.sim-matrix-scroll{overflow-x:auto}
+.sim-matrix{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+.sim-matrix th{text-align:left;padding:9px 12px;font-size:10.5px;letter-spacing:.7px;text-transform:uppercase;color:#8fb0cc;background:rgba(8,20,38,.7);border-bottom:1px solid rgba(56,189,248,.16);white-space:nowrap}
+.sim-matrix td{padding:9px 12px;border-bottom:1px solid rgba(56,189,248,.1);color:#e2f0fb;white-space:nowrap}
+.sim-matrix td small{color:#8fb0cc;margin-left:4px;font-size:11px}
+.sim-matrix tbody tr{cursor:pointer;transition:background .15s}
+.sim-matrix tbody tr:hover{background:rgba(56,189,248,.09)}
+.sim-matrix tbody tr.is-active{background:rgba(24,216,107,.12)}
+.sim-matrix td.is-up{color:#fcd34d}
+.sim-matrix td.is-down{color:#7dd3fc}
